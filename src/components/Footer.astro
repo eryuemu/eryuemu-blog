@@ -21,18 +21,18 @@ const formattedWords = totalWords >= 1000 ? (totalWords / 1000).toFixed(1) + 'k'
 		<!-- Left info -->
 		<div class="footer-left">
 			<p>
-				由 <a href="https://astro.build/" target="_blank">Astro</a> 驱动
+				<span class="footer-segment">由 <a href="https://astro.build/" target="_blank">Astro</a> 驱动</span>
 			</p>
 		</div>
 
 		<!-- Center Copyright & Uptime -->
 		<div class="footer-center">
 			<p>
-				&copy; 2026 - {today.getFullYear()} ❤️ eryuemu
+				<span class="footer-segment">&copy; 2026 - {today.getFullYear()} ❤️ eryuemu</span>
 				<span class="divider-dot">·</span>
-				共 {totalPosts} 篇文章
+				<span class="footer-segment">共 {totalPosts} 篇文章</span>
 				<span class="divider-dot">·</span>
-				共 {formattedWords} 字
+				<span class="footer-segment">共 {formattedWords} 字</span>
 			</p>
 			<p class="uptime-row">博客已运行 <span id="uptime" class="highlight-text">0 天 0 小时 0 分钟 0 秒</span></p>
 		</div>
@@ -40,9 +40,9 @@ const formattedWords = totalWords >= 1000 ? (totalWords / 1000).toFixed(1) + 'k'
 		<!-- Right visitor counts -->
 		<div class="footer-right">
 			<p>
-				访问人数 <span id="visitors-count" class="highlight-text">0</span>
+				<span class="footer-segment">访问人数 <span id="visitors-count" class="highlight-text">0</span></span>
 				<span class="divider-dot">·</span>
-				总访问量 <span id="views-count" class="highlight-text">0</span>
+				<span class="footer-segment">总访问量 <span id="views-count" class="highlight-text">0</span></span>
 			</p>
 		</div>
 	</div>
@@ -103,6 +103,10 @@ const formattedWords = totalWords >= 1000 ? (totalWords / 1000).toFixed(1) + 'k'
 	.divider-dot {
 		margin: 0 0.4rem;
 		color: var(--border-hover);
+	}
+
+	.footer-segment {
+		white-space: nowrap;
 	}
 
 	.footer-inner a {
