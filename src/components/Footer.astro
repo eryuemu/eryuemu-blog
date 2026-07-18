@@ -30,7 +30,7 @@ const formattedWords = totalWords >= 1000 ? (totalWords / 1000).toFixed(1) + 'k'
 		<!-- Center Copyright & Uptime -->
 		<div class="footer-center">
 			<p>
-				&copy; 2024 - {today.getFullYear()} ❤️ eryuemu
+				&copy; 2026 - {today.getFullYear()} ❤️ eryuemu
 				<span class="divider-dot">·</span>
 				共 {totalPosts} 篇文章
 				<span class="divider-dot">·</span>
@@ -154,11 +154,11 @@ const formattedWords = totalWords >= 1000 ? (totalWords / 1000).toFixed(1) + 'k'
 	let uptimeInterval: number;
 
 	function setupFooterStats() {
-		// Uptime start date (March 24, 2024 calculates ~846 days on July 18, 2026)
-		const startDate = new Date('2024-03-24T00:00:00');
+		// Uptime start date (Set to July 18, 2026)
+		const startDate = new Date('2026-07-18T16:00:00');
 		
-		// Visitor count base date (decoupled to July 18, 2026 to start exactly at 1623 & 2817 today)
-		const visitorBaseDate = new Date('2026-07-18T00:00:00');
+		// Visitor count base date
+		const visitorBaseDate = new Date('2026-07-18T16:00:00');
 		
 		// 1. Uptime Clock
 		function updateUptime() {
@@ -186,9 +186,9 @@ const formattedWords = totalWords >= 1000 ? (totalWords / 1000).toFixed(1) + 'k'
 			updateUptime(); // immediate call
 		}
 
-		// 2. Growing Visitor count (3 new visitors/day, 8 views/day from July 18, 2026)
-		const baseVisitors = 1623;
-		const baseViews = 2817;
+		// 2. Growing Visitor count (simulated increment starting at 0 today)
+		const baseVisitors = 0;
+		const baseViews = 0;
 		const now = new Date();
 		const daysDiff = Math.max(0, Math.floor((now.getTime() - visitorBaseDate.getTime()) / (1000 * 60 * 60 * 24)));
 
