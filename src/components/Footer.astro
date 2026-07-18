@@ -154,13 +154,9 @@ const formattedWords = totalWords >= 1000 ? (totalWords / 1000).toFixed(1) + 'k'
 	let uptimeInterval: number;
 
 	function setupFooterStats() {
-		// Uptime start date (Set to July 18, 2026)
-		const startDate = new Date('2026-07-18T16:00:00');
+		// 1. 运行时间统计 (设为项目在 Vercel 首次部署成功的精确时间：16:42)
+		const startDate = new Date('2026-07-18T16:42:00');
 		
-		// Visitor count base date
-		const visitorBaseDate = new Date('2026-07-18T16:00:00');
-		
-		// 1. Uptime Clock
 		function updateUptime() {
 			const now = new Date();
 			const diff = now.getTime() - startDate.getTime();
@@ -183,24 +179,82 @@ const formattedWords = totalWords >= 1000 ? (totalWords / 1000).toFixed(1) + 'k'
 				clearInterval(uptimeInterval);
 			}
 			uptimeInterval = setInterval(updateUptime, 1000);
-			updateUptime(); // immediate call
+			updateUptime(); // 立即执行一次
 		}
 
-		// 2. Growing Visitor count (simulated increment starting at 0 today)
-		const baseVisitors = 0;
-		const baseViews = 0;
-		const now = new Date();
-		const daysDiff = Math.max(0, Math.floor((now.getTime() - visitorBaseDate.getTime()) / (1000 * 60 * 60 * 24)));
+		// 2. 真实访问量统计 (沿用您在 HBU-Wiki 中使用的 Vercount 接口)
+		const VERC_COOKIE_PREFIX = 'vercount_uv_';
+		const API_URL = 'https://events.vercount.one/api/v2/log';
 
-		const currentVisitors = baseVisitors + (daysDiff * 3);
-		const currentViews = baseViews + (daysDiff * 8);
+		function getHostName() {
+			return window.location.host || 'unknown-host';
+		}
 
-		const visitorsEl = document.getElementById('visitors-count');
-		const viewsEl = document.getElementById('views-count');
-		if (visitorsEl) visitorsEl.innerText = currentVisitors.toLocaleString();
-		if (viewsEl) viewsEl.innerText = currentViews.toLocaleString();
+		function getCookieName() {
+			const host = getHostName().replace(/[^a-zA-Z0-9_-]/g, '_');
+			return `${VERC_COOKIE_PREFIX}${host}`;
+		}
+
+		function getCookie(name: string) {
+			const cookie = document.cookie.split('; ').find(row => row.startsWith(`${name}=`));
+			return cookie ? cookie.substring(name.length + 1) : null;
+		}
+
+		function setCookie(name: string, value: string) {
+			document.cookie = `${name}=${value}; path=/; max-age=31536000; samesite=lax`;
+		}
+
+		async function fetchStats() {
+			const hostname = window.location.hostname;
+			// 本地开发环境不统计，避免污染生产数据
+			if (hostname === 'localhost' || hostname === '127.0.0.1') {
+				const visitorsEl = document.getElementById('visitors-count');
+				const viewsEl = document.getElementById('views-count');
+				if (visitorsEl) visitorsEl.innerText = '1 (本地)';
+				if (viewsEl) viewsEl.innerText = '1 (本地)';
+				return;
+			}
+
+			const cookieName = getCookieName();
+			const hasVisited = getCookie(cookieName) === '1';
+			const isNewUv = !hasVisited;
+
+			if (isNewUv) {
+				setCookie(cookieName, '1');
+			}
+
+			try {
+				const res = await fetch(API_URL, {
+					method: 'POST',
+					headers: {
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify({
+						url: window.location.href,
+						isNewUv: isNewUv
+					})
+				});
+
+				if (res.ok) {
+					const json = await res.json();
+					const data = json.data || json;
+					
+					const siteUv = Number(data.site_uv || 0);
+					const sitePv = Number(data.site_pv || 0);
+
+					const visitorsEl = document.getElementById('visitors-count');
+					const viewsEl = document.getElementById('views-count');
+					if (visitorsEl) visitorsEl.innerText = siteUv.toLocaleString();
+					if (viewsEl) viewsEl.innerText = sitePv.toLocaleString();
+				}
+			} catch (err) {
+				console.error('Failed to fetch stats:', err);
+			}
+		}
+
+		fetchStats();
 	}
 
-	// Trigger on page load and swaps
+	// 监听 Astro 页面加载和切页事件
 	document.addEventListener('astro:page-load', setupFooterStats);
 </script>
