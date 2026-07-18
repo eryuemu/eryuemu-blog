@@ -45,19 +45,19 @@ npm run build
 
 ## 🔄 Obsidian 笔记同步方案
 
-本项目配备了 `migrate.js` 迁移同步脚本，可在发布新文章时随时运行。
+本项目配备了 `migrate.cjs` 迁移同步脚本，可在发布新文章时随时运行。
 
 ### 使用方法
 
 在 WSL2 终端中直接运行：
 
 ```bash
-node migrate.js
+node migrate.cjs
 ```
 
 ### 同步机制介绍
 1. **源路径**：从 `/mnt/c/MyKnowledgeBase/开发` 读取已整理的公开技术文档。
-2. **清洗过滤**：自动排除敏感/草稿性质的文档（配置在 `migrate.js` 中的 `skipFiles`）。
+2. **清洗过滤**：自动排除敏感/草稿性质的文档（配置在 `migrate.cjs` 中的 `skipFiles`）。
 3. **内容转化**：
    - 提取原本的创建时间 `created: YYYY-MM-DD` 作为 `pubDate`。
    - 解析 Obsidian 语法图片引用 `![[vault/image.png]]` 并转换为相对路径。

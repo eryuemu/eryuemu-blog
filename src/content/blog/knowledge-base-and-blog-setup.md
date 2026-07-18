@@ -114,6 +114,6 @@ graph LR
 
 ## 相关笔记
 
-- [Claude Code 安装与配置完全指南](/blog/claude-code-installation-guide) ← 本地 AI 工具链
+- [Claude Code 安装与配置完全指南](/eryuemu-blog/blog/claude-code-installation-guide) ← 本地 AI 工具链
 - **学业/大二上学期选课全记录** ← 适合留在本地的"私密内容"示例
 - HBU-Wiki（VitePress 项目，已稳定运行）

@@ -294,7 +294,7 @@ cat ~/.claude/settings.json
 
 ## 相关笔记
 
-- [Windows 开发环境大扫除：从C盘灾难到WSL2物理隔离](/blog/windows-dev-env-cleanup) ← 前篇：诊断、决策、清理全流程
-- [Claude Code 安装与配置完全指南](/blog/claude-code-installation-guide) ← Claude Code 原生安装 + CC Switch 面板详解
-- [HBU-Wiki 开发环境搭建：从fnm到项目级Node.js隔离](/blog/hbu-wiki-dev-env-setup) ← 旧方案（已升级至 WSL2）
+- [Windows 开发环境大扫除：从C盘灾难到WSL2物理隔离](/eryuemu-blog/blog/windows-dev-env-cleanup) ← 前篇：诊断、决策、清理全流程
+- [Claude Code 安装与配置完全指南](/eryuemu-blog/blog/claude-code-installation-guide) ← Claude Code 原生安装 + CC Switch 面板详解
+- [HBU-Wiki 开发环境搭建：从fnm到项目级Node.js隔离](/eryuemu-blog/blog/hbu-wiki-dev-env-setup) ← 旧方案（已升级至 WSL2）
 - **工具** ← 工具 & 效率 MOC

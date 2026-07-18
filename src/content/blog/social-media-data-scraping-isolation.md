@@ -4,7 +4,7 @@ description: '一次与 AI 的深度协作：从"我要抓小红书选课帖子"
 pubDate: '2026-07-04'
 ---
 
-> ⚠️ **架构已升级（2026-07-05）**：本文记录的是在 Windows 宿主机上用 `uv` + 虚拟环境做 Python 项目隔离的方案。目前开发环境已整体迁移至 WSL2，ScrapingTools 项目在 Linux 虚拟磁盘内运行，Python 和 Playwright 浏览器内核全部锁在 WSL2 里，从根部解决了隔离问题。本文的隔离方法论仍然有效，只是实现方式已升级。详见 [C 盘大扫除（前篇）](/blog/windows-dev-env-cleanup) 和 [WSL2 实战手册（后篇）](/blog/wsl2-practical-guide)。
+> ⚠️ **架构已升级（2026-07-05）**：本文记录的是在 Windows 宿主机上用 `uv` + 虚拟环境做 Python 项目隔离的方案。目前开发环境已整体迁移至 WSL2，ScrapingTools 项目在 Linux 虚拟磁盘内运行，Python 和 Playwright 浏览器内核全部锁在 WSL2 里，从根部解决了隔离问题。本文的隔离方法论仍然有效，只是实现方式已升级。详见 [C 盘大扫除（前篇）](/eryuemu-blog/blog/windows-dev-env-cleanup) 和 [WSL2 实战手册（后篇）](/eryuemu-blog/blog/wsl2-practical-guide)。
 
 ---
 
@@ -213,5 +213,5 @@ C:\workspace\ScrapingTools\
 ## 相关笔记
 
 - **工具** ← 工具 & 效率 MOC
-- [Claude Code 安装与配置完全指南](/blog/claude-code-installation-guide) ← 同样的"零污染"装机哲学
-- [本地知识库与博客搭建思路](/blog/knowledge-base-and-blog-setup) ← 知识库 vs 博客的思考
+- [Claude Code 安装与配置完全指南](/eryuemu-blog/blog/claude-code-installation-guide) ← 同样的"零污染"装机哲学
+- [本地知识库与博客搭建思路](/eryuemu-blog/blog/knowledge-base-and-blog-setup) ← 知识库 vs 博客的思考
