@@ -1,0 +1,228 @@
+---
+import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
+import BaseHead from '../components/BaseHead.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import FormattedDate from '../components/FormattedDate.astro';
+import Splash from '../components/Splash.astro';
+import avatar from '../assets/avatar.jpg';
+import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
+
+const posts = (await getCollection('blog'))
+	.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
+	.slice(0, 6);
+---
+
+<!doctype html>
+<html lang="zh-CN">
+	<head>
+		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
+		<style>
+			.hero {
+				display: flex;
+				align-items: center;
+				gap: 3rem;
+				padding: 4rem 0 3rem 0;
+			}
+
+			.hero-avatar {
+				width: 130px;
+				height: 130px;
+				border-radius: 50%;
+				object-fit: cover;
+				border: 1px solid var(--border);
+				flex-shrink: 0;
+			}
+
+			.hero-content {
+				flex: 1;
+			}
+
+			.hero-title {
+				font-size: 2rem;
+				font-weight: 700;
+				line-height: 1.3;
+				margin-bottom: 0.8rem;
+				color: var(--text-primary);
+			}
+
+			.hero-desc {
+				font-size: 1.05rem;
+				color: var(--text-secondary);
+				max-width: 560px;
+				line-height: 1.7;
+				margin-bottom: 1.5rem;
+			}
+
+			.hero-links {
+				display: flex;
+				gap: 1.5rem;
+				align-items: center;
+			}
+
+			.hero-links a {
+				font-size: 0.9rem;
+				font-weight: 500;
+				color: var(--text-primary);
+				text-decoration: none;
+				display: inline-flex;
+				align-items: center;
+				gap: 0.35rem;
+			}
+
+			.hero-links a:hover {
+				opacity: 0.6;
+			}
+
+			.hero-links .arrow {
+				transition: transform 0.2s ease;
+			}
+
+			.hero-links a:hover .arrow {
+				transform: translateX(3px);
+			}
+
+			/* Section */
+			.section-header {
+				display: flex;
+				justify-content: space-between;
+				align-items: baseline;
+				margin-bottom: 1.5rem;
+				padding-bottom: 0.8rem;
+				border-bottom: 1px solid var(--border);
+			}
+
+			.section-title {
+				margin: 0;
+				font-size: 1.1rem;
+				font-weight: 600;
+				color: var(--text-primary);
+			}
+
+			.view-all {
+				font-size: 0.85rem;
+				font-weight: 500;
+				color: var(--text-muted);
+				display: inline-flex;
+				align-items: center;
+				gap: 0.3rem;
+			}
+
+			.view-all:hover {
+				color: var(--text-primary);
+				opacity: 1;
+			}
+
+			/* Posts Grid */
+			.posts-grid {
+				display: grid;
+				grid-template-columns: 1fr;
+				gap: 0;
+			}
+
+			.post-item {
+				display: block;
+			}
+
+			.post-item a {
+				display: flex;
+				align-items: baseline;
+				gap: 1rem;
+				padding: 1rem 0;
+				border-bottom: 1px solid var(--border);
+				text-decoration: none;
+				transition: opacity 0.15s ease;
+			}
+
+			.post-item:last-child a {
+				border-bottom: none;
+			}
+
+			.post-item a:hover {
+				opacity: 0.6;
+			}
+
+			.post-date {
+				font-size: 0.85rem;
+				color: var(--text-muted);
+				white-space: nowrap;
+				flex-shrink: 0;
+				font-variant-numeric: tabular-nums;
+			}
+
+			.post-title {
+				font-size: 1rem;
+				font-weight: 500;
+				color: var(--text-primary);
+				line-height: 1.4;
+			}
+
+			@media (max-width: 768px) {
+				.hero {
+					flex-direction: column;
+					align-items: flex-start;
+					gap: 1.5rem;
+					padding: 2.5rem 0 2rem 0;
+				}
+				.hero-avatar {
+					width: 90px;
+					height: 90px;
+				}
+				.hero-title {
+					font-size: 1.6rem;
+				}
+				.hero-desc {
+					font-size: 0.95rem;
+				}
+				.post-item a {
+					flex-direction: column;
+					gap: 0.2rem;
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<Splash />
+		<Header />
+		<main>
+			<section class="hero">
+				<Image src={avatar} alt="eryuemu's avatar" class="hero-avatar" loading="eager" />
+				<div class="hero-content">
+					<h1 class="hero-title">你好，我是 eryuemu</h1>
+					<p class="hero-desc">
+						主修自动化专业，热衷于嵌入式开发、逆向工程、Windows 内核安全及网络安全技术。这里是我的个人技术空间。
+					</p>
+					<div class="hero-links">
+						<a href="/blog">
+							阅读文章 <span class="arrow">→</span>
+						</a>
+						<a href="/about">关于我</a>
+					</div>
+				</div>
+			</section>
+
+			<section>
+				<div class="section-header">
+					<h2 class="section-title">近期文章</h2>
+					<a href="/blog" class="view-all">全部 →</a>
+				</div>
+				<div class="posts-grid">
+					{
+						posts.map((post) => (
+							<article class="post-item">
+								<a href={`/blog/${post.id}/`}>
+									<span class="post-date">
+										<FormattedDate date={post.data.pubDate} />
+									</span>
+									<span class="post-title">{post.data.title}</span>
+								</a>
+							</article>
+						))
+					}
+				</div>
+			</section>
+		</main>
+		<Footer />
+	</body>
+</html>

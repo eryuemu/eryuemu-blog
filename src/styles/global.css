@@ -1,0 +1,403 @@
+/* ─── Design System · MiMo-inspired Minimal Light/Dark ─── */
+
+:root {
+	--font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+
+	/* Light mode tokens */
+	--bg: #ffffff;
+	--bg-secondary: #fafafa;
+	--text-primary: #1a1a1a;
+	--text-secondary: #555555;
+	--text-muted: #999999;
+
+	--border: #e8e8e8;
+	--border-hover: #d0d0d0;
+
+	--accent: #1a1a1a;
+
+	--max-width: 960px;
+	--radius: 6px;
+}
+
+html.dark {
+	/* Dark mode tokens */
+	--bg: #0a0a0a;
+	--bg-secondary: #141414;
+	--text-primary: #f0f0f0;
+	--text-secondary: #a0a0a0;
+	--text-muted: #666666;
+
+	--border: #222222;
+	--border-hover: #333333;
+
+	--accent: #f0f0f0;
+}
+
+* {
+	box-sizing: border-box;
+}
+
+body {
+	font-family: var(--font-sans);
+	margin: 0;
+	padding: 0;
+	background-color: var(--bg);
+	color: var(--text-primary);
+	line-height: 1.7;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+/* Smooth theme transition */
+body, header, footer, article, pre, code {
+	transition: background-color 0.3s cubic-bezier(0.16, 1, 0.3, 1), 
+	            border-color 0.3s cubic-bezier(0.16, 1, 0.3, 1), 
+	            color 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+main {
+	width: var(--max-width);
+	max-width: calc(100% - 3em);
+	margin: auto;
+	padding: 7em 0 4em 0;
+}
+
+/* ─── Typography ─── */
+
+h1, h2, h3, h4, h5, h6 {
+	margin: 0 0 0.6rem 0;
+	color: var(--text-primary);
+	font-weight: 700;
+	line-height: 1.3;
+}
+
+h1 { font-size: 2.2rem; }
+h2 { font-size: 1.6rem; }
+h3 { font-size: 1.25rem; }
+h4 { font-size: 1.1rem; }
+
+strong, b {
+	font-weight: 600;
+	color: var(--text-primary);
+}
+
+a {
+	color: var(--text-primary);
+	text-decoration: none;
+	transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+a:hover {
+	opacity: 0.6;
+}
+
+p {
+	margin-top: 0;
+	margin-bottom: 1.5em;
+	color: var(--text-secondary);
+}
+
+img {
+	max-width: 100%;
+	height: auto;
+	border-radius: var(--radius);
+}
+
+/* ─── Code ─── */
+
+code {
+	font-family: 'Fira Code', 'SF Mono', 'Courier New', monospace;
+	padding: 0.18em 0.4em;
+	background-color: var(--bg-secondary);
+	border: 1px solid var(--border);
+	border-radius: 4px;
+	font-size: 0.88em;
+	color: var(--text-primary);
+}
+
+pre {
+	padding: 1.25em 1.5em;
+	border: 1px solid var(--border);
+	border-radius: var(--radius);
+	overflow-x: auto;
+	font-size: 0.9em;
+	line-height: 1.5;
+}
+pre > code {
+	all: unset;
+	font-family: inherit;
+}
+
+/* Shiki light/dark variable mapping */
+.astro-code,
+.astro-code span {
+	color: var(--shiki-light) !important;
+	background-color: var(--shiki-light-bg) !important;
+}
+
+html.dark .astro-code,
+html.dark .astro-code span {
+	color: var(--shiki-dark) !important;
+	background-color: var(--shiki-dark-bg) !important;
+}
+
+/* ─── Blockquote ─── */
+
+blockquote {
+	border-left: 3px solid var(--text-primary);
+	padding: 0.8em 1.2em;
+	margin: 1.5em 0;
+	background: transparent;
+}
+blockquote p {
+	margin: 0;
+	color: var(--text-secondary);
+}
+
+hr {
+	border: none;
+	border-top: 1px solid var(--border);
+	margin: 3em 0;
+}
+
+/* ─── Card ─── */
+
+.card {
+	background: var(--bg);
+	border: 1px solid var(--border);
+	border-radius: var(--radius);
+	transition: border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.card:hover {
+	border-color: var(--border-hover);
+}
+
+/* ─── Reading Progress Bar ─── */
+
+#reading-progress {
+	position: fixed;
+	top: 54px;
+	left: 0;
+	width: 0%;
+	height: 2px;
+	background-color: var(--text-primary);
+	z-index: 1001;
+	transition: width 0.08s linear;
+}
+
+/* ─── Code Copy Button Styles ─── */
+
+.code-block-wrapper {
+	position: relative;
+	margin-bottom: 1.5rem;
+}
+.code-block-wrapper pre {
+	margin-bottom: 0;
+}
+.copy-code-button {
+	position: absolute;
+	top: 8px;
+	right: 8px;
+	padding: 4px 8px;
+	font-size: 0.75rem;
+	font-weight: 500;
+	color: var(--text-muted);
+	background: var(--bg);
+	border: 1px solid var(--border);
+	border-radius: 4px;
+	cursor: pointer;
+	opacity: 0;
+	transition: opacity 0.2s ease, background-color 0.15s ease, color 0.15s ease;
+}
+.code-block-wrapper:hover .copy-code-button {
+	opacity: 1;
+}
+.copy-code-button:hover {
+	background-color: var(--bg-secondary);
+	color: var(--text-primary);
+	border-color: var(--border-hover);
+}
+
+/* ─── Editorial .prose Typography Style Sheet ─── */
+
+.prose {
+	color: var(--text-secondary);
+	font-size: 1.05rem;
+	line-height: 1.8;
+}
+
+.prose p {
+	margin-bottom: 1.4rem;
+}
+
+.prose h1, .prose h2, .prose h3, .prose h4 {
+	color: var(--text-primary);
+	margin-top: 2rem;
+	margin-bottom: 0.8rem;
+}
+
+.prose h2 {
+	font-size: 1.5rem;
+	border-bottom: 1px solid var(--border);
+	padding-bottom: 0.4rem;
+}
+
+.prose h3 {
+	font-size: 1.2rem;
+}
+
+/* List styles inside prose */
+.prose ul, .prose ol {
+	padding-left: 1.5rem;
+	margin-bottom: 1.5rem;
+}
+
+.prose li {
+	margin-bottom: 0.5rem;
+}
+
+.prose ul {
+	list-style-type: square;
+}
+
+/* Nested lists */
+.prose ul ul, .prose ol ul, .prose ul ol, .prose ol ol {
+	margin-top: 0.5rem;
+	margin-bottom: 0.5rem;
+}
+
+/* Table styling */
+.prose table {
+	width: 100%;
+	border-collapse: collapse;
+	margin: 2rem 0;
+	font-size: 0.95rem;
+}
+
+.prose th, .prose td {
+	padding: 0.75rem 1rem;
+	text-align: left;
+	border-bottom: 1px solid var(--border);
+	transition: background-color 0.2s ease;
+}
+
+.prose th {
+	font-weight: 600;
+	color: var(--text-primary);
+	background-color: var(--bg-secondary);
+}
+
+.prose tr:hover td {
+	background-color: var(--bg-secondary);
+}
+
+/* Keyboards & Highlighting */
+.prose kbd {
+	font-family: inherit;
+	background-color: var(--bg-secondary);
+	border: 1px solid var(--border);
+	border-bottom-width: 2px;
+	border-radius: 4px;
+	padding: 0.1rem 0.4rem;
+	font-size: 0.85em;
+	box-shadow: 0 1px 0 rgba(0,0,0,0.05);
+	color: var(--text-primary);
+}
+
+.prose mark {
+	background-color: rgba(253, 224, 71, 0.35);
+	color: inherit;
+	padding: 0.1em 0.2em;
+	border-radius: 2px;
+}
+
+/* Abbr & Footnotes */
+.prose abbr {
+	text-decoration: underline dotted var(--text-muted);
+	cursor: help;
+}
+
+.prose .footnotes {
+	font-size: 0.9rem;
+	margin-top: 3rem;
+	border-top: 1px solid var(--border);
+	padding-top: 1.5rem;
+	color: var(--text-muted);
+}
+
+/* ─── Animation Effects ─── */
+
+@keyframes fadeInUp {
+	from {
+		opacity: 0;
+		transform: translateY(16px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+main > * {
+	animation: fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Stagger delay */
+main > section:nth-of-type(1) { animation-delay: 0.05s; }
+main > section:nth-of-type(2) { animation-delay: 0.15s; }
+main > section:nth-of-type(3) { animation-delay: 0.25s; }
+
+@media (prefers-reduced-motion: reduce) {
+	main > * {
+		animation: none !important;
+	}
+}
+
+/* ─── List Row Hover & Interaction Effects ─── */
+
+.post-item a, .post-link {
+	position: relative;
+	transition: background-color 0.25s cubic-bezier(0.16, 1, 0.3, 1), padding 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease !important;
+}
+
+.post-item a:hover, .post-link:hover {
+	background-color: var(--bg-secondary);
+	padding-left: 0.75rem !important;
+	padding-right: 0.75rem !important;
+	border-radius: 6px;
+	opacity: 1 !important;
+}
+
+/* ─── Responsive ─── */
+
+@media (max-width: 768px) {
+	body {
+		font-size: 16px;
+	}
+	main {
+		padding-top: 5em;
+		padding-left: 1.2em;
+		padding-right: 1.2em;
+		width: 100%;
+		max-width: 100%;
+	}
+	h1 { font-size: 1.8rem; }
+	h2 { font-size: 1.4rem; }
+
+	#reading-progress {
+		top: 50px;
+	}
+}
+
+.sr-only {
+	border: 0;
+	padding: 0;
+	margin: 0;
+	position: absolute !important;
+	height: 1px;
+	width: 1px;
+	overflow: hidden;
+	clip: rect(1px 1px 1px 1px);
+	clip: rect(1px, 1px, 1px, 1px);
+	clip-path: inset(50%);
+	white-space: nowrap;
+}

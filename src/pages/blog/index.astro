@@ -1,0 +1,137 @@
+---
+import { getCollection } from 'astro:content';
+import BaseHead from '../../components/BaseHead.astro';
+import Footer from '../../components/Footer.astro';
+import FormattedDate from '../../components/FormattedDate.astro';
+import Header from '../../components/Header.astro';
+import { SITE_DESCRIPTION, SITE_TITLE } from '../../consts';
+
+const posts = (await getCollection('blog')).sort(
+	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
+---
+
+<!doctype html>
+<html lang="zh-CN">
+	<head>
+		<BaseHead title={`文章 — ${SITE_TITLE}`} description={SITE_DESCRIPTION} />
+		<style>
+			.page-header {
+				padding: 1rem 0 2rem 0;
+			}
+
+			.page-title {
+				font-size: 1.6rem;
+				font-weight: 700;
+				color: var(--text-primary);
+				margin-bottom: 0.4rem;
+			}
+
+			.page-desc {
+				font-size: 0.95rem;
+				color: var(--text-muted);
+				margin: 0;
+			}
+
+			.posts-list {
+				list-style: none;
+				margin: 0;
+				padding: 0;
+			}
+
+			.post-item {
+				border-bottom: 1px solid var(--border);
+			}
+
+			.post-item:first-child {
+				border-top: 1px solid var(--border);
+			}
+
+			.post-link {
+				display: flex;
+				align-items: baseline;
+				gap: 1.2rem;
+				padding: 1.1rem 0;
+				text-decoration: none;
+				transition: opacity 0.15s ease;
+			}
+
+			.post-link:hover {
+				opacity: 0.6;
+			}
+
+			.post-date {
+				font-size: 0.85rem;
+				color: var(--text-muted);
+				white-space: nowrap;
+				flex-shrink: 0;
+				font-variant-numeric: tabular-nums;
+			}
+
+			.post-info {
+				flex: 1;
+				min-width: 0;
+			}
+
+			.post-title {
+				font-size: 1.05rem;
+				font-weight: 600;
+				color: var(--text-primary);
+				line-height: 1.4;
+				margin: 0 0 0.25rem 0;
+			}
+
+			.post-excerpt {
+				font-size: 0.9rem;
+				color: var(--text-muted);
+				margin: 0;
+				line-height: 1.5;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				white-space: nowrap;
+			}
+
+			@media (max-width: 768px) {
+				.page-title {
+					font-size: 1.4rem;
+				}
+				.post-link {
+					flex-direction: column;
+					gap: 0.15rem;
+				}
+				.post-excerpt {
+					display: none;
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<Header />
+		<main>
+			<section class="page-header">
+				<h1 class="page-title">文章</h1>
+				<p class="page-desc">技术笔记与经验分享</p>
+			</section>
+			<section>
+				<ul class="posts-list">
+					{
+						posts.map((post) => (
+							<li class="post-item">
+								<a href={`/blog/${post.id}/`} class="post-link">
+									<span class="post-date">
+										<FormattedDate date={post.data.pubDate} />
+									</span>
+									<div class="post-info">
+										<h2 class="post-title">{post.data.title}</h2>
+										<p class="post-excerpt">{post.data.description}</p>
+									</div>
+								</a>
+							</li>
+						))
+					}
+				</ul>
+			</section>
+		</main>
+		<Footer />
+	</body>
+</html>

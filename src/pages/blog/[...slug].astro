@@ -1,0 +1,36 @@
+---
+import { type CollectionEntry, getCollection, render } from 'astro:content';
+import BlogPost from '../../layouts/BlogPost.astro';
+
+export async function getStaticPaths() {
+	const posts = await getCollection('blog');
+	return posts.map((post) => ({
+		params: { slug: post.id },
+		props: post,
+	}));
+}
+type Props = CollectionEntry<'blog'>;
+
+const post = Astro.props;
+const { Content } = await render(post);
+
+// Calculate stats dynamically from markdown body
+const bodyText = post.body || '';
+const cleanText = bodyText.replace(/[\s\r\n#*`_>[\]()\-+!]+/g, '');
+const wordCount = cleanText.length;
+const readingTime = Math.max(1, Math.ceil(wordCount / 350)); // ~350 chars per minute
+
+// Deterministic mock views based on post id
+const generateViews = (str: string) => {
+	let hash = 0;
+	for (let i = 0; i < str.length; i++) {
+		hash = str.charCodeAt(i) + ((hash << 5) - hash);
+	}
+	return Math.abs(hash % 1100) + 382; // Bound views realistically
+};
+const views = generateViews(post.id);
+---
+
+<BlogPost {...post.data} wordCount={wordCount} readingTime={readingTime} views={views}>
+	<Content />
+</BlogPost>

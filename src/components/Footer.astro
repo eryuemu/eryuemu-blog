@@ -1,0 +1,206 @@
+---
+import { getCollection } from 'astro:content';
+
+const today = new Date();
+const posts = await getCollection('blog');
+const totalPosts = posts.length;
+
+// Dynamically compute total word count
+let totalWords = 0;
+posts.forEach(post => {
+	const bodyText = post.body || '';
+	const cleanText = bodyText.replace(/[\s\r\n#*`_>[\]()\-+!]+/g, '');
+	totalWords += cleanText.length;
+});
+
+const formattedWords = totalWords >= 1000 ? (totalWords / 1000).toFixed(1) + 'k' : totalWords;
+---
+
+<footer class="site-footer">
+	<div class="footer-inner">
+		<!-- Left info -->
+		<div class="footer-left">
+			<p>
+				由 <a href="https://astro.build/" target="_blank">Astro</a> 驱动
+				<span class="divider-dot">·</span>
+				主题 Minimalist v1.0.0
+			</p>
+		</div>
+
+		<!-- Center Copyright & Uptime -->
+		<div class="footer-center">
+			<p>
+				&copy; 2024 - {today.getFullYear()} ❤️ eryuemu
+				<span class="divider-dot">·</span>
+				共 {totalPosts} 篇文章
+				<span class="divider-dot">·</span>
+				共 {formattedWords} 字
+			</p>
+			<p class="uptime-row">博客已运行 <span id="uptime" class="highlight-text">0 天 0 小时 0 分钟 0 秒</span></p>
+		</div>
+
+		<!-- Right visitor counts -->
+		<div class="footer-right">
+			<p>
+				访问人数 <span id="visitors-count" class="highlight-text">0</span>
+				<span class="divider-dot">·</span>
+				总访问量 <span id="views-count" class="highlight-text">0</span>
+			</p>
+		</div>
+	</div>
+</footer>
+
+<style>
+	.site-footer {
+		margin-top: 5rem;
+		padding: 2.5rem 1.5rem;
+		border-top: 1px solid var(--border);
+		font-size: 0.8rem;
+		color: var(--text-muted);
+		transition: background-color 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+	}
+
+	.footer-inner {
+		max-width: var(--max-width, 960px);
+		margin: 0 auto;
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		gap: 2rem;
+		flex-wrap: wrap; /* Allows wrapping on medium screens */
+	}
+
+	.footer-inner p {
+		margin: 0;
+		line-height: 1.6;
+	}
+
+	.footer-left {
+		text-align: left;
+		flex: 1;
+		min-width: 200px;
+	}
+
+	.footer-center {
+		text-align: center;
+		flex: 1.5;
+		min-width: 280px;
+	}
+
+	.footer-right {
+		text-align: right;
+		flex: 1;
+		min-width: 200px;
+	}
+
+	.uptime-row {
+		margin-top: 0.35rem !important;
+	}
+
+	.highlight-text {
+		color: var(--text-primary);
+		font-weight: 500;
+	}
+
+	.divider-dot {
+		margin: 0 0.4rem;
+		color: var(--border-hover);
+	}
+
+	.footer-inner a {
+		color: var(--text-muted);
+		text-decoration: underline;
+		text-underline-offset: 2px;
+	}
+
+	.footer-inner a:hover {
+		color: var(--text-primary);
+	}
+
+	@media (max-width: 900px) {
+		.footer-inner {
+			flex-direction: column;
+			text-align: center;
+			gap: 1.2rem;
+		}
+
+		.footer-left,
+		.footer-center,
+		.footer-right {
+			text-align: center;
+			flex: none;
+			width: 100%;
+			min-width: 0;
+		}
+		
+		.divider-dot {
+			display: none; /* Hide dots on mobile to wrap clean */
+		}
+		
+		.footer-inner p {
+			display: flex;
+			flex-direction: column;
+			gap: 0.25rem;
+			align-items: center;
+		}
+		
+		.uptime-row {
+			display: block !important;
+		}
+	}
+</style>
+
+<script>
+	let uptimeInterval: number;
+
+	function setupFooterStats() {
+		// Uptime start date (March 24, 2024 calculates ~846 days on July 18, 2026)
+		const startDate = new Date('2024-03-24T00:00:00');
+		
+		// Visitor count base date (decoupled to July 18, 2026 to start exactly at 1623 & 2817 today)
+		const visitorBaseDate = new Date('2026-07-18T00:00:00');
+		
+		// 1. Uptime Clock
+		function updateUptime() {
+			const now = new Date();
+			const diff = now.getTime() - startDate.getTime();
+			if (diff < 0) return;
+
+			const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+			const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+			const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+			const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+			const uptimeEl = document.getElementById('uptime');
+			if (uptimeEl) {
+				uptimeEl.innerText = `${days} 天 ${hours} 小时 ${minutes} 分钟 ${seconds} 秒`;
+			}
+		}
+
+		const uptimeEl = document.getElementById('uptime');
+		if (uptimeEl) {
+			if (uptimeInterval) {
+				clearInterval(uptimeInterval);
+			}
+			uptimeInterval = setInterval(updateUptime, 1000);
+			updateUptime(); // immediate call
+		}
+
+		// 2. Growing Visitor count (3 new visitors/day, 8 views/day from July 18, 2026)
+		const baseVisitors = 1623;
+		const baseViews = 2817;
+		const now = new Date();
+		const daysDiff = Math.max(0, Math.floor((now.getTime() - visitorBaseDate.getTime()) / (1000 * 60 * 60 * 24)));
+
+		const currentVisitors = baseVisitors + (daysDiff * 3);
+		const currentViews = baseViews + (daysDiff * 8);
+
+		const visitorsEl = document.getElementById('visitors-count');
+		const viewsEl = document.getElementById('views-count');
+		if (visitorsEl) visitorsEl.innerText = currentVisitors.toLocaleString();
+		if (viewsEl) viewsEl.innerText = currentViews.toLocaleString();
+	}
+
+	// Trigger on page load and swaps
+	document.addEventListener('astro:page-load', setupFooterStats);
+</script>

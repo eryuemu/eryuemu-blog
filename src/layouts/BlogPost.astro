@@ -1,0 +1,248 @@
+---
+import { Image } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+import BaseHead from '../components/BaseHead.astro';
+import Footer from '../components/Footer.astro';
+import FormattedDate from '../components/FormattedDate.astro';
+import Header from '../components/Header.astro';
+
+type Props = CollectionEntry<'blog'>['data'] & {
+	wordCount?: number;
+	readingTime?: number;
+	views?: number;
+};
+
+const { title, description, pubDate, updatedDate, heroImage, wordCount, readingTime, views } = Astro.props;
+---
+
+<html lang="zh-CN">
+	<head>
+		<BaseHead title={title} description={description} />
+		<style>
+			main {
+				max-width: 720px;
+				padding-top: 7em;
+			}
+
+			.article-header {
+				margin-bottom: 2.5rem;
+				padding-bottom: 1.5rem;
+				border-bottom: 1px solid var(--border);
+			}
+
+			.article-header h1 {
+				font-size: 2rem;
+				font-weight: 700;
+				line-height: 1.3;
+				margin: 0 0 0.8rem 0;
+			}
+
+			.article-meta {
+				font-size: 0.88rem;
+				color: var(--text-muted);
+				display: flex;
+				align-items: center;
+				flex-wrap: wrap;
+				gap: 0.5rem;
+			}
+
+			.meta-item {
+				display: inline-flex;
+				align-items: center;
+				gap: 0.3rem;
+			}
+
+			.meta-icon {
+				color: var(--text-muted);
+				opacity: 0.8;
+				flex-shrink: 0;
+				margin-bottom: -1px; /* Align slightly */
+			}
+
+			.separator {
+				color: var(--border);
+				margin-right: 0.1rem;
+			}
+
+			.updated {
+				font-style: italic;
+			}
+
+			.hero-image {
+				margin-bottom: 2rem;
+				border-radius: var(--radius);
+				overflow: hidden;
+			}
+
+			.hero-image img {
+				display: block;
+				width: 100%;
+				height: auto;
+				border-radius: 0;
+			}
+
+			.prose {
+				color: var(--text-secondary);
+				font-size: 1.05rem;
+				line-height: 1.8;
+			}
+
+			.back-link {
+				display: inline-flex;
+				align-items: center;
+				gap: 0.3rem;
+				margin-bottom: 2rem;
+				font-size: 0.9rem;
+				color: var(--text-muted);
+			}
+
+			.back-link:hover {
+				color: var(--text-primary);
+				opacity: 1;
+			}
+
+			@media (max-width: 768px) {
+				.article-header h1 {
+					font-size: 1.6rem;
+				}
+			}
+		</style>
+	</head>
+
+	<body>
+		<div id="reading-progress"></div>
+		<Header />
+		<main>
+			<a href="/blog" class="back-link">← 返回文章列表</a>
+
+			<article>
+				{heroImage && (
+					<div class="hero-image">
+						<Image width={1020} height={510} src={heroImage} alt="" />
+					</div>
+				)}
+
+				<div class="article-header">
+					<h1>{title}</h1>
+					<div class="article-meta">
+						<span class="meta-item">
+							<svg class="meta-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+								<rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+								<line x1="16" y1="2" x2="16" y2="6"></line>
+								<line x1="8" y1="2" x2="8" y2="6"></line>
+								<line x1="3" y1="10" x2="21" y2="10"></line>
+							</svg>
+							<FormattedDate date={pubDate} />
+						</span>
+						{readingTime && (
+							<span class="meta-item">
+								<span class="separator">·</span>
+								<svg class="meta-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+									<circle cx="12" cy="12" r="10"></circle>
+									<polyline points="12 6 12 12 16 14"></polyline>
+								</svg>
+								{readingTime} 分钟阅读
+							</span>
+						)}
+						{wordCount && (
+							<span class="meta-item">
+								<span class="separator">·</span>
+								<svg class="meta-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+									<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+									<polyline points="14 2 14 8 20 8"></polyline>
+									<line x1="16" y1="13" x2="8" y2="13"></line>
+									<line x1="16" y1="17" x2="8" y2="17"></line>
+									<polyline points="10 9 9 9 8 9"></polyline>
+								</svg>
+								{wordCount.toLocaleString()} 字
+							</span>
+						)}
+						{views && (
+							<span class="meta-item">
+								<span class="separator">·</span>
+								<svg class="meta-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+									<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+									<circle cx="12" cy="12" r="3"></circle>
+								</svg>
+								{views.toLocaleString()} 阅读
+							</span>
+						)}
+						{updatedDate && (
+							<span class="meta-item updated">
+								<span class="separator">·</span>
+								更新于 <FormattedDate date={updatedDate} />
+							</span>
+						)}
+					</div>
+				</div>
+
+				<div class="prose">
+					<slot />
+				</div>
+			</article>
+		</main>
+		<Footer />
+
+		<script>
+			function setupBlogPost() {
+				// 1. Reading progress bar handler
+				const progressBar = document.getElementById('reading-progress');
+				if (progressBar) {
+					const updateProgress = () => {
+						const scrollTop = window.scrollY || document.documentElement.scrollTop;
+						const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+						const scrollPercent = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
+						progressBar.style.width = scrollPercent + '%';
+					};
+					window.addEventListener('scroll', updateProgress, { passive: true });
+					updateProgress(); // initialize
+				}
+
+				// 2. Code block copy buttons
+				const codeBlocks = document.querySelectorAll('pre');
+				codeBlocks.forEach((codeBlock) => {
+					// Guard against duplicate wraps on page-load swaps
+					if (codeBlock.parentElement && codeBlock.parentElement.classList.contains('code-block-wrapper')) {
+						return;
+					}
+
+					const wrapper = document.createElement('div');
+					wrapper.className = 'code-block-wrapper';
+					
+					if (codeBlock.parentNode) {
+						codeBlock.parentNode.insertBefore(wrapper, codeBlock);
+						wrapper.appendChild(codeBlock);
+
+						const copyButton = document.createElement('button');
+						copyButton.className = 'copy-code-button';
+						copyButton.type = 'button';
+						copyButton.innerText = 'Copy';
+
+						wrapper.appendChild(copyButton);
+
+						copyButton.addEventListener('click', async () => {
+							const textToCopy = codeBlock.innerText || '';
+							try {
+								await navigator.clipboard.writeText(textToCopy);
+								copyButton.innerText = 'Copied!';
+								copyButton.style.borderColor = 'var(--text-primary)';
+								copyButton.style.color = 'var(--text-primary)';
+								setTimeout(() => {
+									copyButton.innerText = 'Copy';
+									copyButton.style.borderColor = '';
+									copyButton.style.color = '';
+								}, 2000);
+							} catch (err) {
+								console.error('Failed to copy text: ', err);
+								copyButton.innerText = 'Error';
+							}
+						});
+					}
+				});
+			}
+
+			// Runs on initial page load and after every page swap in Astro View Transitions
+			document.addEventListener('astro:page-load', setupBlogPost);
+		</script>
+	</body>
+</html>
