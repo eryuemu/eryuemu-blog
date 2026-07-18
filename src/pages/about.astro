@@ -3,31 +3,144 @@ import Layout from '../layouts/BlogPost.astro';
 ---
 
 <Layout
-	title="关于"
-	description="关于 eryuemu"
-	pubDate={new Date('2025-01-01')}
+	title="关于我"
+	description="关于 eryuemu（二月木）"
+	pubDate={new Date('2026-07-10')}
 >
+	<blockquote>
+		"事在人为，圆融自治。"
+	</blockquote>
+
 	<p>
-		我是 eryuemu，主修自动化专业的在校学生。
+		你好，我是 <strong>eryuemu（二月木）</strong>。
 	</p>
 
 	<p>
-		日常关注嵌入式系统开发、逆向工程、Windows 内核安全、网络安全等方向。喜欢在底层和系统层面折腾，享受理解事物运作原理的过程。
+		我是河北大学的一名大二在读学生，大一学的是生物科学，大一下学期转到了<strong>自动化</strong>专业。
+		<strong>高中就读于衡水二中</strong>（经历并见证了极度压抑的“衡水模式”）。
+		而在此之前，我从<strong>初中时期开始自学硬笔与软笔书法</strong>，把写字当作静心的方式。
+		虽然日常总是和各种 AI 编程工具、WSL2 和代码库打交道，但实际上我是一个<strong>非计算机专业的工科生</strong>，在开发领域也还是个初学者。
+	</p>
+
+	<blockquote>
+		"心愿是见证衡水模式在世界上消失。"
+	</blockquote>
+
+	<p>
+		至于我折腾技术的起点，说起来非常戏剧性：2025 年底，我试图在某个资源站下载八月社的 Galgame《秽翼的尤斯蒂娅》，结果网站公告上赫然写着“限制 IDM 等多线程下载器，下载慢就买张机票去香港”。为了能把游戏下下来，我硬着头皮开始查资料，由此学会了折腾代理配置。
+		当时我又想，在现在和未来我们必须学会使用 AI，于是顺藤摸瓜解锁了 Google AI Studio、GPT、Gemini 等国外大模型。结果折腾到最后，我的兴趣全跑偏到了折腾技术上，反而不想玩游戏了——难绷的是，至今我都没去推那部《秽翼的尤斯蒂娅》（）。
 	</p>
 
 	<p>
-		这个博客用来记录学习过程中的技术笔记、踩坑经验和一些个人思考。不追求面面俱到，只写自己真正理解的东西。
+		我是一个重度的<strong>“赛博洁癖”</strong>患者，无法容忍开发环境在 Windows C 盘里乱丢残留。
+		因此，我强迫自己把所有代码、Node.js、Python 全部锁进 WSL2 (Ubuntu) 的 ext4 虚拟磁盘里进行物理隔离。
 	</p>
 
-	<h3>技术栈</h3>
+	<p>
+		这里是我的数字自留地，用来记录我一路走来的踩坑经验、技术沉淀和一些个人碎碎念。
+	</p>
+
+	<hr />
+
+	<h2>🛠️ 我的折腾版图 (Tinkering & Projects)</h2>
+
+	<h3>1. 软件环境与本地自动化</h3>
 	<ul>
-		<li>嵌入式：STM32、RTOS、驱动开发</li>
-		<li>安全：逆向分析、内核安全、漏洞研究</li>
-		<li>工具：IDA Pro、Ghidra、Wireshark、x64dbg</li>
+		<li><strong>开发流派</strong>：坚定的 Windows + WSL2 物理隔离拥护者。Node.js 用 NVM 管理，Python 用 <code>uv</code> 虚拟环境，Git 和代码库全部锁在 Linux 里，坚决不碰系统级全局安装。</li>
+		<li><strong>AI 编程辅助</strong>：深度依赖各类 AI 辅助工具。主力 AI IDE 用的是 Antigravity 2.0（挂 Gemini Pro 学生会员），终端里用 Claude Code CLI（在 WSL2 中通过 cc-switch 接入 DeepSeek API）。</li>
+		<li><strong>QQ 机器人</strong>：折腾过 AstrBot、MaiBot 与 LLBot 等机器人框架。基于 NapCat 协议，在旧联想小新笔记本上本地部署并维护着自己的 QQ 聊天机器人用于群聊水群。</li>
 	</ul>
 
-	<h3>联系</h3>
+	<h3>2. 硬件与网络实验</h3>
+	<ul>
+		<li><strong>物理碰撞</strong>：作为自动化专业学生，比起纯软件，我更喜欢能摸得着的硬件。手搓过带有 LED 律动灯效的开源键盘固件，也连夜顶着 DRC 警告画过 Bluetooth 放大器的 PCB 板。</li>
+		<li><strong>物理 eSIM 写卡</strong>：对通信底层技术很感兴趣。折腾过物理 eUICC 卡，在国行系统里用 EasyEUICC 下发并激活了英国 giffgaff 卡，实现了本地的多网络环境搭建。</li>
+		<li><strong>卡片收集</strong>：喜欢收集各种好看的银行卡和交通卡，手头有七八张跨境支付万事达卡，以及洛天依/初音未来的定制交通卡。</li>
+	</ul>
+
+	<h3>3. <a href="https://github.com/eryuemu/HBU-Wiki" target="_blank">HBU-Wiki 校园百科</a></h3>
 	<p>
-		GitHub: <a href="https://github.com/eryuemu" target="_blank">@eryuemu</a>
+		这是一个基于 VitePress 搭建的开源项目，旨在整理和开源我们学校那些零散、口口相传的宝贵信息（如选课避坑、学业规划等）。目前框架已搭建完毕，正在逐步填充内容。欢迎访问 <a href="https://github.com/eryuemu/HBU-Wiki" target="_blank">GitHub 仓库</a>。
+	</p>
+
+	<hr />
+
+	<h2>🌸 现实、文字与二次元</h2>
+	<p>
+		虽然日常的时间大部分被 0 和 1 的代码和焊锡占据，但在屏幕之外，我还有两个完全不同的世界：
+	</p>
+	<ul>
+		<li><strong>书法与诗词</strong>：中学起自学硬软笔书法，尤爱褚遂良的《倪宽赞》与赵孟頫的《赤壁赋》。自嘲是一个“书法旮旯（galgame）痴”，也喜欢折腾一点“书法 AI”（纯属非专业野路子，书法专业的同学们还请不要拷打我 🤣）。此外，在高中那段极其压抑的日子里，我也会写一些诗词来排解心头的愤懑。而在代码写烦的时候，铺开纸笔写字是我在数字时代保留的最后一丝古典仪式感，也是让我内心平静下来的方式。</li>
+		<li><strong>Galgame</strong>：是一个通关了 40+ 部作品的硬核玩家。我很少把它们当成单纯消磨时间的娱乐，而是沉迷于其宏大的叙事结构、细腻的情感逻辑，以及剧本在文本层面的组织架构。<strong>此外，我也非常喜欢听各类 Galgame 的 OP（主题曲）。</strong></li>
+		<li><strong>音乐偏好</strong>：偏爱国风与虚拟歌姬，经常单曲循环<strong>银临</strong>和<strong>《忘川风华录》</strong>的歌曲。同时也是<strong>中文 VOCALOID 术曲</strong>的忠实听众，特别中意<strong>洛天依</strong>以及各种中 V 的作品（这也解释了为什么我手里会有洛天依的交通卡 💎）。</li>
+	</ul>
+
+	<hr />
+
+	<h2>💻 硬件装备</h2>
+	<ul>
+		<li><strong>主力开发/游戏机</strong>：七彩虹隐星 P16 Pro (i9-13900HX / RTX 5060 / 16G RAM / 1TB SSD)</li>
+		<li><strong>老数据服务器</strong>：联想小新 14 (i5-13500H / 16G RAM / 512G SSD) —— 目前用来跑我的本地 QQ 机器人</li>
+	</ul>
+
+	<hr />
+
+	<h2>📅 经历与时间线 (Timeline)</h2>
+	<table>
+		<thead>
+			<tr>
+				<th>时间</th>
+				<th>事件</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td><strong>初中</strong></td>
+				<td>自学硬笔与软笔书法（褚遂良《倪宽赞》、赵孟頫《赤壁赋》）</td>
+			</tr>
+			<tr>
+				<td><strong>高中</strong></td>
+				<td>就读于衡水二中，经历并见证了极度压抑的“衡水模式”；期间常写诗词以排解心头的愤懑</td>
+			</tr>
+			<tr>
+				<td><strong>2025.09</strong></td>
+				<td>大一入学，就读于生物科学专业</td>
+			</tr>
+			<tr>
+				<td><strong>2025.11 底</strong></td>
+				<td>为了下载 Galgame 折腾代理，接触 Google AI Studio，初窥大模型门径</td>
+			</tr>
+			<tr>
+				<td><strong>2026.02</strong></td>
+				<td>成功转专业至<strong>自动化</strong>专业</td>
+			</tr>
+			<tr>
+				<td><strong>2026.03 - 2026.06</strong></td>
+				<td>折腾大模型、多平台 API Key、AI Agent，折腾 eSIM 写卡与跨境万事达卡收集</td>
+			</tr>
+			<tr>
+				<td><strong>2026.06 - 2026.07</strong></td>
+				<td>搭建 HBU-Wiki 校园百科、本地 QQ 机器人（MaiBot + LLBot），构建 Obsidian 本地个人知识库</td>
+			</tr>
+			<tr>
+				<td><strong>2026.07</strong></td>
+				<td>购置七彩虹隐星新机，搭建 WSL2 物理隔离开发环境，完成 C 盘大扫除，部署上线本站（eryuemu-blog）</td>
+			</tr>
+		</tbody>
+	</table>
+
+	<hr />
+
+	<h2>📫 找到我</h2>
+	<ul>
+		<li><strong>Email</strong>: <a href="mailto:eryuemu1213@outlook.com">eryuemu1213@outlook.com</a> / <a href="mailto:eryuemu1213@qq.com">eryuemu1213@qq.com</a></li>
+		<li><strong>GitHub</strong>: <a href="https://github.com/eryuemu" target="_blank">@eryuemu</a></li>
+		<li><strong>本站技术栈</strong>：Astro 博客系统 + Vercel 托管 + Waline 评论（Supabase 数据库）+ Vercount 访客统计。</li>
+	</ul>
+
+	<hr />
+
+	<p style="font-style: italic; text-align: center; color: var(--text-muted); margin-top: 3rem;">
+		“既然拿到了通往新世界的门票，剩下的就是尽情去折腾。”
 	</p>
 </Layout>

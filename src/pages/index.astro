@@ -11,7 +11,7 @@ import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
 
 const posts = (await getCollection('blog'))
 	.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
-	.slice(0, 6);
+	.slice(0, 10);
 ---
 
 <!doctype html>
@@ -189,9 +189,9 @@ const posts = (await getCollection('blog'))
 			<section class="hero">
 				<Image src={avatar} alt="eryuemu's avatar" class="hero-avatar" loading="eager" />
 				<div class="hero-content">
-					<h1 class="hero-title">你好，我是 eryuemu</h1>
+					<h1 class="hero-title">你好，我是 eryuemu（二月木）</h1>
 					<p class="hero-desc">
-						主修自动化专业，热衷于嵌入式开发、逆向工程、Windows 内核安全及网络安全技术。这里是我的个人技术空间。
+						主修自动化专业。重度软硬件折腾控、赛博洁癖患者。这里记录了我折腾大模型、WSL2、eSIM、QQ 机器人、书法与二次元的日常。
 					</p>
 					<div class="hero-links">
 						<a href="/blog">
