@@ -5,6 +5,7 @@ import BaseHead from '../components/BaseHead.astro';
 import Footer from '../components/Footer.astro';
 import FormattedDate from '../components/FormattedDate.astro';
 import Header from '../components/Header.astro';
+import { SITE_TITLE } from '../consts';
 
 type Props = CollectionEntry<'blog'>['data'] & {
 	wordCount?: number;
@@ -17,7 +18,7 @@ const { title, description, pubDate, updatedDate, heroImage, wordCount, readingT
 
 <html lang="zh-CN">
 	<head>
-		<BaseHead title={title} description={description} />
+		<BaseHead title={`${title} — ${SITE_TITLE}`} description={description} />
 		<style>
 			main {
 				max-width: 720px;
