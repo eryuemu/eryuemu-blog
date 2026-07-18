@@ -6,6 +6,7 @@ import Footer from '../components/Footer.astro';
 import FormattedDate from '../components/FormattedDate.astro';
 import Header from '../components/Header.astro';
 import { SITE_TITLE } from '../consts';
+import WalineComments from '../components/WalineComments.astro';
 
 type Props = CollectionEntry<'blog'>['data'] & {
 	wordCount?: number;
@@ -180,6 +181,7 @@ const { title, description, pubDate, updatedDate, heroImage, wordCount, readingT
 				<div class="prose">
 					<slot />
 				</div>
+				<WalineComments />
 			</article>
 		</main>
 		<Footer />

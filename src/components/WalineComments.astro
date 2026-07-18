@@ -1,0 +1,179 @@
+---
+import { WALINE_SERVER_URL } from '../consts';
+---
+
+<div class="comments-wrapper">
+  <div class="comments-divider">
+    <span class="divider-text">💬 评论区</span>
+  </div>
+  <div id="waline"></div>
+</div>
+
+<script define:vars={{ serverURL: WALINE_SERVER_URL }}>
+  let walineInstance = null;
+
+  async function initWaline() {
+    const el = document.getElementById('waline');
+    if (!el) return;
+
+    // 检查是否配置了有效的服务 URL
+    if (!serverURL || serverURL.includes('your-waline-server') || serverURL === 'https://comments.eryuemu.com') {
+      el.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 2rem 0; font-size: 0.9rem; border: 1px dashed var(--border); border-radius: var(--radius);">⚠️ 请在 <code>src/consts.ts</code> 中配置您的 <code>WALINE_SERVER_URL</code> 以启用评论区。</div>';
+      return;
+    }
+
+    // 1. 动态加载 CSS (避免编译开销且保证按需加载)
+    if (!document.getElementById('waline-css')) {
+      const link = document.createElement('link');
+      link.id = 'waline-css';
+      link.rel = 'stylesheet';
+      link.href = 'https://unpkg.com/@waline/client@v3/dist/waline.css';
+      document.head.appendChild(link);
+    }
+
+    // 2. 动态引入 JS SDK
+    try {
+      const { init } = await import('https://unpkg.com/@waline/client@v3/dist/waline.js');
+      
+      walineInstance = init({
+        el: '#waline',
+        serverURL: serverURL,
+        lang: 'zh-CN',
+        dark: 'html.dark',
+        path: window.location.pathname,
+        emoji: [
+          '//unpkg.com/@waline/emojis@1.2.0/weibo',
+          '//unpkg.com/@waline/emojis@1.2.0/bilibili',
+          '//unpkg.com/@waline/emojis@1.2.0/qq'
+        ],
+        // 如果开启了 Pageview，可以让 Waline 统计阅读量
+        pageview: true,
+      });
+    } catch (e) {
+      console.error('Failed to load Waline: ', e);
+      el.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 1.5rem 0; font-size: 0.9rem;">评论区加载失败，请检查网络连接。</div>';
+    }
+  }
+
+  // 页面首次加载时初始化
+  initWaline();
+
+  // 监听 Astro View Transitions 切换事件，确保切换页面时重新渲染
+  document.addEventListener('astro:after-swap', () => {
+    if (walineInstance && typeof walineInstance.destroy === 'function') {
+      walineInstance.destroy();
+    }
+    initWaline();
+  });
+</script>
+
+<style is:global>
+  /* ─── 将 Waline 的配色系统完美融入 MiMo 博客主题 ─── */
+  :root {
+    --waline-theme-color: var(--text-primary) !important;
+    --waline-active-color: var(--text-primary) !important;
+    --waline-border-color: var(--border) !important;
+    --waline-disable-bg-color: var(--bg-secondary) !important;
+    --waline-bg-color: var(--bg) !important;
+    --waline-bg-color-light: var(--bg-secondary) !important;
+    --waline-text-color: var(--text-secondary) !important;
+    --waline-color: var(--text-primary) !important;
+    --waline-info-bg-color: var(--bg-secondary) !important;
+    --waline-info-color: var(--text-muted) !important;
+  }
+
+  .comments-wrapper {
+    margin-top: 4rem;
+    padding-top: 1rem;
+  }
+
+  .comments-divider {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+  }
+
+  .comments-divider::before,
+  .comments-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .divider-text {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+  }
+
+  /* 适配极简 Mimo 设计风格的细节微调 */
+  .wl-editor {
+    background-color: var(--bg-secondary) !important;
+    color: var(--text-primary) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius) !important;
+    font-family: inherit !important;
+    font-size: 0.95rem !important;
+    padding: 12px !important;
+  }
+
+  .wl-input {
+    border-bottom: 1px solid var(--border) !important;
+    color: var(--text-primary) !important;
+  }
+
+  .wl-input:focus, .wl-editor:focus {
+    border-color: var(--text-primary) !important;
+  }
+
+  .wl-btn {
+    border-radius: var(--radius) !important;
+    border: 1px solid var(--border) !important;
+    background: var(--bg) !important;
+    color: var(--text-secondary) !important;
+    font-weight: 500 !important;
+    font-size: 0.88rem !important;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  }
+
+  .wl-btn.primary {
+    background: var(--text-primary) !important;
+    color: var(--bg) !important;
+    border: 1px solid var(--text-primary) !important;
+  }
+
+  .wl-btn:hover {
+    opacity: 0.8 !important;
+  }
+
+  .wl-panel {
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius) !important;
+    background: var(--bg) !important;
+    overflow: hidden;
+  }
+
+  .wl-header {
+    border-bottom: 1px solid var(--border) !important;
+    background: var(--bg-secondary) !important;
+  }
+
+  .wl-meta > span {
+    background: var(--bg-secondary) !important;
+    border: 1px solid var(--border) !important;
+    color: var(--text-secondary) !important;
+    border-radius: 4px !important;
+  }
+
+  .wl-count {
+    color: var(--text-primary) !important;
+  }
+
+  /* 隐藏 Waline 版权标志，保持极致简约 */
+  .wl-power {
+    display: none !important;
+  }
+</style>
