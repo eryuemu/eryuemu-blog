@@ -194,10 +194,10 @@ const posts = (await getCollection('blog'))
 						主修自动化专业。重度软硬件折腾控、赛博洁癖患者。这里记录了我折腾大模型、WSL2、eSIM、QQ 机器人、书法与二次元的日常。
 					</p>
 					<div class="hero-links">
-						<a href="/blog">
+						<a href={`${import.meta.env.BASE_URL}blog`}>
 							阅读文章 <span class="arrow">→</span>
 						</a>
-						<a href="/about">关于我</a>
+						<a href={`${import.meta.env.BASE_URL}about`}>关于我</a>
 					</div>
 				</div>
 			</section>
@@ -205,13 +205,13 @@ const posts = (await getCollection('blog'))
 			<section>
 				<div class="section-header">
 					<h2 class="section-title">近期文章</h2>
-					<a href="/blog" class="view-all">全部 →</a>
+					<a href={`${import.meta.env.BASE_URL}blog`} class="view-all">全部 →</a>
 				</div>
 				<div class="posts-grid">
 					{
 						posts.map((post) => (
 							<article class="post-item">
-								<a href={`/blog/${post.id}/`}>
+								<a href={`${import.meta.env.BASE_URL}blog/${post.id}/`}>
 									<span class="post-date">
 										<FormattedDate date={post.data.pubDate} />
 									</span>
