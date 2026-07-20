@@ -25,13 +25,29 @@ const posts = (await getCollection('blog'))
 				padding: 4rem 0 3rem 0;
 			}
 
+			.hero-avatar-container {
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				gap: 0.8rem;
+				flex-shrink: 0;
+			}
+
 			.hero-avatar {
 				width: 130px;
 				height: 130px;
 				border-radius: 50%;
 				object-fit: cover;
 				border: 1px solid var(--border);
-				flex-shrink: 0;
+			}
+
+			.hero-motto {
+				font-size: 0.82rem;
+				color: var(--text-muted);
+				margin: 0;
+				font-weight: 500;
+				letter-spacing: 0.06em;
+				white-space: nowrap;
 			}
 
 			.hero-content {
@@ -219,6 +235,10 @@ const posts = (await getCollection('blog'))
 					gap: 1.5rem;
 					padding: 2.5rem 0 2rem 0;
 				}
+				.hero-avatar-container {
+					align-items: flex-start;
+					gap: 0.6rem;
+				}
 				.hero-avatar {
 					width: 90px;
 					height: 90px;
@@ -241,7 +261,10 @@ const posts = (await getCollection('blog'))
 		<Header />
 		<main>
 			<section class="hero">
-				<Image src={avatar} alt="eryuemu's avatar" class="hero-avatar" loading="eager" />
+				<div class="hero-avatar-container">
+					<Image src={avatar} alt="eryuemu's avatar" class="hero-avatar" loading="eager" />
+					<p class="hero-motto">事在人为 圆融自洽</p>
+				</div>
 				<div class="hero-content">
 					<h1 class="hero-title">你好，我是 eryuemu（二月木）</h1>
 					<p class="hero-desc">
