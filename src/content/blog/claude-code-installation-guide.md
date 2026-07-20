@@ -2,6 +2,7 @@
 title: 'Claude Code 安装与配置完全指南'
 description: '在新电脑上从零搭建 Claude Code 开发环境的完整记录，包含原生安装、代理配置、CC Switch 选项解析，以及新电脑必要软件清单。'
 pubDate: '2026-07-04'
+category: '开发'
 ---
 
 ## 背景

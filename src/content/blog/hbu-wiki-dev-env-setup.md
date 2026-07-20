@@ -2,6 +2,7 @@
 title: 'HBU-Wiki 开发环境搭建：从 fnm 到项目级 Node.js 隔离'
 description: '新电脑只有 Git 和 Python，需要开发一个 VitePress 项目（HBU-Wiki）。在不污染系统的前提下搭建本地开发环境，经历了三个方案的反复推演和一次编码翻车，最终实现了"双击即用、删文件夹即销毁"的终极隔离方案。'
 pubDate: '2026-07-04'
+category: '开发'
 ---
 
 > ⚠️ **架构已升级（2026-07-05）**：本文记录的是在 Windows 宿主机上做项目级隔离的方案。目前开发环境已整体迁移至 WSL2，Node.js、Python、项目代码全部锁在 Linux 虚拟磁盘内，从根部解决了隔离问题。本文的"地基 vs 沙子"方法论仍然有效，只是实现方式从"塞进项目文件夹"升级为"塞进 WSL2"。详见 [C 盘大扫除（前篇）](/blog/windows-dev-env-cleanup) 和 [WSL2 实战手册（后篇）](/blog/wsl2-practical-guide)。

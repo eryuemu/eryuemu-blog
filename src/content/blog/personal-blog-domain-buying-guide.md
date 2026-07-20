@@ -2,6 +2,7 @@
 title: '个人博客域名选购指南'
 description: '为 eryuemu-blog 和 HBU-Wiki 选购域名的完整决策过程：后缀对比、注册商选择、薅羊毛策略、国内实名/备案辨析。'
 pubDate: '2026-07-19'
+category: '开发'
 ---
 
 ## 一、最终决策

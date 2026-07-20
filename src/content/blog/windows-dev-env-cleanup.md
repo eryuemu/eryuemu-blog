@@ -2,6 +2,7 @@
 title: 'Windows 开发环境大扫除：从 C 盘灾难到 WSL2 物理隔离'
 description: 'Python、Node.js、Git 在 C 盘到处拉屎怎么办？空文件夹是系统自带的吗？赛博洁癖怎么治？本文从诊断到决策到执行，记录了把 Windows 宿主机清成一张白纸、然后将所有开发环境锁进 WSL2 虚拟磁盘的完整过程。'
 pubDate: '2026-07-05'
+category: '开发'
 ---
 
 ## 一、问题：C 盘在失控

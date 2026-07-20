@@ -158,7 +158,54 @@ const posts = (await getCollection('blog'))
 				line-height: 1.4;
 			}
 
+			/* Category Tabs */
+			.category-tabs {
+				display: flex;
+				gap: 0.35rem;
+				background: var(--bg-secondary);
+				padding: 0.2rem;
+				border-radius: 18px;
+				border: 1px solid var(--border);
+				align-self: center;
+			}
+
+			.tab-btn {
+				background: transparent;
+				border: none;
+				padding: 0.3rem 0.75rem;
+				font-size: 0.82rem;
+				font-weight: 500;
+				color: var(--text-muted);
+				border-radius: 14px;
+				cursor: pointer;
+				transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+			}
+
+			.tab-btn:hover {
+				color: var(--text-primary);
+			}
+
+			.tab-btn.active {
+				background: var(--bg);
+				color: var(--text-primary);
+				box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+			}
+
 			@media (max-width: 768px) {
+				.section-header {
+					flex-direction: column;
+					align-items: flex-start;
+					gap: 0.8rem;
+				}
+				.category-tabs {
+					width: 100%;
+					box-sizing: border-box;
+					justify-content: space-between;
+				}
+				.tab-btn {
+					flex: 1;
+					text-align: center;
+				}
 				.hero {
 					flex-direction: column;
 					align-items: flex-start;
@@ -205,12 +252,18 @@ const posts = (await getCollection('blog'))
 			<section>
 				<div class="section-header">
 					<h2 class="section-title">近期文章</h2>
+					<!-- Category Filter Tabs -->
+					<div class="category-tabs" id="category-filter">
+						<button class="tab-btn active" data-category="all">全部</button>
+						<button class="tab-btn" data-category="开发">💻 开发技术</button>
+						<button class="tab-btn" data-category="galgame">🌸 旮旯空间</button>
+					</div>
 					<a href={`${import.meta.env.BASE_URL.replace(/\/$/, '')}/blog`} class="view-all">全部 →</a>
 				</div>
-				<div class="posts-grid">
+				<div class="posts-grid" id="posts-list">
 					{
 						posts.map((post) => (
-							<article class="post-item">
+							<article class="post-item" data-category={post.data.category || '开发'}>
 								<a href={`${import.meta.env.BASE_URL.replace(/\/$/, '')}/blog/${post.id}/`}>
 									<span class="post-date">
 										<FormattedDate date={post.data.pubDate} />
@@ -224,5 +277,38 @@ const posts = (await getCollection('blog'))
 			</section>
 		</main>
 		<Footer />
+
+		<script>
+			function setupCategoryFilter() {
+				const filterContainer = document.getElementById('category-filter');
+				if (!filterContainer) return;
+
+				const buttons = filterContainer.querySelectorAll('.tab-btn');
+				const posts = document.querySelectorAll('#posts-list .post-item');
+
+				buttons.forEach(btn => {
+					btn.addEventListener('click', () => {
+						// Remove active class from all buttons
+						buttons.forEach(b => b.classList.remove('active'));
+						// Add active class to clicked button
+						btn.classList.add('active');
+
+						const selectedCategory = btn.getAttribute('data-category');
+
+						posts.forEach(post => {
+							const postCategory = post.getAttribute('data-category');
+							if (selectedCategory === 'all' || postCategory === selectedCategory) {
+								(post as HTMLElement).style.display = 'block';
+							} else {
+								(post as HTMLElement).style.display = 'none';
+							}
+						});
+					});
+				});
+			}
+
+			// Runs on page load and page swap for View Transitions
+			document.addEventListener('astro:page-load', setupCategoryFilter);
+		</script>
 	</body>
 </html>

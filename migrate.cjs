@@ -56,9 +56,10 @@ for (const file of files) {
   const filePath = path.join(srcDir, file);
   let content = fs.readFileSync(filePath, 'utf-8');
 
-  // A. Extract publication date & hero image from original frontmatter
+  // A. Extract publication date, hero image & category from original frontmatter
   let pubDate = '2026-07-18'; // Default fallback
   let heroImage = '';
+  let category = '开发'; // Default category
   const frontmatterMatch = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
   if (frontmatterMatch) {
     const yaml = frontmatterMatch[1];
@@ -69,6 +70,19 @@ for (const file of files) {
     const heroImageMatch = yaml.match(/heroImage:\s*['"]?([^\r\n'"]+)['"]?/);
     if (heroImageMatch) {
       heroImage = heroImageMatch[1];
+    }
+    const categoryMatch = yaml.match(/category:\s*['"]?([^\r\n'"]+)['"]?/);
+    if (categoryMatch) {
+      category = categoryMatch[1].trim();
+    } else {
+      // Auto-detect category from tags
+      const tagsMatch = yaml.match(/tags:\s*\r?\n([\s\S]*?)(?:\r?\n\w+:|$)/);
+      if (tagsMatch) {
+        const tagsText = tagsMatch[1].toLowerCase();
+        if (tagsText.includes('galgame') || tagsText.includes('游戏') || tagsText.includes('二次元')) {
+          category = 'galgame';
+        }
+      }
     }
   }
 
@@ -128,7 +142,8 @@ for (const file of files) {
     '---',
     `title: '${title.replace(/'/g, "''")}'`,
     `description: '${description.replace(/'/g, "''")}'`,
-    `pubDate: '${pubDate}'`
+    `pubDate: '${pubDate}'`,
+    `category: '${category}'`
   ];
   if (heroImage) {
     cleanFrontmatterFields.push(`heroImage: '${heroImage}'`);

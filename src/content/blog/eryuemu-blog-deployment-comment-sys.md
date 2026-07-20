@@ -2,6 +2,7 @@
 title: 'eryuemu-blog 部署与评论系统搭建全复盘'
 description: '从零到上线：GitHub 仓库重命名 → Vercel 部署 Astro 博客 → Waline 评论系统 + Supabase 数据库 → Vercount 真实访客统计。中间踩过 IPv6 不兼容、ESM/CommonJS 版本冲突、LeanCloud 停止注册三个大坑，最终全部打通，评论框完美运行。'
 pubDate: '2026-07-18'
+category: '开发'
 ---
 
 ## 一、前置决策：几个"选哪个"

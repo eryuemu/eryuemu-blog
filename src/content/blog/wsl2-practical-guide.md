@@ -2,6 +2,7 @@
 title: 'WSL2 实战手册：空间账单、文件系统与 cc-switch 四连坑'
 description: '接续 [[开发/Windows 开发环境大扫除：从C盘灾难到WSL2物理隔离|C 盘大扫除（前篇）]]——WSL2 装好之后发生了什么：10GB 空间去哪了、`.vhdx` 藏在哪、`/mnt/c` 为什么慢得离谱、Windows GUI 工具怎么访问 Linux 文件、以及让 Claude Code CLI 通过 cc-switch 中转接入 DeepSeek 时踩的四个连环坑。'
 pubDate: '2026-07-05'
+category: '开发'
 ---
 
 ## 一、装完之后：空间和位置

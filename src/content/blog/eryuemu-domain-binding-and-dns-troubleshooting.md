@@ -2,6 +2,7 @@
 title: 'eryuemu.com 域名绑定与 DNS 踩坑实录'
 description: '域名买好之后才是真正的战场：Spaceship DNS 配 A/CNAME 记录、Vercel 域名绑定、Vercel "推荐" IP 在国内被墙、切回经典配置后 DNS 缓存迟迟不刷新——每一步都有坑，每一个坑都踩了一遍。'
 pubDate: '2026-07-20'
+category: '开发'
 ---
 
 ## 一、前置条件

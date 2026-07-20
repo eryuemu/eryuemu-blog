@@ -2,6 +2,7 @@
 title: '当 Galgame 变成“旮旯给木”：我们还能守住那份感动吗？'
 description: '一名普通 GAL 玩家ের视角：谈 Galgame 的出圈、日本官方进驻 B 站、以及对高校同好会与小众热爱的一些思考。'
 pubDate: '2026-02-09'
+category: 'galgame'
 heroImage: '../../assets/c107-flat-cover-spine.jpg'
 ---
 
