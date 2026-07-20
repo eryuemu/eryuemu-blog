@@ -7,7 +7,6 @@ const destDir = path.join(__dirname, 'src/content/blog');
 
 // Files to skip as per request or meta files
 const skipFiles = [
-  'eryuemu-blog 部署与评论系统搭建全复盘.md',
   '工具.md'
 ];
 
@@ -19,7 +18,11 @@ const slugMap = {
   "WSL2 实战手册：空间账单、symlink 陷阱与 cc-switch 四连坑": "wsl2-practical-guide",
   "Windows 开发环境大扫除：从C盘灾难到WSL2物理隔离": "windows-dev-env-cleanup",
   "本地知识库与博客搭建思路": "knowledge-base-and-blog-setup",
-  "社交媒体数据采集-隔离环境搭建": "social-media-data-scraping-isolation"
+  "社交媒体数据采集-隔离环境搭建": "social-media-data-scraping-isolation",
+  "eryuemu-blog 部署与评论系统搭建全复盘": "eryuemu-blog-deployment-comment-sys",
+  "eryuemu.com 域名绑定与 DNS 踩坑实录": "eryuemu-domain-binding-and-dns-troubleshooting",
+  "个人博客域名选购指南": "personal-blog-domain-buying-guide",
+  "当 Galgame 变成“旮旯给木”：我们还能守住那份感动吗？": "when-galgame-becomes-tala-game"
 };
 
 console.log('--- Starting Blog Migration ---');
@@ -53,14 +56,19 @@ for (const file of files) {
   const filePath = path.join(srcDir, file);
   let content = fs.readFileSync(filePath, 'utf-8');
 
-  // A. Extract publication date from original frontmatter
+  // A. Extract publication date & hero image from original frontmatter
   let pubDate = '2026-07-18'; // Default fallback
+  let heroImage = '';
   const frontmatterMatch = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
   if (frontmatterMatch) {
     const yaml = frontmatterMatch[1];
     const createdMatch = yaml.match(/(?:created|date):\s*([\d-]+)/);
     if (createdMatch) {
       pubDate = createdMatch[1];
+    }
+    const heroImageMatch = yaml.match(/heroImage:\s*['"]?([^\r\n'"]+)['"]?/);
+    if (heroImageMatch) {
+      heroImage = heroImageMatch[1];
     }
   }
 
@@ -116,15 +124,17 @@ for (const file of files) {
   });
 
   // H. Construct the clean Astro frontmatter
-  const cleanFrontmatter = [
+  const cleanFrontmatterFields = [
     '---',
     `title: '${title.replace(/'/g, "''")}'`,
     `description: '${description.replace(/'/g, "''")}'`,
-    `pubDate: '${pubDate}'`,
-    '---',
-    '',
-    body
-  ].join('\n');
+    `pubDate: '${pubDate}'`
+  ];
+  if (heroImage) {
+    cleanFrontmatterFields.push(`heroImage: '${heroImage}'`);
+  }
+  cleanFrontmatterFields.push('---', '', body);
+  const cleanFrontmatter = cleanFrontmatterFields.join('\n');
 
   // I. Write to destination file
   const baseName = path.basename(file, '.md');

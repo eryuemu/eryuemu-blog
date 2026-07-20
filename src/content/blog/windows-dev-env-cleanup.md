@@ -222,7 +222,7 @@ Windows 宿主机 (C盘)
 
 - ⚠️ **不识别 `\\wsl$\` UNC 路径**，必须先将 WSL2 映射为网络驱动器（如 `W:` 盘）
 - 之后通过 `W:\home\<用户名>\workspace\` 正常打开项目
-- 映射方法详见 [后篇](/eryuemu-blog/blog/wsl2-practical-guide)
+- 映射方法详见 [后篇](/blog/wsl2-practical-guide)
 
 ### 6.4 Codex 桌面端
 
@@ -245,7 +245,7 @@ Windows 宿主机 (C盘)
 
 WSL2 通过 symlink 共享 Windows 上的 `settings.json`，所以 cc-switch 写一次，两边同时生效。
 
-> 详细配置过程及四个踩坑记录见 [后篇](/eryuemu-blog/blog/wsl2-practical-guide)。
+> 详细配置过程及四个踩坑记录见 [后篇](/blog/wsl2-practical-guide)。
 
 ### 6.6 Git 推送
 
@@ -285,8 +285,8 @@ Windows 的 Git 已卸载，所有 Git 操作在 WSL2 内完成：
 
 ## 相关笔记
 
-- [WSL2 实战手册：空间账单、symlink 陷阱与 cc-switch 四连坑](/eryuemu-blog/blog/wsl2-practical-guide) ← 后篇：安装后的空间账单、文件系统细节、cc-switch 四连坑
-- [Claude Code 安装与配置完全指南](/eryuemu-blog/blog/claude-code-installation-guide) ← Claude Code 原生安装 + CC Switch 配置面板详解
-- [HBU-Wiki 开发环境搭建：从fnm到项目级Node.js隔离](/eryuemu-blog/blog/hbu-wiki-dev-env-setup) ← 旧方案（已升级至 WSL2），方法论仍有效
-- [社交媒体数据采集-隔离环境搭建](/eryuemu-blog/blog/social-media-data-scraping-isolation) ← 旧方案（已升级至 WSL2），方法论仍有效
+- [WSL2 实战手册：空间账单、symlink 陷阱与 cc-switch 四连坑](/blog/wsl2-practical-guide) ← 后篇：安装后的空间账单、文件系统细节、cc-switch 四连坑
+- [Claude Code 安装与配置完全指南](/blog/claude-code-installation-guide) ← Claude Code 原生安装 + CC Switch 配置面板详解
+- [HBU-Wiki 开发环境搭建：从fnm到项目级Node.js隔离](/blog/hbu-wiki-dev-env-setup) ← 旧方案（已升级至 WSL2），方法论仍有效
+- [社交媒体数据采集-隔离环境搭建](/blog/social-media-data-scraping-isolation) ← 旧方案（已升级至 WSL2），方法论仍有效
 - **工具** ← 工具 & 效率 MOC
