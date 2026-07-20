@@ -6,14 +6,14 @@ import { WALINE_SERVER_URL } from '../consts';
   <div class="comments-divider">
     <span class="divider-text">💬 评论区</span>
   </div>
-  <div id="waline"></div>
+  <div id="waline-comment-box"></div>
 </div>
 
 <script define:vars={{ serverURL: WALINE_SERVER_URL }}>
   let walineInstance = null;
 
   async function initWaline() {
-    const el = document.getElementById('waline');
+    const el = document.getElementById('waline-comment-box');
     if (!el) return;
 
     // 检查是否配置了有效的服务 URL
@@ -36,7 +36,7 @@ import { WALINE_SERVER_URL } from '../consts';
       const { init } = await import('https://unpkg.com/@waline/client@v3/dist/waline.js');
       
       walineInstance = init({
-        el: '#waline',
+        el: '#waline-comment-box',
         serverURL: serverURL,
         lang: 'zh-CN',
         dark: 'html.dark',
