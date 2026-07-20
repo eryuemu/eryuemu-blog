@@ -10,8 +10,7 @@ import avatar from '../assets/avatar.jpg';
 import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
 
 const posts = (await getCollection('blog'))
-	.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
-	.slice(0, 10);
+	.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 ---
 
 <!doctype html>
@@ -286,6 +285,23 @@ const posts = (await getCollection('blog'))
 				const buttons = filterContainer.querySelectorAll('.tab-btn');
 				const posts = document.querySelectorAll('#posts-list .post-item');
 
+				function applyFilter(selectedCategory: string | null) {
+					let visibleCount = 0;
+					posts.forEach(post => {
+						const postCategory = post.getAttribute('data-category');
+						if (selectedCategory === 'all' || postCategory === selectedCategory) {
+							if (visibleCount < 10) {
+								(post as HTMLElement).style.display = 'block';
+								visibleCount++;
+							} else {
+								(post as HTMLElement).style.display = 'none';
+							}
+						} else {
+							(post as HTMLElement).style.display = 'none';
+						}
+					});
+				}
+
 				buttons.forEach(btn => {
 					btn.addEventListener('click', () => {
 						// Remove active class from all buttons
@@ -294,17 +310,15 @@ const posts = (await getCollection('blog'))
 						btn.classList.add('active');
 
 						const selectedCategory = btn.getAttribute('data-category');
-
-						posts.forEach(post => {
-							const postCategory = post.getAttribute('data-category');
-							if (selectedCategory === 'all' || postCategory === selectedCategory) {
-								(post as HTMLElement).style.display = 'block';
-							} else {
-								(post as HTMLElement).style.display = 'none';
-							}
-						});
+						applyFilter(selectedCategory);
 					});
 				});
+
+				// Run once on load to filter active category (showing max 10 items)
+				const activeBtn = filterContainer.querySelector('.tab-btn.active');
+				if (activeBtn) {
+					applyFilter(activeBtn.getAttribute('data-category'));
+				}
 			}
 
 			// Runs on page load and page swap for View Transitions
