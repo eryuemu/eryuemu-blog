@@ -11,10 +11,9 @@ import WalineComments from '../components/WalineComments.astro';
 type Props = CollectionEntry<'blog'>['data'] & {
 	wordCount?: number;
 	readingTime?: number;
-	views?: number;
 };
 
-const { title, description, pubDate, updatedDate, heroImage, wordCount, readingTime, views } = Astro.props;
+const { title, description, pubDate, updatedDate, heroImage, wordCount, readingTime } = Astro.props;
 ---
 
 <html lang="zh-CN">
@@ -164,16 +163,7 @@ const { title, description, pubDate, updatedDate, heroImage, wordCount, readingT
 								{wordCount.toLocaleString()} 字
 							</span>
 						)}
-						{views && (
-							<span class="meta-item">
-								<span class="separator">·</span>
-								<svg class="meta-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-									<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-									<circle cx="12" cy="12" r="3"></circle>
-								</svg>
-								{views.toLocaleString()} 阅读
-							</span>
-						)}
+
 						{updatedDate && (
 							<span class="meta-item updated">
 								<span class="separator">·</span>

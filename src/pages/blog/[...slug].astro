@@ -20,17 +20,8 @@ const cleanText = bodyText.replace(/[\s\r\n#*`_>[\]()\-+!]+/g, '');
 const wordCount = cleanText.length;
 const readingTime = Math.max(1, Math.ceil(wordCount / 350)); // ~350 chars per minute
 
-// Deterministic mock views based on post id
-const generateViews = (str: string) => {
-	let hash = 0;
-	for (let i = 0; i < str.length; i++) {
-		hash = str.charCodeAt(i) + ((hash << 5) - hash);
-	}
-	return Math.abs(hash % 1100) + 382; // Bound views realistically
-};
-const views = generateViews(post.id);
 ---
 
-<BlogPost {...post.data} wordCount={wordCount} readingTime={readingTime} views={views}>
+<BlogPost {...post.data} wordCount={wordCount} readingTime={readingTime}>
 	<Content />
 </BlogPost>
