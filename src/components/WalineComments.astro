@@ -17,7 +17,7 @@ import { WALINE_SERVER_URL } from '../consts';
     if (!el) return;
 
     // 检查是否配置了有效的服务 URL
-    if (!serverURL || serverURL.includes('your-waline-server') || serverURL === 'https://comments.eryuemu.com') {
+    if (!serverURL || serverURL.includes('your-waline-server')) {
       el.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 2rem 0; font-size: 0.9rem; border: 1px dashed var(--border); border-radius: var(--radius);">⚠️ 请在 <code>src/consts.ts</code> 中配置您的 <code>WALINE_SERVER_URL</code> 以启用评论区。</div>';
       return;
     }
