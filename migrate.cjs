@@ -106,7 +106,7 @@ for (const file of files) {
     const text = displayText ? displayText.trim() : cleanPath;
 
     if (slug) {
-      return `[${text}](/eryuemu-blog/blog/${slug})`;
+      return `[${text}](/blog/${slug})`;
     } else if (cleanPath === 'eryuemu-blog 部署与评论系统搭建全复盘') {
       return `**${text}**`;
     } else {

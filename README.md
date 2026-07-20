@@ -1,65 +1,76 @@
-# eryuemu-blog (二月木的个人博客)
+# 🌌 eryuemu-blog (二月木的个人博客)
 
-基于 [Astro](https://astro.build/) 构建的个人极客博客，使用物理隔离的 WSL2 (Ubuntu) 环境开发，并实现与本地 Obsidian 知识库的自动化同步与渲染。
+> 🌐 访问地址: [https://eryuemu.com](https://eryuemu.com)
 
-## 🚀 项目架构与特点
-
-- **零污染物理隔离**：所有的 Node.js 环境（由 NVM 管理）、开发包及项目仓库全部锁在 WSL2 (Ubuntu) 虚拟磁盘中，完美保持 Windows 主机环境的赛博洁癖。
-- **Obsidian 自动化同步**：通过自定义 Node 脚本，直接读取 Windows 宿主机下的本地 Obsidian 知识库，完成 Frontmatter 转换、内部 WikiLinks 解析以及 `![[vault/image.png]]` 图片链接路径重写。
-- **极速与 SEO**：基于 Astro 纯静态生成，首屏加载极快，配备 Sitemap、RSS 订阅支持。
-- **互动服务**：集成 Waline 评论系统（后端基于 Supabase）及 Vercount 流量计数。
+基于 **Astro** 构建的个人极客博客系统。开发环境与 Windows 宿主机完全物理隔离，并依托自定义同步脚本，实现了本地 **Obsidian** 知识库到线上网站的自动化同步与排版转换。
 
 ---
 
-## 🛠️ 本地开发指南
+## 💎 项目核心设计与特点
 
-### 1. 启动本地开发服务
+* 🔬 **零污染物理隔离**：所有的 Node.js 运行环境（由 nvm 管理）、依赖包及代码仓库均锁定在 **WSL2 (Ubuntu)** 虚拟磁盘中，完美保持 Windows 系统的干净与纯粹。
+* 📝 **Obsidian 自动化同步**：通过 `migrate.cjs` 自定义脚本，自动从 Windows 挂载路径读取本地知识库，完成 Frontmatter 重新渲染、内部 `[[WikiLinks]]` 解析重定向以及 `![[Image]]` 图片相对路径改写。
+* 🚀 **Vercel 全局加速**：完全托管于 Vercel 全局 CDN 边缘节点，配合自定义域名 `eryuemu.com`，在国内与全球均能享受极致的秒开体验。
+* 💬 **动态交互与统计**：
+  * **评论系统**：集成 Waline 评论框架（后端依托云端 Supabase 数据库与 Vercel 部署）。
+  * **流量计数**：集成 Vercount 实现轻量、精准的页面访问统计。
+* ⚡ **极速与 SEO**：基于 Astro 纯静态生成（SSG），配备开箱即用的 Sitemap 和 RSS 订阅支持。
 
-项目使用自定义 Astro 后台常驻服务管理，请在 WSL2 中执行以下指令：
+---
+
+## 🛠️ 本地开发与常驻服务管理
+
+博客开发通过 WSL2 中的 Astro 常驻服务进行管理，防止开发服务意外退出：
 
 ```bash
-# 后台运行 Dev Server
+# 后台常驻运行本地开发服务器 (默认端口: http://localhost:4321)
 npx astro dev --background
 
-# 查看运行状态
+# 检查当前服务运行状态
 npx astro dev status
 
-# 查看实时日志
+# 实时查看本地开发日志
 npx astro dev logs
 
-# 关闭服务
+# 停止后台开发服务器
 npx astro dev stop
 ```
 
-本地预览地址为：[http://localhost:4321](http://localhost:4321)
-
-### 2. 静态生成与构建
-
-```bash
-npm run build
-```
-
-构建好的静态资源会生成在 `dist/` 文件夹中。
-
 ---
 
-## 🔄 Obsidian 笔记同步方案
+## 🔄 Obsidian 知识库同步方案
 
-本项目配备了 `migrate.cjs` 迁移同步脚本，可在发布新文章时随时运行。
+当你在本地 Obsidian 中写完或修改了文章，可以通过以下方式同步到博客：
 
-### 使用方法
+### 1. 同步机制说明
+运行脚本时，它会执行以下管道操作：
+1. **源路径扫描**：从挂载的 Windows 本地路径（如 `/mnt/c/MyKnowledgeBase/开发`）读取最新的 Markdown 文档。
+2. **Slug 映射解析**：根据 `migrate.cjs` 内置的 `slugMap` 映射表将中文文件名转换为 URL 友好的 slugs。
+3. **内容预处理**：
+   - 提取原始 Obsidian 的 `created` 日期生成统一的 `pubDate`。
+   - 解析 Obsidian 专属的图片语法（如 `![[image.png]]`）并转换为标准的相对路径。
+   - 解析 `[[WikiLinks]]` 并自动转换为适配 `eryuemu.com/blog/xxx` 的站内链接。
+4. **编译与覆盖**：生成干净标准的 Markdown 格式博客，并写入项目的 `src/content/blog/` 目录中。
 
-在 WSL2 终端中直接运行：
-
+### 2. 执行同步命令
+在 WSL2 项目根目录下直接运行：
 ```bash
 node migrate.cjs
 ```
 
-### 同步机制介绍
-1. **源路径**：从 `/mnt/c/MyKnowledgeBase/开发` 读取已整理的公开技术文档。
-2. **清洗过滤**：自动排除敏感/草稿性质的文档（配置在 `migrate.cjs` 中的 `skipFiles`）。
-3. **内容转化**：
-   - 提取原本的创建时间 `created: YYYY-MM-DD` 作为 `pubDate`。
-   - 解析 Obsidian 语法图片引用 `![[vault/image.png]]` 并转换为相对路径。
-   - 将 Obsidian 的 `[[WikiLinks]]` 按预设映射表转换为 Astro 可读的 URL Slugs。
-   - 移除不必要的 Markdown 题头及一级大标题，重构符合 Astro 标准的 Frontmatter 描述。
+---
+
+## 📦 线上部署工作流
+
+项目已实现 **无感自动化部署**（CI/CD）：
+
+```mermaid
+graph LR
+    A[Obsidian 编辑] --> B[node migrate.cjs 同步]
+    B --> C[Git Push 推送]
+    C --> D[Vercel 监听到提交]
+    D --> E[Vercel 自动构建/发布]
+    E --> F[eryuemu.com 实时更新]
+```
+
+当代码被推送到 GitHub 仓库的 `main` 分支时，Vercel 将会自动拉取最新版本进行云端构建，并在 1 分钟内完成全网节点的静默部署。
