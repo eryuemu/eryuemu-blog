@@ -43,7 +43,8 @@ heroImage: '../../assets/c107-flat-cover-spine.jpg'
 
 说回各大会社官方纷纷效仿柚子社进驻 B 站卖收藏集，对此我并不反感，我反而是鼓励的态度，因为这增加了创作者和玩家的交流。在进驻之前，厂商的消息大多都是在 X（原 Twitter）这种平台才能看到，而 B 站有了官号，就不只是能卖个收藏集这么简单，日本创作者和中国玩家的交流会变得更密切，将 B 站这种平台作为一种桥梁，当然，前提是会社运营要认真一些，而不是来这里挂个名卖个收藏集就走。
 
-![各大 Galgame 会社进驻 B 站](../../assets/galgame-bilibili-accounts.jpg)
+![galgame-bilibili-accounts.jpg](../../assets/galgame-bilibili-accounts.jpg)
+*各大 Galgame 会社进驻 B 站*
 
 当然，B 站作为目前国内最大的 ACG 社区，其价值远不止于充当厂商的“售票处”。在流量喧嚣之外，更让我感动的，是那些长久以来深耕于此的 UP 主们——像“Galgame 批评”、“爱摸鱼的人潮”、“略懂先生的小屋”等等。他们不追逐“旮旯给木”的烂梗流量，而是用深度的杂谈、专业的评测和充满情怀的考据，在维护着这个圈子的格调。
 
@@ -60,7 +61,8 @@ heroImage: '../../assets/c107-flat-cover-spine.jpg'
 
 这些高校同好会，提供了一个相对封闭但温暖的避风港。大家因为纯粹的热爱聚在一起，构筑起了友善的交流氛围。这是 Galgame 玩家群体中不可或缺的一部分。
 
-![c107高校联合刊物在贴吧的讨论](../../assets/c107-tieba-post.jpg)
+![c107-tieba-post.jpg](../../assets/c107-tieba-post.jpg)
+*c107高校联合刊物在贴吧的讨论*
 
 看到这么多同龄人依然在为这个“小众”的爱好发光发热，我觉得这就够了，只要 Galgame 还有受众，还有愿意静下心来去阅读、去感受的人，这门独特的艺术形式就永远不会消亡。中国很大，人口基数摆在这里。即便是考证门槛极高、极度硬核的业余无线电圈子，在国内也有二三十万的持证玩家（这还不算更庞大的泛爱好者群体）。相比之下，Galgame 作为一种通俗 of 娱乐形式，它的潜在受众只多不少……
 
@@ -83,10 +85,10 @@ heroImage: '../../assets/c107-flat-cover-spine.jpg'
 
 #### 合同志 3D 效果图与企划发布
 
-![C107联合社刊3D渲染效果图](../../assets/c107-3d-mockup.jpg)
+![c107-3d-mockup.jpg](../../assets/c107-3d-mockup.jpg)
 *《高校视觉小说同好会合同志》3D 效果图*
 
-![C107联合社刊推特发布信息](../../assets/c107-twitter-post.jpg)
+![c107-twitter-post.jpg](../../assets/c107-twitter-post.jpg)
 *东京大学视觉小说同好会（UT-ViNos）在 X（Twitter）上发布的 C107 参展公告*
 
 #### 实体书目录与国内高校参与名单
@@ -97,7 +99,7 @@ heroImage: '../../assets/c107-flat-cover-spine.jpg'
 
 | | |
 | :---: | :---: |
-| ![目录页 1](../../assets/c107-toc-1.jpg) | ![目录页 2](../../assets/c107-toc-2.jpg) |
-| ![目录页 3](../../assets/c107-toc-3.jpg) | ![目录页 4](../../assets/c107-toc-4.jpg) |
+| ![c107-toc-1.jpg](../../assets/c107-toc-1.jpg) | ![c107-toc-2.jpg](../../assets/c107-toc-2.jpg) |
+| ![c107-toc-3.jpg](../../assets/c107-toc-3.jpg) | ![c107-toc-4.jpg](../../assets/c107-toc-4.jpg) |
 
 从目录中可以看到，像北京大学、复旦大学、上海交通大学、中科大、西南大学、重庆理工大学等 30 多所国内高校 of Galgame/视觉小说同好会都在其中留下了足迹。这本沉甸甸的实体书，正是中日两国高校年轻玩家跨越语言、用热爱连接彼此的最佳见证。
