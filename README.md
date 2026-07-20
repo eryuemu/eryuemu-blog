@@ -1,5 +1,9 @@
 # eryuemu-blog (二月木的个人博客)
 
+* 主访问地址: [https://eryuemu.com](https://eryuemu.com)
+* Vercel 分配地址: [https://eryuemu-blog.vercel.app](https://eryuemu-blog.vercel.app)
+* 原 GitHub Pages 地址 (已停用): [https://eryuemu.github.io/eryuemu-blog](https://eryuemu.github.io/eryuemu-blog)
+
 本仓库是二月木的个人博客项目。项目开发环境在 WSL2 中实现物理隔离，利用自定义脚本自动同步 Windows 本地 Obsidian 知识库，并托管至 Vercel 进行全球边缘加速部署。
 
 ---
