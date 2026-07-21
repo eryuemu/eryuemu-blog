@@ -155,22 +155,32 @@ import HeaderLink from './HeaderLink.astro';
 	:global(html.dark) .sun-icon { display: block; }
 	:global(html.dark) .moon-icon { display: none; }
 
-	@media (max-width: 768px) {
-		nav {
-			padding: 0 1rem;
-		}
-		.logo {
-			font-size: 0.95rem;
-		}
-		:global(.nav-links a) {
-			padding: 0.3rem 0.6rem;
-			font-size: 0.85rem;
-		}
-		/* Allow theme toggle on mobile but hide github */
-		.icon-link {
-			display: none;
-		}
-	}
+        @media (max-width: 768px) {
+                nav {
+                        flex-wrap: nowrap;
+                        padding: 0 1rem;
+                }
+                .logo {
+                        font-size: 0.95rem;
+                        flex-shrink: 0;
+                }
+                .nav-links {
+                        min-width: 0;
+                        flex-shrink: 1;
+                        gap: 0;
+                }
+                :global(.nav-links a) {
+                        padding: 0.25rem 0.5rem;
+                        font-size: 0.82rem;
+                        white-space: nowrap;
+                }
+                .nav-right {
+                        flex-shrink: 0;
+                }
+                .icon-link {
+                        display: none;
+                }
+        }
 </style>
 
 <script>
