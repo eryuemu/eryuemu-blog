@@ -1,0 +1,1051 @@
+---
+import { PLAYLIST } from '../data/playlist';
+---
+
+<div id="custom-music-player" transition:persist class="music-player-container collapsed">
+	<!-- Audio Object -->
+	<audio id="player-audio" preload="metadata"></audio>
+
+	<!-- COLLAPSED STATE: Floating Disc Trigger -->
+	<button id="player-trigger" class="player-trigger-btn" aria-label="展开音乐播放器">
+		<div class="vinyl-disc">
+			<img id="trigger-cover" src={PLAYLIST[0].cover} alt="封面" class="disc-cover" />
+			<div class="disc-center"></div>
+		</div>
+		<div class="trigger-play-indicator">
+			<svg id="trigger-icon-play" viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+				<polygon points="5 3 19 12 5 21 5 3"></polygon>
+			</svg>
+			<svg id="trigger-icon-pause" viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="display:none;">
+				<rect x="6" y="4" width="4" height="16"></rect>
+				<rect x="14" y="4" width="4" height="16"></rect>
+			</svg>
+		</div>
+	</button>
+
+	<!-- EXPANDED STATE: Full Player Card -->
+	<div class="player-card">
+		<div class="player-info-row">
+			<!-- Left: Rotating Album Cover -->
+			<div class="player-cover-area">
+				<div class="vinyl-disc large">
+					<img id="card-cover" src={PLAYLIST[0].cover} alt="封面" class="disc-cover" />
+					<div class="disc-center"></div>
+				</div>
+			</div>
+
+			<!-- Right: Title, Metadata, Controls & Progress -->
+			<div class="player-main-area">
+				<!-- Header: Title, Artist and Visualizer -->
+				<div class="player-header">
+					<div class="song-meta">
+						<div id="player-song-title" class="song-title">歌曲加载中...</div>
+						<div id="player-song-artist" class="song-artist">歌手</div>
+					</div>
+					<!-- Minimize Button -->
+					<button id="player-minimize" class="icon-btn minimize-btn" aria-label="收起播放器">
+						<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+							<polyline points="4 14 10 14 10 20"></polyline>
+							<polyline points="20 10 14 10 14 4"></polyline>
+						</svg>
+					</button>
+				</div>
+
+				<!-- Dynamic Visualizer Waves -->
+				<div id="audio-visualizer" class="audio-visualizer-bars">
+					<span class="bar bar-1"></span>
+					<span class="bar bar-2"></span>
+					<span class="bar bar-3"></span>
+					<span class="bar bar-4"></span>
+				</div>
+
+				<!-- Progress Bar Row -->
+				<div class="progress-row">
+					<div id="progress-container" class="progress-bar-track">
+						<div id="progress-fill" class="progress-bar-fill"></div>
+						<div id="progress-handle" class="progress-bar-handle"></div>
+					</div>
+					<div class="time-display">
+						<span id="time-current">00:00</span>
+						<span class="time-divider">/</span>
+						<span id="time-duration">00:00</span>
+					</div>
+				</div>
+
+				<!-- Control Row -->
+				<div class="controls-row">
+					<div class="playback-controls">
+						<button id="btn-prev" class="icon-btn" aria-label="上一首">
+							<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+								<polygon points="19 20 9 12 19 4 19 20"></polygon>
+								<line x1="5" y1="4" x2="5" y2="20" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"></line>
+							</svg>
+						</button>
+						<button id="btn-play-pause" class="icon-btn play-btn" aria-label="播放/暂停">
+							<svg id="icon-play" viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+								<polygon points="5 3 19 12 5 21 5 3"></polygon>
+							</svg>
+							<svg id="icon-pause" viewBox="0 0 24 24" width="18" height="18" fill="currentColor" style="display:none;">
+								<rect x="6" y="4" width="4" height="16"></rect>
+								<rect x="14" y="4" width="4" height="16"></rect>
+							</svg>
+						</button>
+						<button id="btn-next" class="icon-btn" aria-label="下一首">
+							<svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+								<polygon points="5 4 15 12 5 20 5 4"></polygon>
+								<line x1="19" y1="4" x2="19" y2="20" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"></line>
+							</svg>
+						</button>
+					</div>
+
+					<div class="extra-controls">
+						<!-- Lyric Toggle Button -->
+						<button id="btn-lyrics" class="icon-btn lyric-btn" aria-label="歌词面板">
+							<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+								<line x1="8" y1="6" x2="21" y2="6"></line>
+								<line x1="8" y1="12" x2="21" y2="12"></line>
+								<line x1="8" y1="18" x2="21" y2="18"></line>
+								<line x1="3" y1="6" x2="3.01" y2="6"></line>
+								<line x1="3" y1="12" x2="3.01" y2="12"></line>
+								<line x1="3" y1="18" x2="3.01" y2="18"></line>
+							</svg>
+						</button>
+						<button id="btn-mute" class="icon-btn mute-btn" aria-label="静音切换">
+							<svg id="icon-volume-on" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+								<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+								<path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+							</svg>
+							<svg id="icon-volume-muted" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+								<polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+								<line x1="23" y1="9" x2="17" y2="15"></line>
+								<line x1="17" y1="9" x2="23" y2="15"></line>
+							</svg>
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Bottom: Lyrics Scroll Area -->
+		<div class="player-lyrics-panel">
+			<div class="lyrics-scroll-container" id="lyrics-scroll">
+				<!-- Rendered dynamically -->
+			</div>
+		</div>
+	</div>
+</div>
+
+<style>
+	/* ─── Container and Layout ─── */
+	.music-player-container {
+		position: fixed;
+		bottom: 1.5rem;
+		right: 1.5rem;
+		z-index: 1005;
+		transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+		font-family: var(--font-sans);
+	}
+
+	/* ─── Collapsed State ─── */
+	.music-player-container.collapsed {
+		width: 54px;
+		height: 54px;
+		border-radius: 50%;
+		overflow: visible;
+		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+	}
+
+	.music-player-container.collapsed .player-card {
+		opacity: 0;
+		pointer-events: none;
+		transform: scale(0.9) translateY(10px);
+		display: none;
+	}
+
+	.music-player-container.collapsed .player-trigger-btn {
+		display: block;
+	}
+
+	/* ─── Expanded State ─── */
+	.music-player-container.expanded {
+		width: 320px;
+		height: 146px;
+		border-radius: var(--radius);
+		box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+		background: rgba(255, 255, 255, 0.72);
+		backdrop-filter: blur(16px) saturate(180%);
+		-webkit-backdrop-filter: blur(16px) saturate(180%);
+		border: 1px solid var(--border);
+		padding: 0.85rem;
+		overflow: hidden;
+	}
+
+	:global(html.dark) .music-player-container.expanded {
+		background: rgba(18, 18, 18, 0.72);
+		border-color: var(--border);
+	}
+
+	.music-player-container.expanded .player-trigger-btn {
+		display: none;
+	}
+
+	.music-player-container.expanded .player-card {
+		display: flex;
+		flex-direction: column;
+		opacity: 1;
+		pointer-events: auto;
+		transform: scale(1) translateY(0);
+		gap: 0.85rem;
+		height: 100%;
+	}
+
+	/* ─── Trigger Button ─── */
+	.player-trigger-btn {
+		position: relative;
+		width: 54px;
+		height: 54px;
+		border: 1px solid var(--border);
+		border-radius: 50%;
+		background: var(--bg);
+		cursor: pointer;
+		padding: 0;
+		outline: none;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+	}
+
+	.player-trigger-btn:hover {
+		transform: scale(1.06);
+		border-color: var(--border-hover);
+		box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+	}
+
+	.trigger-play-indicator {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		background: rgba(26, 26, 26, 0.85);
+		color: #ffffff;
+		width: 28px;
+		height: 28px;
+		border-radius: 50%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		opacity: 0;
+		transition: opacity 0.25s ease, transform 0.25s ease;
+		pointer-events: none;
+	}
+
+	.player-trigger-btn:hover .trigger-play-indicator {
+		opacity: 1;
+	}
+
+	/* ─── Vinyl Disc Animation ─── */
+	.vinyl-disc {
+		position: relative;
+		width: 100%;
+		height: 100%;
+		border-radius: 50%;
+		background: #111111;
+		border: 1px solid rgba(255, 255, 255, 0.08);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.8);
+	}
+
+	.vinyl-disc::before {
+		content: '';
+		position: absolute;
+		width: calc(100% - 10px);
+		height: calc(100% - 10px);
+		border: 1px solid rgba(255, 255, 255, 0.05);
+		border-radius: 50%;
+	}
+
+	.disc-cover {
+		width: calc(100% - 14px);
+		height: calc(100% - 14px);
+		border-radius: 50%;
+		object-fit: cover;
+		transition: transform 0.3s ease;
+	}
+
+	.disc-center {
+		position: absolute;
+		width: 10px;
+		height: 10px;
+		background: var(--bg);
+		border: 1px solid rgba(0, 0, 0, 0.15);
+		border-radius: 50%;
+		box-shadow: inset 0 0 2px rgba(0, 0, 0, 0.2);
+	}
+
+	.playing .vinyl-disc {
+		animation: spin 16s linear infinite;
+	}
+
+	@keyframes spin {
+		from { transform: rotate(0deg); }
+		to { transform: rotate(360deg); }
+	}
+
+	/* Large Disc inside Card */
+	.player-cover-area {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+	}
+
+	.vinyl-disc.large {
+		width: 100px;
+		height: 100px;
+		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15), inset 0 0 16px rgba(0, 0, 0, 0.9);
+	}
+
+	.vinyl-disc.large .disc-cover {
+		width: calc(100% - 24px);
+		height: calc(100% - 24px);
+	}
+
+	.vinyl-disc.large .disc-center {
+		width: 16px;
+		height: 16px;
+	}
+
+	/* ─── Main Area Layout ─── */
+	.player-main-area {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		min-width: 0; /* Prevents overflow */
+		justify-content: space-between;
+	}
+
+	.player-header {
+		display: flex;
+		align-items: flex-start;
+		justify-content: space-between;
+		position: relative;
+		padding-right: 20px; /* Leave room for visualizer/close button */
+	}
+
+	.song-meta {
+		min-width: 0;
+		flex: 1;
+	}
+
+	.song-title {
+		font-size: 0.88rem;
+		font-weight: 600;
+		color: var(--text-primary);
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		line-height: 1.25;
+		margin-bottom: 0.15rem;
+	}
+
+	.song-artist {
+		font-size: 0.75rem;
+		color: var(--text-muted);
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		line-height: 1.2;
+	}
+
+	/* ─── Controls ─── */
+	.icon-btn {
+		background: none;
+		border: none;
+		color: var(--text-secondary);
+		cursor: pointer;
+		padding: 0.3rem;
+		border-radius: 4px;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		transition: all 0.2s ease;
+		outline: none;
+	}
+
+	.icon-btn:hover {
+		color: var(--text-primary);
+		background: var(--border);
+	}
+
+	.minimize-btn {
+		position: absolute;
+		top: -0.1rem;
+		right: -0.1rem;
+		padding: 0.2rem;
+		color: var(--text-muted);
+	}
+
+	.minimize-btn:hover {
+		color: var(--text-primary);
+	}
+
+	/* Play/Pause Button */
+	.play-btn {
+		background: var(--text-primary) !important;
+		color: var(--bg) !important;
+		width: 28px;
+		height: 28px;
+		border-radius: 50%;
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+	}
+
+	.play-btn:hover {
+		transform: scale(1.05);
+		opacity: 0.9;
+	}
+
+	/* Controls Row */
+	.controls-row {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		margin-top: 0.2rem;
+	}
+
+	.playback-controls {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
+	.extra-controls {
+		display: flex;
+		align-items: center;
+	}
+
+	/* ─── Progress Bar ─── */
+	.progress-row {
+		display: flex;
+		align-items: center;
+		gap: 0.6rem;
+		margin-top: 0.4rem;
+	}
+
+	.progress-bar-track {
+		flex: 1;
+		height: 4px;
+		background: var(--border);
+		border-radius: 2px;
+		position: relative;
+		cursor: pointer;
+		transition: height 0.15s ease;
+	}
+
+	.progress-bar-track:hover {
+		height: 6px;
+	}
+
+	.progress-bar-fill {
+		height: 100%;
+		background: var(--text-primary);
+		border-radius: 2px;
+		width: 0%;
+		position: relative;
+	}
+
+	.progress-bar-handle {
+		position: absolute;
+		top: 50%;
+		transform: translate(-50%, -50%) scale(0);
+		width: 10px;
+		height: 10px;
+		background: var(--text-primary);
+		border-radius: 50%;
+		transition: transform 0.15s ease;
+		pointer-events: none;
+	}
+
+	.progress-bar-track:hover .progress-bar-handle {
+		transform: translate(-50%, -50%) scale(1);
+	}
+
+	.time-display {
+		font-size: 0.68rem;
+		font-variant-numeric: tabular-nums;
+		color: var(--text-muted);
+		white-space: nowrap;
+		display: flex;
+		align-items: center;
+		gap: 0.15rem;
+	}
+
+	.time-divider {
+		opacity: 0.7;
+	}
+
+	/* ─── Visualizer ─── */
+	.audio-visualizer-bars {
+		display: flex;
+		align-items: flex-end;
+		gap: 2px;
+		height: 14px;
+		position: absolute;
+		right: 1.5rem;
+		top: 0.15rem;
+	}
+
+	.bar {
+		width: 2px;
+		height: 100%;
+		background-color: var(--text-muted);
+		border-radius: 1px;
+		transform-origin: bottom;
+		transform: scaleY(0.2);
+	}
+
+	.playing .bar {
+		background-color: var(--text-primary);
+		animation: bounce 1.2s ease-in-out infinite alternate;
+	}
+
+	.playing .bar-1 { animation-delay: 0.1s; }
+	.playing .bar-2 { animation-delay: 0.4s; }
+	.playing .bar-3 { animation-delay: 0.2s; }
+	.playing .bar-4 { animation-delay: 0.5s; }
+
+	@keyframes bounce {
+		0% { transform: scaleY(0.15); }
+		100% { transform: scaleY(1); }
+	}
+
+	/* Responsive tweaks */
+	@media (max-width: 768px) {
+		.music-player-container {
+			bottom: 1rem;
+			right: 1rem;
+		}
+	}
+
+	/* ─── Lyrics Panel (Option B) ─── */
+	.player-lyrics-panel {
+		height: 0;
+		opacity: 0;
+		overflow: hidden;
+		transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+		border-top: 1px dashed var(--border);
+		padding-top: 0;
+		margin-top: 0;
+	}
+
+	.player-info-row {
+		display: flex;
+		gap: 0.85rem;
+		width: 100%;
+		flex-shrink: 0;
+	}
+
+	.music-player-container.expanded.show-lyrics {
+		height: 390px;
+	}
+
+	.music-player-container.expanded.show-lyrics .player-lyrics-panel {
+		height: 230px;
+		opacity: 1;
+		margin-top: 0.65rem;
+		padding-top: 0.65rem;
+	}
+
+	.lyrics-scroll-container {
+		height: 100%;
+		overflow-y: scroll;
+		scroll-behavior: smooth;
+		scrollbar-width: none; /* Firefox */
+		-ms-overflow-style: none;  /* IE and Edge */
+		padding: 100px 0; /* Align active line to center */
+	}
+
+	.lyrics-scroll-container::-webkit-scrollbar {
+		display: none; /* Chrome, Safari, Opera */
+	}
+
+	.lyric-line {
+		font-size: 0.78rem;
+		text-align: center;
+		color: var(--text-muted);
+		opacity: 0.45;
+		transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+		margin: 0.8rem 0;
+		line-height: 1.45;
+		padding: 0 0.75rem;
+	}
+
+	.lyric-line.active {
+		color: var(--text-primary);
+		opacity: 1;
+		font-weight: 600;
+		font-size: 0.85rem;
+		transform: scale(1.04);
+	}
+
+	.lyric-line.no-lyrics {
+		opacity: 0.6;
+		font-style: italic;
+		padding-top: 30px;
+	}
+
+	.lyric-btn.active {
+		color: var(--text-primary);
+		background: var(--border);
+	}
+</style>
+
+<script>
+	import { PLAYLIST } from '../data/playlist';
+	import { LYRICS } from '../data/lyrics';
+
+	let audio: HTMLAudioElement | null = null;
+	let currentTrackIndex = 0;
+	let isPlaying = false;
+	let isCollapsed = true;
+	let showLyrics = false;
+
+	let parsedLyrics: Array<{ time: number; text: string }> = [];
+	let lyricElements: HTMLElement[] = [];
+	let currentLyricIndex = -1;
+
+	// Elements
+	let container: HTMLElement | null = null;
+	let triggerBtn: HTMLElement | null = null;
+	let triggerCover: HTMLImageElement | null = null;
+	let cardCover: HTMLImageElement | null = null;
+	let songTitle: HTMLElement | null = null;
+	let songArtist: HTMLElement | null = null;
+	let btnPlayPause: HTMLElement | null = null;
+	let btnPrev: HTMLElement | null = null;
+	let btnNext: HTMLElement | null = null;
+	let btnMute: HTMLElement | null = null;
+	let btnMinimize: HTMLElement | null = null;
+	let btnLyrics: HTMLElement | null = null;
+	let lyricsScroll: HTMLElement | null = null;
+	
+	let triggerPlayIcon: HTMLElement | null = null;
+	let triggerPauseIcon: HTMLElement | null = null;
+	let cardPlayIcon: HTMLElement | null = null;
+	let cardPauseIcon: HTMLElement | null = null;
+	let volumeOnIcon: HTMLElement | null = null;
+	let volumeMutedIcon: HTMLElement | null = null;
+	
+	let progressContainer: HTMLElement | null = null;
+	let progressFill: HTMLElement | null = null;
+	let progressHandle: HTMLElement | null = null;
+	let timeCurrent: HTMLElement | null = null;
+	let timeDuration: HTMLElement | null = null;
+
+	function formatTime(seconds: number): string {
+		if (isNaN(seconds)) return '00:00';
+		const m = Math.floor(seconds / 60);
+		const s = Math.floor(seconds % 60);
+		return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+	}
+
+	function loadTrack(index: number) {
+		if (index < 0 || index >= PLAYLIST.length) return;
+		currentTrackIndex = index;
+		const track = PLAYLIST[index];
+
+		if (audio) {
+			const wasPlaying = isPlaying;
+			audio.src = track.src;
+			
+			// Update UI
+			if (songTitle) songTitle.innerText = track.title;
+			if (songArtist) songArtist.innerText = track.artist;
+			if (triggerCover) triggerCover.src = track.cover;
+			if (cardCover) cardCover.src = track.cover;
+			
+			if (progressFill) progressFill.style.width = '0%';
+			if (progressHandle) progressHandle.style.left = '0%';
+			if (timeCurrent) timeCurrent.innerText = '00:00';
+			if (timeDuration) timeDuration.innerText = '00:00';
+
+			// Load & Parse Lyrics
+			const trackKey = track.src.split('/').pop()?.split('.')[0] || '';
+			const lrcText = LYRICS[trackKey] || '';
+			parsedLyrics = parseLRC(lrcText);
+			currentLyricIndex = -1;
+			renderLyrics();
+
+			localStorage.setItem('mp_current_index', index.toString());
+
+			// If it was playing, keep playing the new track
+			if (wasPlaying) {
+				audio.play().catch(err => {
+					console.log('Playback prevented by browser:', err);
+					setPlayingState(false);
+				});
+			}
+		}
+	}
+
+	function setPlayingState(play: boolean) {
+		isPlaying = play;
+		if (container) {
+			if (isPlaying) {
+				container.classList.add('playing');
+			} else {
+				container.classList.remove('playing');
+			}
+		}
+
+		// Update trigger button icons
+		if (triggerPlayIcon && triggerPauseIcon) {
+			triggerPlayIcon.style.display = isPlaying ? 'none' : 'block';
+			triggerPauseIcon.style.display = isPlaying ? 'block' : 'none';
+		}
+
+		// Update card play icons
+		if (cardPlayIcon && cardPauseIcon) {
+			cardPlayIcon.style.display = isPlaying ? 'none' : 'block';
+			cardPauseIcon.style.display = isPlaying ? 'block' : 'none';
+		}
+	}
+
+	function togglePlay() {
+		if (!audio) return;
+		if (audio.paused) {
+			audio.play().then(() => {
+				setPlayingState(true);
+			}).catch(err => {
+				console.log('Playback prevented by browser:', err);
+			});
+		} else {
+			audio.pause();
+			setPlayingState(false);
+		}
+	}
+
+	function playNext() {
+		let next = currentTrackIndex + 1;
+		if (next >= PLAYLIST.length) next = 0;
+		loadTrack(next);
+		// Force play when next is clicked
+		if (audio) {
+			audio.play().then(() => setPlayingState(true)).catch(err => console.log(err));
+		}
+	}
+
+	function playPrev() {
+		let prev = currentTrackIndex - 1;
+		if (prev < 0) prev = PLAYLIST.length - 1;
+		loadTrack(prev);
+		// Force play when prev is clicked
+		if (audio) {
+			audio.play().then(() => setPlayingState(true)).catch(err => console.log(err));
+		}
+	}
+
+	function toggleMute() {
+		if (!audio) return;
+		audio.muted = !audio.muted;
+		localStorage.setItem('mp_muted', audio.muted ? '1' : '0');
+		updateVolumeUI();
+	}
+
+	function updateVolumeUI() {
+		if (!audio) return;
+		const muted = audio.muted;
+		if (volumeOnIcon && volumeMutedIcon) {
+			volumeOnIcon.style.display = muted ? 'none' : 'block';
+			volumeMutedIcon.style.display = muted ? 'block' : 'none';
+		}
+	}
+
+	function setCollapsedState(collapsed: boolean) {
+		isCollapsed = collapsed;
+		if (container) {
+			if (isCollapsed) {
+				container.classList.remove('expanded');
+				container.classList.remove('show-lyrics');
+				container.classList.add('collapsed');
+				if (btnLyrics) btnLyrics.classList.remove('active');
+			} else {
+				container.classList.remove('collapsed');
+				container.classList.add('expanded');
+				if (showLyrics) {
+					container.classList.add('show-lyrics');
+					if (btnLyrics) btnLyrics.classList.add('active');
+				}
+			}
+		}
+		localStorage.setItem('mp_collapsed', isCollapsed ? '1' : '0');
+	}
+
+	/* ─── Lyrics Parser, Render, Sync & Toggle ─── */
+	function parseLRC(lrcText: string): Array<{ time: number; text: string }> {
+		if (!lrcText) return [];
+		const lines = lrcText.split('\n');
+		const result: Array<{ time: number; text: string }> = [];
+		const timeRegex = /\[(\d+):(\d+)(?:\.(\d+))?\]/;
+		let hasTimestamps = false;
+
+		for (const line of lines) {
+			const match = timeRegex.exec(line);
+			if (match) {
+				hasTimestamps = true;
+				const minutes = parseInt(match[1], 10);
+				const seconds = parseInt(match[2], 10);
+				const msStr = match[3] || '0';
+				const ms = parseInt(msStr.padEnd(3, '0').slice(0, 3), 10);
+				const time = minutes * 60 + seconds + ms / 1000;
+				const text = line.replace(timeRegex, '').trim();
+				result.push({ time, text });
+			}
+		}
+
+		if (!hasTimestamps) {
+			// 纯文本歌词模式（无时间戳）
+			return lines.map((line, idx) => ({ time: idx, text: line.trim() }));
+		}
+
+		return result.sort((a, b) => a.time - b.time);
+	}
+
+	function renderLyrics() {
+		if (!lyricsScroll) return;
+		lyricsScroll.innerHTML = '';
+		lyricElements = [];
+
+		if (parsedLyrics.length === 0) {
+			const p = document.createElement('p');
+			p.className = 'lyric-line no-lyrics';
+			p.innerText = '暂无歌词';
+			lyricsScroll.appendChild(p);
+			return;
+		}
+
+		parsedLyrics.forEach((line) => {
+			const p = document.createElement('p');
+			p.className = 'lyric-line';
+			p.innerText = line.text || ' ';
+			lyricsScroll.appendChild(p);
+			lyricElements.push(p);
+		});
+	}
+
+	function updateLyricsSync(_currentTime: number) {
+		// 全局静态歌词模式：不进行自动高亮和强制自动滚动，保持干净的纯文本展示，供用户自由滑动阅读
+		return;
+	}
+
+	function toggleLyrics() {
+		showLyrics = !showLyrics;
+		if (container) {
+			if (showLyrics) {
+				container.classList.add('show-lyrics');
+				if (btnLyrics) btnLyrics.classList.add('active');
+				
+				setTimeout(() => {
+					if (currentLyricIndex >= 0 && lyricElements[currentLyricIndex] && lyricsScroll) {
+						const activeEl = lyricElements[currentLyricIndex];
+						const containerHeight = lyricsScroll.clientHeight;
+						const elemTop = activeEl.offsetTop;
+						const elemHeight = activeEl.clientHeight;
+						lyricsScroll.scrollTop = elemTop - (containerHeight / 2) + (elemHeight / 2);
+					}
+				}, 350);
+			} else {
+				container.classList.remove('show-lyrics');
+				if (btnLyrics) btnLyrics.classList.remove('active');
+			}
+		}
+		localStorage.setItem('mp_show_lyrics', showLyrics ? '1' : '0');
+	}
+
+	function handleProgressClick(e: MouseEvent) {
+		if (!audio || !progressContainer) return;
+		const rect = progressContainer.getBoundingClientRect();
+		const clickX = e.clientX - rect.left;
+		const width = rect.width;
+		let percentage = clickX / width;
+		if (percentage < 0) percentage = 0;
+		if (percentage > 1) percentage = 1;
+
+		if (audio.duration) {
+			audio.currentTime = percentage * audio.duration;
+		}
+	}
+
+	// Setup all controller bindings
+	function initMusicPlayer() {
+		container = document.getElementById('custom-music-player');
+		if (!container) return;
+
+		// If player is already initialized globally, don't re-init
+		if ((window as any).__music_player_setup) {
+			// Sync elements to the existing player references in the global scope if necessary
+			// In Astro View Transitions, elements inside transition:persist are persistent, 
+			// meaning the container node itself is transferred to the new DOM.
+			// However, we should ensure the reference points to the current active DOM nodes.
+			return;
+		}
+		(window as any).__music_player_setup = true;
+
+		audio = document.getElementById('player-audio') as HTMLAudioElement;
+		triggerBtn = document.getElementById('player-trigger');
+		triggerCover = document.getElementById('trigger-cover') as HTMLImageElement;
+		cardCover = document.getElementById('card-cover') as HTMLImageElement;
+		songTitle = document.getElementById('player-song-title');
+		songArtist = document.getElementById('player-song-artist');
+		btnPlayPause = document.getElementById('btn-play-pause');
+		btnPrev = document.getElementById('btn-prev');
+		btnNext = document.getElementById('btn-next');
+		btnMute = document.getElementById('btn-mute');
+		btnMinimize = document.getElementById('player-minimize');
+		btnLyrics = document.getElementById('btn-lyrics');
+		lyricsScroll = document.getElementById('lyrics-scroll');
+		
+		triggerPlayIcon = document.getElementById('trigger-icon-play');
+		triggerPauseIcon = document.getElementById('trigger-icon-pause');
+		cardPlayIcon = document.getElementById('icon-play');
+		cardPauseIcon = document.getElementById('icon-pause');
+		volumeOnIcon = document.getElementById('icon-volume-on');
+		volumeMutedIcon = document.getElementById('icon-volume-muted');
+		
+		progressContainer = document.getElementById('progress-container');
+		progressFill = document.getElementById('progress-fill');
+		progressHandle = document.getElementById('progress-handle');
+		timeCurrent = document.getElementById('time-current');
+		timeDuration = document.getElementById('time-duration');
+
+		if (!audio) return;
+
+		// Restore settings from LocalStorage
+		const savedIndex = localStorage.getItem('mp_current_index');
+		const initialIndex = savedIndex ? parseInt(savedIndex, 10) : 0;
+		
+		const savedMuted = localStorage.getItem('mp_muted');
+		audio.muted = savedMuted === '1';
+
+		const savedCollapsed = localStorage.getItem('mp_collapsed');
+		const initialCollapsed = savedCollapsed === null ? true : savedCollapsed === '1';
+
+		const savedShowLyrics = localStorage.getItem('mp_show_lyrics');
+		showLyrics = savedShowLyrics === '1';
+
+		// Load initial track metadata
+		loadTrack(initialIndex);
+		setCollapsedState(initialCollapsed);
+		updateVolumeUI();
+
+		if (showLyrics && !initialCollapsed) {
+			container.classList.add('show-lyrics');
+			if (btnLyrics) btnLyrics.classList.add('active');
+		}
+
+		// Set initial volume
+		audio.volume = 0.65;
+
+		// Audio Event Listeners
+		audio.addEventListener('timeupdate', () => {
+			if (!audio) return;
+			const current = audio.currentTime;
+			const duration = audio.duration || 0;
+			
+			if (timeCurrent) timeCurrent.innerText = formatTime(current);
+			
+			if (duration > 0) {
+				const pct = (current / duration) * 100;
+				if (progressFill) progressFill.style.width = `${pct}%`;
+				if (progressHandle) progressHandle.style.left = `${pct}%`;
+			}
+
+			updateLyricsSync(current);
+		});
+
+		audio.addEventListener('durationchange', () => {
+			if (audio && timeDuration) timeDuration.innerText = formatTime(audio.duration);
+		});
+
+		audio.addEventListener('ended', () => {
+			playNext();
+		});
+
+		audio.addEventListener('play', () => {
+			setPlayingState(true);
+		});
+
+		audio.addEventListener('pause', () => {
+			setPlayingState(false);
+		});
+
+		// User Interaction Controls
+		if (triggerBtn) {
+			triggerBtn.addEventListener('click', (e) => {
+				e.stopPropagation();
+				setCollapsedState(false);
+				// If not playing, toggle play on expand
+				if (!isPlaying) {
+					togglePlay();
+				}
+			});
+		}
+
+		if (btnMinimize) {
+			btnMinimize.addEventListener('click', (e) => {
+				e.stopPropagation();
+				setCollapsedState(true);
+			});
+		}
+
+		if (btnPlayPause) {
+			btnPlayPause.addEventListener('click', (e) => {
+				e.stopPropagation();
+				togglePlay();
+			});
+		}
+
+		if (btnNext) {
+			btnNext.addEventListener('click', (e) => {
+				e.stopPropagation();
+				playNext();
+			});
+		}
+
+		if (btnPrev) {
+			btnPrev.addEventListener('click', (e) => {
+				e.stopPropagation();
+				playPrev();
+			});
+		}
+
+		if (btnMute) {
+			btnMute.addEventListener('click', (e) => {
+				e.stopPropagation();
+				toggleMute();
+			});
+		}
+
+		if (btnLyrics) {
+			btnLyrics.addEventListener('click', (e) => {
+				e.stopPropagation();
+				toggleLyrics();
+			});
+		}
+
+		if (progressContainer) {
+			progressContainer.addEventListener('click', (e) => {
+				e.stopPropagation();
+				handleProgressClick(e);
+			});
+		}
+	}
+
+	// Initialize on page load (works with View Transitions)
+	document.addEventListener('astro:page-load', () => {
+		initMusicPlayer();
+	});
+</script>

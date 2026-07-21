@@ -1,5 +1,6 @@
 ---
 import { getCollection } from 'astro:content';
+import MusicPlayer from './MusicPlayer.astro';
 
 const today = new Date();
 const posts = await getCollection('blog');
@@ -47,6 +48,8 @@ const formattedWords = totalWords >= 1000 ? (totalWords / 1000).toFixed(1) + 'k'
 		</div>
 	</div>
 </footer>
+
+<MusicPlayer />
 
 <style>
 	.site-footer {
