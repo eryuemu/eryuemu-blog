@@ -1,17 +1,15 @@
 export interface Friend {
-	name: string;
-	url: string;
-	avatar: string;
-	description: string;
-	tags?: string[];
+  title: string;
+  link: string;
+  logo: string;
+  desc: string;
 }
 
 export const friends: Friend[] = [
-	{
-		name: '口袋分享记',
-		url: 'https://111620.xyz/',
-		avatar: 'https://img.111620.xyz/2025/07/29/6887b5efbf768.png',
-		description: '斯是陋室，惟吾德馨。所谓过往，皆为序章。',
-		tags: ['个人博客', '分享']
-	}
+  {
+    title: '口袋分享记',
+    link: 'https://111620.xyz/',
+    logo: '/friends/koudai-share.png',
+    desc: '所谓过往，皆为序章。虚室生白️',
+  }
 ];
