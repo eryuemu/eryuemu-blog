@@ -9,6 +9,7 @@ import HeaderLink from './HeaderLink.astro';
 		<div class="nav-links">
 			<HeaderLink href={import.meta.env.BASE_URL}>首页</HeaderLink>
 			<HeaderLink href={`${import.meta.env.BASE_URL.replace(/\/$/, '')}/blog`}>文章</HeaderLink>
+			<HeaderLink href={`${import.meta.env.BASE_URL.replace(/\/$/, '')}/friends`}>友链</HeaderLink>
 			<HeaderLink href={`${import.meta.env.BASE_URL.replace(/\/$/, '')}/about`}>关于</HeaderLink>
 		</div>
 		<div class="nav-right">
