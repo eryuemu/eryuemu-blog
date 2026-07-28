@@ -13,7 +13,7 @@ type Props = CollectionEntry<'blog'>['data'] & {
 	readingTime?: number;
 };
 
-const { title, description, pubDate, updatedDate, heroImage, wordCount, readingTime, type = 'ai-organized' } = Astro.props;
+const { title, description, pubDate, updatedDate, heroImage, wordCount, readingTime, type } = Astro.props;
 ---
 
 <html lang="zh-CN">
@@ -196,21 +196,17 @@ const { title, description, pubDate, updatedDate, heroImage, wordCount, readingT
 								更新于 <FormattedDate date={updatedDate} />
 							</span>
 						)}
-						<span class="meta-item">
-							<span class="separator">·</span>
-							<span class={`type-badge ${type === 'original' ? 'type-original' : 'type-ai'}`}>
-								{type === 'original' ? '原创' : 'AI 整理'}
-							</span>
-						</span>
 					</div>
-					<div class="creation-notice">
-						<span class="notice-title">创作说明：</span>
-						{type === 'original' ? (
-							<span>本文由作者独立撰写，记录真实的开发实践与个人思考。</span>
-						) : (
-							<span>本文基于作者与 AI 的调试对话整理生成，完整保留问题排查思路与技术细节。</span>
-						)}
-					</div>
+					{type && (
+						<div class="creation-notice">
+							<span class="notice-title">创作说明：</span>
+							{type === 'original' ? (
+								<span>本文由作者独立撰写，记录真实的开发实践与个人思考。</span>
+							) : (
+								<span>本文基于作者与 AI 的调试对话整理生成，完整保留问题排查思路与技术细节。</span>
+							)}
+						</div>
+					)}
 				</div>
 
 				<div class="prose">
