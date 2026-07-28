@@ -307,12 +307,11 @@ const posts = (await getCollection('blog'))
 			<section>
 				<div class="section-header">
 					<h2 class="section-title">近期文章</h2>
-					<!-- Category/Type Filter Tabs -->
+					<!-- Category Filter Tabs -->
 					<div class="category-tabs" id="category-filter">
-						<button class="tab-btn active" data-filter="all">全部</button>
-						<button class="tab-btn" data-filter="original">原创</button>
-						<button class="tab-btn" data-filter="ai-organized">AI 整理</button>
-						<button class="tab-btn" data-filter="galgame">Galgame</button>
+						<button class="tab-btn active" data-category="all">全部</button>
+						<button class="tab-btn" data-category="开发">开发</button>
+						<button class="tab-btn" data-category="galgame">Galgame</button>
 					</div>
 					<a href={`${import.meta.env.BASE_URL.replace(/\/$/, '')}/blog`} class="view-all">全部 →</a>
 				</div>
@@ -348,16 +347,11 @@ const posts = (await getCollection('blog'))
 				const postsContainer = document.getElementById('posts-list');
 				const posts = postsContainer ? postsContainer.querySelectorAll('.post-item') : [];
 
-				function applyFilter(selectedFilter: string | null) {
+				function applyFilter(selectedCategory: string | null) {
 					let visibleCount = 0;
 					posts.forEach(post => {
 						const postCategory = post.getAttribute('data-category');
-						const postType = post.getAttribute('data-type');
-						const isMatch = selectedFilter === 'all' || 
-							postType === selectedFilter || 
-							postCategory === selectedFilter;
-
-						if (isMatch) {
+						if (selectedCategory === 'all' || postCategory === selectedCategory) {
 							if (visibleCount < 10) {
 								(post as HTMLElement).style.display = 'block';
 								visibleCount++;
@@ -377,23 +371,23 @@ const posts = (await getCollection('blog'))
 						buttons.forEach(b => b.classList.remove('active'));
 						btn.classList.add('active');
 
-						const selectedFilter = btn.getAttribute('data-filter');
+						const selectedCategory = btn.getAttribute('data-category');
 
 						if (postsContainer) {
 							postsContainer.classList.add('is-filtering');
 							setTimeout(() => {
-								applyFilter(selectedFilter);
+								applyFilter(selectedCategory);
 								postsContainer.classList.remove('is-filtering');
 							}, 160);
 						} else {
-							applyFilter(selectedFilter);
+							applyFilter(selectedCategory);
 						}
 					});
 				});
 
 				const activeBtn = filterContainer.querySelector('.tab-btn.active');
 				if (activeBtn) {
-					applyFilter(activeBtn.getAttribute('data-filter'));
+					applyFilter(activeBtn.getAttribute('data-category'));
 				}
 			}
 
