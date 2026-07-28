@@ -173,11 +173,36 @@ const posts = (await getCollection('blog'))
 				font-variant-numeric: tabular-nums;
 			}
 
+			.post-title-wrapper {
+				display: inline-flex;
+				align-items: center;
+				gap: 0.5rem;
+				flex: 1;
+				min-width: 0;
+			}
+
 			.post-title {
 				font-size: 1rem;
 				font-weight: 500;
 				color: var(--text-primary);
 				line-height: 1.4;
+			}
+
+			.type-badge-inline {
+				font-size: 0.72rem;
+				font-weight: 500;
+				padding: 0.08rem 0.4rem;
+				border-radius: 4px;
+				line-height: 1.2;
+				border: 1px solid var(--border);
+				background: var(--bg-secondary);
+				color: var(--text-muted);
+				white-space: nowrap;
+				flex-shrink: 0;
+			}
+
+			.type-badge-inline.is-original {
+				color: var(--text-primary);
 			}
 
 			/* Category Tabs */
@@ -282,23 +307,29 @@ const posts = (await getCollection('blog'))
 			<section>
 				<div class="section-header">
 					<h2 class="section-title">近期文章</h2>
-					<!-- Category Filter Tabs -->
+					<!-- Category/Type Filter Tabs -->
 					<div class="category-tabs" id="category-filter">
-						<button class="tab-btn active" data-category="all">全部</button>
-						<button class="tab-btn" data-category="开发">开发</button>
-						<button class="tab-btn" data-category="galgame">Galgame</button>
+						<button class="tab-btn active" data-filter="all">全部</button>
+						<button class="tab-btn" data-filter="original">原创</button>
+						<button class="tab-btn" data-filter="ai-organized">AI 整理</button>
+						<button class="tab-btn" data-filter="galgame">Galgame</button>
 					</div>
 					<a href={`${import.meta.env.BASE_URL.replace(/\/$/, '')}/blog`} class="view-all">全部 →</a>
 				</div>
 				<div class="posts-grid" id="posts-list">
 					{
 						posts.map((post) => (
-							<article class="post-item" data-category={post.data.category || '开发'}>
+							<article class="post-item" data-category={post.data.category || '开发'} data-type={post.data.type || 'ai-organized'}>
 								<a href={`${import.meta.env.BASE_URL.replace(/\/$/, '')}/blog/${post.id}/`}>
 									<span class="post-date">
 										<FormattedDate date={post.data.pubDate} />
 									</span>
-									<span class="post-title">{post.data.title}</span>
+									<span class="post-title-wrapper">
+										<span class="post-title">{post.data.title}</span>
+										<span class={`type-badge-inline ${post.data.type === 'original' ? 'is-original' : 'is-ai'}`}>
+											{post.data.type === 'original' ? '原创' : 'AI 整理'}
+										</span>
+									</span>
 								</a>
 							</article>
 						))
@@ -317,11 +348,16 @@ const posts = (await getCollection('blog'))
 				const postsContainer = document.getElementById('posts-list');
 				const posts = postsContainer ? postsContainer.querySelectorAll('.post-item') : [];
 
-				function applyFilter(selectedCategory: string | null) {
+				function applyFilter(selectedFilter: string | null) {
 					let visibleCount = 0;
 					posts.forEach(post => {
 						const postCategory = post.getAttribute('data-category');
-						if (selectedCategory === 'all' || postCategory === selectedCategory) {
+						const postType = post.getAttribute('data-type');
+						const isMatch = selectedFilter === 'all' || 
+							postType === selectedFilter || 
+							postCategory === selectedFilter;
+
+						if (isMatch) {
 							if (visibleCount < 10) {
 								(post as HTMLElement).style.display = 'block';
 								visibleCount++;
@@ -338,34 +374,29 @@ const posts = (await getCollection('blog'))
 					btn.addEventListener('click', () => {
 						if (btn.classList.contains('active')) return;
 
-						// Remove active class from all buttons
 						buttons.forEach(b => b.classList.remove('active'));
-						// Add active class to clicked button
 						btn.classList.add('active');
 
-						const selectedCategory = btn.getAttribute('data-category');
+						const selectedFilter = btn.getAttribute('data-filter');
 
 						if (postsContainer) {
-							// Apply dynamic fade transition
 							postsContainer.classList.add('is-filtering');
 							setTimeout(() => {
-								applyFilter(selectedCategory);
+								applyFilter(selectedFilter);
 								postsContainer.classList.remove('is-filtering');
 							}, 160);
 						} else {
-							applyFilter(selectedCategory);
+							applyFilter(selectedFilter);
 						}
 					});
 				});
 
-				// Run once on load to filter active category (showing max 10 items)
 				const activeBtn = filterContainer.querySelector('.tab-btn.active');
 				if (activeBtn) {
-					applyFilter(activeBtn.getAttribute('data-category'));
+					applyFilter(activeBtn.getAttribute('data-filter'));
 				}
 			}
 
-			// Runs on page load and page swap for View Transitions
 			document.addEventListener('astro:page-load', setupCategoryFilter);
 		</script>
 	</body>

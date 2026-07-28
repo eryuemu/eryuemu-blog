@@ -73,12 +73,36 @@ const posts = (await getCollection('blog')).sort(
 				min-width: 0;
 			}
 
+			.post-title-row {
+				display: flex;
+				align-items: center;
+				gap: 0.5rem;
+				margin-bottom: 0.25rem;
+			}
+
 			.post-title {
 				font-size: 1.05rem;
 				font-weight: 600;
 				color: var(--text-primary);
 				line-height: 1.4;
-				margin: 0 0 0.25rem 0;
+				margin: 0;
+			}
+
+			.type-badge-inline {
+				font-size: 0.72rem;
+				font-weight: 500;
+				padding: 0.08rem 0.4rem;
+				border-radius: 4px;
+				line-height: 1.2;
+				border: 1px solid var(--border);
+				background: var(--bg-secondary);
+				color: var(--text-muted);
+				white-space: nowrap;
+				flex-shrink: 0;
+			}
+
+			.type-badge-inline.is-original {
+				color: var(--text-primary);
 			}
 
 			.post-excerpt {
@@ -122,7 +146,12 @@ const posts = (await getCollection('blog')).sort(
 										<FormattedDate date={post.data.pubDate} />
 									</span>
 									<div class="post-info">
-										<h2 class="post-title">{post.data.title}</h2>
+										<div class="post-title-row">
+											<h2 class="post-title">{post.data.title}</h2>
+											<span class={`type-badge-inline ${post.data.type === 'original' ? 'is-original' : 'is-ai'}`}>
+												{post.data.type === 'original' ? '原创' : 'AI 整理'}
+											</span>
+										</div>
 										<p class="post-excerpt">{post.data.description}</p>
 									</div>
 								</a>

@@ -13,7 +13,7 @@ type Props = CollectionEntry<'blog'>['data'] & {
 	readingTime?: number;
 };
 
-const { title, description, pubDate, updatedDate, heroImage, wordCount, readingTime } = Astro.props;
+const { title, description, pubDate, updatedDate, heroImage, wordCount, readingTime, type = 'ai-organized' } = Astro.props;
 ---
 
 <html lang="zh-CN">
@@ -102,9 +102,35 @@ const { title, description, pubDate, updatedDate, heroImage, wordCount, readingT
 				color: var(--text-muted);
 			}
 
-			.back-link:hover {
+			.type-badge {
+				font-size: 0.76rem;
+				font-weight: 500;
+				padding: 0.1rem 0.45rem;
+				border-radius: 4px;
+				line-height: 1.2;
+				border: 1px solid var(--border);
+				background: var(--bg-secondary);
+				color: var(--text-muted);
+			}
+
+			.type-badge.type-original {
 				color: var(--text-primary);
-				opacity: 1;
+			}
+
+			.creation-notice {
+				margin-top: 1.2rem;
+				padding: 0.75rem 1rem;
+				background: var(--bg-secondary);
+				border: 1px solid var(--border);
+				border-radius: var(--radius, 8px);
+				font-size: 0.85rem;
+				color: var(--text-secondary);
+				line-height: 1.6;
+			}
+
+			.creation-notice .notice-title {
+				font-weight: 600;
+				color: var(--text-primary);
 			}
 
 			@media (max-width: 768px) {
@@ -169,6 +195,20 @@ const { title, description, pubDate, updatedDate, heroImage, wordCount, readingT
 								<span class="separator">·</span>
 								更新于 <FormattedDate date={updatedDate} />
 							</span>
+						)}
+						<span class="meta-item">
+							<span class="separator">·</span>
+							<span class={`type-badge ${type === 'original' ? 'type-original' : 'type-ai'}`}>
+								{type === 'original' ? '原创' : 'AI 整理'}
+							</span>
+						</span>
+					</div>
+					<div class="creation-notice">
+						<span class="notice-title">创作说明：</span>
+						{type === 'original' ? (
+							<span>本文由作者独立撰写，记录真实的开发实践与个人思考。</span>
+						) : (
+							<span>本文基于作者与 AI 的调试对话整理生成，完整保留问题排查思路与技术细节。</span>
 						)}
 					</div>
 				</div>
