@@ -65,8 +65,10 @@ for (const srcDir of srcDirs) {
   // A. Extract publication date, hero image, category & type from original frontmatter
   let pubDate = '2026-07-18'; // Default fallback
   let heroImage = '';
-  let category = '随笔'; // Default category
-  let type = 'original'; // Default to original
+  let category = srcDir.includes('随笔') ? '随笔' : '开发';
+  let hasExplicitType = false;
+  let type = 'ai-organized';
+
   const frontmatterMatch = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
   if (frontmatterMatch) {
     const yaml = frontmatterMatch[1];
@@ -81,6 +83,7 @@ for (const srcDir of srcDirs) {
     const typeMatch = yaml.match(/type:\s*['"]?([^\r\n'"]+)['"]?/);
     if (typeMatch) {
       type = typeMatch[1].trim();
+      hasExplicitType = true;
     }
     const categoryMatch = yaml.match(/category:\s*['"]?([^\r\n'"]+)['"]?/);
     if (categoryMatch) {
@@ -90,10 +93,24 @@ for (const srcDir of srcDirs) {
       const tagsMatch = yaml.match(/tags:\s*\r?\n([\s\S]*?)(?:\r?\n\w+:|$)/);
       if (tagsMatch) {
         const tagsText = tagsMatch[1].toLowerCase();
-        if (tagsText.includes('galgame') || tagsText.includes('游戏') || tagsText.includes('二次元')) {
-          category = 'galgame';
+        if (tagsText.includes('galgame') || tagsText.includes('随笔')) {
+          category = '随笔';
         }
       }
+    }
+  }
+
+  // Normalize categories: Merge galgame into 随笔
+  if (category === 'galgame') {
+    category = '随笔';
+  }
+
+  // Set type defaults based on category if not explicitly provided
+  if (!hasExplicitType) {
+    if (category === '随笔' || srcDir.includes('随笔')) {
+      type = 'original';
+    } else {
+      type = 'ai-organized';
     }
   }
 
