@@ -62,10 +62,11 @@ for (const srcDir of srcDirs) {
     const filePath = path.join(srcDir, file);
     let content = fs.readFileSync(filePath, 'utf-8');
 
-  // A. Extract publication date, hero image & category from original frontmatter
+  // A. Extract publication date, hero image, category & type from original frontmatter
   let pubDate = '2026-07-18'; // Default fallback
   let heroImage = '';
-  let category = '开发'; // Default category
+  let category = '随笔'; // Default category
+  let type = 'original'; // Default to original
   const frontmatterMatch = content.match(/^---\r?\n([\s\S]*?)\r?\n---/);
   if (frontmatterMatch) {
     const yaml = frontmatterMatch[1];
@@ -76,6 +77,10 @@ for (const srcDir of srcDirs) {
     const heroImageMatch = yaml.match(/heroImage:\s*['"]?([^\r\n'"]+)['"]?/);
     if (heroImageMatch) {
       heroImage = heroImageMatch[1];
+    }
+    const typeMatch = yaml.match(/type:\s*['"]?([^\r\n'"]+)['"]?/);
+    if (typeMatch) {
+      type = typeMatch[1].trim();
     }
     const categoryMatch = yaml.match(/category:\s*['"]?([^\r\n'"]+)['"]?/);
     if (categoryMatch) {
@@ -149,7 +154,8 @@ for (const srcDir of srcDirs) {
     `title: '${title.replace(/'/g, "''")}'`,
     `description: '${description.replace(/'/g, "''")}'`,
     `pubDate: '${pubDate}'`,
-    `category: '${category}'`
+    `category: '${category}'`,
+    `type: '${type}'`
   ];
   if (heroImage) {
     cleanFrontmatterFields.push(`heroImage: '${heroImage}'`);

@@ -3,6 +3,7 @@ title: '杂谈——记上海 galonly 展'
 description: '最深的孤独，往往不是一个人独处时产生的，而是在本以为能找到同频者的群体里发现自己依然格格不入时产生的。'
 pubDate: '2026-07-28'
 category: '随笔'
+type: 'original'
 heroImage: '../../assets/东方明珠外滩.jpg'
 ---
 
