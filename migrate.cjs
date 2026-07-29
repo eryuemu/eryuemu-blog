@@ -2,7 +2,10 @@ const fs = require('fs');
 const path = require('path');
 
 // WSL2 Paths (adjust if paths change)
-const srcDir = '/mnt/c/MyKnowledgeBase/开发';
+const srcDirs = [
+  '/mnt/c/MyKnowledgeBase/开发',
+  '/mnt/c/MyKnowledgeBase/随笔'
+];
 const destDir = path.join(__dirname, 'src/content/blog');
 
 // Files to skip as per request or meta files
@@ -22,7 +25,8 @@ const slugMap = {
   "eryuemu-blog 部署与评论系统搭建全复盘": "eryuemu-blog-deployment-comment-sys",
   "eryuemu.com 域名绑定与 DNS 踩坑实录": "eryuemu-domain-binding-and-dns-troubleshooting",
   "个人博客域名选购指南": "personal-blog-domain-buying-guide",
-  "当 Galgame 变成“旮旯给木”：我们还能守住那份感动吗？": "when-galgame-becomes-tala-game"
+  "当 Galgame 变成“旮旯给木”：我们还能守住那份感动吗？": "when-galgame-becomes-tala-game",
+  "杂谈——记上海galonly展": "shanghai-galonly-essay"
 };
 
 console.log('--- Starting Blog Migration ---');
@@ -38,23 +42,25 @@ if (fs.existsSync(destDir)) {
   fs.mkdirSync(destDir, { recursive: true });
 }
 
-// 2. Read and process files from Obsidian folder
-if (!fs.existsSync(srcDir)) {
-  console.error(`Error: Source directory "${srcDir}" does not exist!`);
-  process.exit(1);
-}
-
-const files = fs.readdirSync(srcDir);
+// 2. Read and process files from Obsidian folders
 let successCount = 0;
+const processedFiles = [];
 
-for (const file of files) {
-  if (skipFiles.includes(file) || !file.endsWith('.md')) {
-    console.log(`Skipping file: ${file}`);
+for (const srcDir of srcDirs) {
+  if (!fs.existsSync(srcDir)) {
+    console.warn(`Warning: Source directory "${srcDir}" does not exist! Skipping.`);
     continue;
   }
 
-  const filePath = path.join(srcDir, file);
-  let content = fs.readFileSync(filePath, 'utf-8');
+  const files = fs.readdirSync(srcDir);
+  for (const file of files) {
+    if (skipFiles.includes(file) || !file.endsWith('.md')) {
+      console.log(`Skipping file: ${file}`);
+      continue;
+    }
+
+    const filePath = path.join(srcDir, file);
+    let content = fs.readFileSync(filePath, 'utf-8');
 
   // A. Extract publication date, hero image & category from original frontmatter
   let pubDate = '2026-07-18'; // Default fallback
@@ -159,6 +165,7 @@ for (const file of files) {
   fs.writeFileSync(destPath, cleanFrontmatter, 'utf-8');
   console.log(`Successfully migrated: "${file}" -> "${destSlug}.md"`);
   successCount++;
+  }
 }
 
 console.log(`--- Migration complete. Successfully processed ${successCount} articles. ---`);
