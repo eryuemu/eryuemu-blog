@@ -144,13 +144,13 @@ html.dark .astro-code span {
 
 blockquote {
 	border-left: 3px solid var(--text-primary);
-	padding: 0.3em 1em;
+	padding: 0 1em;
 	margin: 1.5em 0;
 	background: transparent;
 }
 blockquote p {
 	margin: 0;
-	line-height: 1.6;
+	line-height: 1.5;
 	color: var(--text-secondary);
 }
 
