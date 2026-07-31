@@ -2,7 +2,7 @@
 title: '水龙吟·观沪galonly展有感'
 description: '阳历七月二十二日至七月二十七日，我跟群友去了上海一个galonly展玩，顺便逛了逛上海，兴尽悲来而作。'
 pubDate: '2026-07-31'
-category: '诗词'
+category: '随笔'
 type: 'original'
 heroImage: '../../assets/沪galonly展现场.jpg'
 ---
