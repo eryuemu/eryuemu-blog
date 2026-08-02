@@ -1,0 +1,663 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import WalineComments from '../components/WalineComments.astro';
+import FormattedDate from '../components/FormattedDate.astro';
+import { SITE_TITLE } from '../consts';
+import { getCollection, render } from 'astro:content';
+
+const rawThoughts = await getCollection('thoughts');
+
+// Sort: Pinned items first, then pubDate descending
+const thoughts = (await Promise.all(
+	rawThoughts.map(async (thought) => {
+		const { Content } = await render(thought);
+		return {
+			...thought,
+			Content,
+		};
+	})
+)).sort((a, b) => {
+	if (a.data.pinned && !b.data.pinned) return -1;
+	if (!a.data.pinned && b.data.pinned) return 1;
+	return b.data.pubDate.valueOf() - a.data.pubDate.valueOf();
+});
+
+// Collect all unique tags
+const allTags = Array.from(
+	new Set(thoughts.flatMap((t) => t.data.tags || []))
+);
+---
+
+<!doctype html>
+<html lang="zh-CN">
+	<head>
+		<BaseHead
+			title={`心迹 — ${SITE_TITLE}`}
+			description="eryuemu（二月木）的心迹与实时动态，记录生活点滴与灵感火花。"
+		/>
+		<style>
+			main {
+				max-width: 740px;
+				margin: 0 auto;
+				padding-top: 6.5em;
+				padding-bottom: 4rem;
+			}
+
+			/* ─── Profile & Moments Banner Header ─── */
+			.moments-header-card {
+				position: relative;
+				border: 1px solid var(--border);
+				border-radius: var(--radius, 12px);
+				background: var(--bg-secondary);
+				overflow: hidden;
+				margin-bottom: 2rem;
+				transition: border-color 0.25s ease;
+			}
+
+			.moments-cover {
+				height: 130px;
+				background: linear-gradient(135deg, rgba(100, 100, 120, 0.12) 0%, rgba(180, 180, 200, 0.15) 50%, rgba(140, 150, 170, 0.12) 100%);
+				position: relative;
+			}
+
+			:global(html.dark) .moments-cover {
+				background: linear-gradient(135deg, rgba(30, 32, 42, 0.6) 0%, rgba(45, 48, 60, 0.5) 50%, rgba(25, 30, 40, 0.6) 100%);
+			}
+
+			.cover-title {
+				position: absolute;
+				top: 16px;
+				left: 1.25rem;
+				font-size: 0.9rem;
+				font-weight: 600;
+				color: var(--text-primary);
+				background: rgba(255, 255, 255, 0.85);
+				backdrop-filter: blur(8px);
+				-webkit-backdrop-filter: blur(8px);
+				border: 1px solid var(--border);
+				padding: 0.3rem 0.8rem;
+				border-radius: 20px;
+				display: flex;
+				align-items: center;
+				gap: 0.4rem;
+				box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+			}
+
+			:global(html.dark) .cover-title {
+				background: rgba(20, 20, 20, 0.85);
+			}
+
+			.cover-title svg {
+				color: var(--text-secondary);
+				flex-shrink: 0;
+			}
+
+			.moments-profile {
+				padding: 0 1.5rem 1.25rem 1.5rem;
+				display: flex;
+				align-items: flex-end;
+				justify-content: space-between;
+				margin-top: -32px;
+				position: relative;
+				z-index: 2;
+			}
+
+			.user-info {
+				display: flex;
+				align-items: flex-end;
+				gap: 1rem;
+			}
+
+			.avatar-img {
+				width: 68px;
+				height: 68px;
+				border-radius: 50%;
+				border: 3px solid var(--bg);
+				background: var(--bg-secondary);
+				object-fit: cover;
+				box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+			}
+
+			.user-text h1 {
+				font-size: 1.2rem;
+				font-weight: 700;
+				margin: 0;
+				line-height: 1.2;
+				color: var(--text-primary);
+			}
+
+			.user-bio {
+				font-size: 0.85rem;
+				color: var(--text-secondary);
+				margin: 0.25rem 0 0 0;
+			}
+
+			.stats-badge {
+				font-size: 0.8rem;
+				color: var(--text-muted);
+				background: var(--bg);
+				padding: 0.3rem 0.75rem;
+				border-radius: 20px;
+				border: 1px solid var(--border);
+			}
+
+			/* ─── Tag Filter Chips ─── */
+			.filter-bar {
+				display: flex;
+				align-items: center;
+				gap: 0.45rem;
+				overflow-x: auto;
+				padding-bottom: 0.5rem;
+				margin-bottom: 1.8rem;
+				scrollbar-width: none;
+			}
+			.filter-bar::-webkit-scrollbar {
+				display: none;
+			}
+
+			.chip-btn {
+				font-size: 0.82rem;
+				font-weight: 500;
+				color: var(--text-secondary);
+				background: var(--bg-secondary);
+				border: 1px solid var(--border);
+				padding: 0.3rem 0.8rem;
+				border-radius: 20px;
+				cursor: pointer;
+				white-space: nowrap;
+				transition: all 0.2s ease;
+			}
+
+			.chip-btn:hover {
+				border-color: var(--border-hover);
+				color: var(--text-primary);
+			}
+
+			.chip-btn.active {
+				background: var(--text-primary);
+				color: var(--bg);
+				border-color: var(--text-primary);
+			}
+
+			/* ─── Timeline Feed Stream ─── */
+			.timeline-stream {
+				display: flex;
+				flex-direction: column;
+				gap: 1.25rem;
+				margin-bottom: 3.5rem;
+			}
+
+			.thought-card {
+				background: var(--bg);
+				border: 1px solid var(--border);
+				border-radius: var(--radius, 12px);
+				padding: 1.35rem 1.5rem;
+				position: relative;
+				transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+			}
+
+			.thought-card:hover {
+				border-color: var(--border-hover);
+			}
+
+			.thought-card.is-pinned {
+				border-left: 3px solid var(--text-primary);
+			}
+
+			.card-header {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				margin-bottom: 0.85rem;
+			}
+
+			.author-box {
+				display: flex;
+				align-items: center;
+				gap: 0.75rem;
+			}
+
+			.card-avatar {
+				width: 38px;
+				height: 38px;
+				border-radius: 50%;
+				object-fit: cover;
+				background: var(--bg-secondary);
+				border: 1px solid var(--border);
+			}
+
+			.author-name {
+				font-size: 0.92rem;
+				font-weight: 600;
+				color: var(--text-primary);
+				margin: 0;
+				line-height: 1.2;
+			}
+
+			.post-time {
+				font-size: 0.76rem;
+				color: var(--text-muted);
+			}
+
+			.header-badges {
+				display: flex;
+				align-items: center;
+				gap: 0.4rem;
+			}
+
+			.badge {
+				font-size: 0.75rem;
+				padding: 0.15rem 0.5rem;
+				border-radius: 4px;
+				font-weight: 500;
+				display: flex;
+				align-items: center;
+				gap: 0.25rem;
+			}
+
+			.pinned-badge {
+				background: var(--bg-secondary);
+				color: var(--text-primary);
+				border: 1px solid var(--border);
+			}
+
+			.mood-badge {
+				font-size: 0.78rem;
+				color: var(--text-secondary);
+				background: var(--bg-secondary);
+				border: 1px solid var(--border);
+			}
+
+			/* ─── Content Body ─── */
+			.thought-body {
+				font-size: 0.96rem;
+				line-height: 1.7;
+				color: var(--text-primary);
+			}
+
+			.thought-body :global(p) {
+				margin-bottom: 0.5rem;
+				color: var(--text-primary);
+			}
+			.thought-body :global(p:last-child) {
+				margin-bottom: 0;
+			}
+
+			.thought-body :global(pre) {
+				margin: 0.8rem 0;
+			}
+
+			/* ─── Image Grid (Moments style) ─── */
+			.image-grid {
+				display: grid;
+				gap: 0.5rem;
+				margin-top: 0.8rem;
+				margin-bottom: 0.5rem;
+				border-radius: 8px;
+				overflow: hidden;
+			}
+
+			.image-grid.grid-1 {
+				grid-template-columns: 1fr;
+				max-width: 420px;
+			}
+			.image-grid.grid-2, .image-grid.grid-4 {
+				grid-template-columns: repeat(2, 1fr);
+				max-width: 440px;
+			}
+			.image-grid.grid-3, .image-grid.grid-5, .image-grid.grid-6, .image-grid.grid-7, .image-grid.grid-8, .image-grid.grid-9 {
+				grid-template-columns: repeat(3, 1fr);
+				max-width: 480px;
+			}
+
+			.grid-img {
+				width: 100%;
+				aspect-ratio: 1 / 1;
+				object-fit: cover;
+				border-radius: 6px;
+				cursor: zoom-in;
+				background: var(--bg-secondary);
+				border: 1px solid var(--border);
+				transition: transform 0.2s ease, opacity 0.2s ease;
+			}
+
+			.image-grid.grid-1 .grid-img {
+				aspect-ratio: 16 / 10;
+				max-height: 280px;
+			}
+
+			.grid-img:hover {
+				opacity: 0.9;
+				transform: scale(1.01);
+			}
+
+			/* ─── Card Footer ─── */
+			.card-footer {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				padding-top: 0.75rem;
+				border-top: 1px dashed var(--border);
+				margin-top: 0.8rem;
+				font-size: 0.8rem;
+				color: var(--text-muted);
+			}
+
+			.location-tag {
+				display: flex;
+				align-items: center;
+				gap: 0.3rem;
+				color: var(--text-muted);
+			}
+
+			.location-tag svg {
+				flex-shrink: 0;
+			}
+
+			.tags-list {
+				display: flex;
+				gap: 0.35rem;
+			}
+
+			.tag-item {
+				font-size: 0.75rem;
+				color: var(--text-secondary);
+				background: var(--bg-secondary);
+				padding: 0.1rem 0.45rem;
+				border-radius: 4px;
+				border: 1px solid var(--border);
+			}
+
+			/* ─── Lightbox Modal ─── */
+			.lightbox-modal {
+				position: fixed;
+				inset: 0;
+				z-index: 9999;
+				background: rgba(0, 0, 0, 0.85);
+				backdrop-filter: blur(8px);
+				display: none;
+				align-items: center;
+				justify-content: center;
+				padding: 1.5rem;
+				cursor: zoom-out;
+			}
+
+			.lightbox-modal.active {
+				display: flex;
+			}
+
+			.lightbox-modal img {
+				max-width: 90vw;
+				max-height: 90vh;
+				object-fit: contain;
+				border-radius: 8px;
+				box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+			}
+
+			.empty-state {
+				text-align: center;
+				padding: 4rem 1rem;
+				color: var(--text-muted);
+				background: var(--bg-secondary);
+				border: 1px dashed var(--border);
+				border-radius: var(--radius, 12px);
+			}
+
+			.empty-state p {
+				margin: 0;
+				font-size: 0.92rem;
+			}
+
+			@media (max-width: 768px) {
+				main {
+					padding-top: 5.5em;
+				}
+				.moments-cover {
+					height: 100px;
+				}
+				.moments-profile {
+					margin-top: -24px;
+					flex-direction: column;
+					align-items: flex-start;
+					gap: 0.8rem;
+				}
+				.avatar-img {
+					width: 54px;
+					height: 54px;
+				}
+				.stats-badge {
+					align-self: flex-end;
+				}
+				.thought-card {
+					padding: 1rem 1.1rem;
+				}
+				.image-grid.grid-1, .image-grid.grid-2, .image-grid.grid-3, .image-grid.grid-4, .image-grid.grid-9 {
+					max-width: 100%;
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<Header />
+		<main>
+			<!-- Moments Header Banner -->
+			<div class="moments-header-card">
+				<div class="moments-cover">
+					<div class="cover-title">
+						<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<path d="M12 22v-9"></path>
+							<path d="M12 13a7 7 0 1 0-7-7c0 3.87 3.13 7 7 7z"></path>
+							<path d="M12 13a7 7 0 1 1 7-7c0 3.87-3.13 7-7 7z"></path>
+						</svg>
+						<span>心迹</span>
+					</div>
+				</div>
+				<div class="moments-profile">
+					<div class="user-info">
+						<img
+							src="https://eryuemu.com/avatar.jpg"
+							alt="eryuemu"
+							class="avatar-img"
+							onerror="this.onerror=null; this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%23222%22/><circle cx=%2250%22 cy=%2238%22 r=%2220%22 fill=%22%23666%22/><path d=%22M20 85c0-20 15-30 30-30s30 10 30 30z%22 fill=%22%23666%22/></svg>';"
+						/>
+						<div class="user-text">
+							<h1>eryuemu</h1>
+							<p class="user-bio">这里是我内心世界的映射</p>
+						</div>
+					</div>
+					<div class="stats-badge">
+						{thoughts.length} 条动态
+					</div>
+				</div>
+			</div>
+
+			<!-- Filter Chips -->
+			{allTags.length > 0 && (
+				<div class="filter-bar">
+					<button class="chip-btn active" data-tag="all">全部</button>
+					{allTags.map((tag) => (
+						<button class="chip-btn" data-tag={tag}>
+							#{tag}
+						</button>
+					))}
+				</div>
+			)}
+
+			<!-- Timeline Stream -->
+			<div class="timeline-stream">
+				{thoughts.length === 0 ? (
+					<div class="empty-state">
+						<p>还没有记录心迹。在 <code>src/content/thoughts/</code> 目录下新建 Markdown 文件即可随时发布。</p>
+					</div>
+				) : (
+					thoughts.map((thought) => {
+						const { Content } = thought;
+						const { pubDate, tags = [], location, mood, images = [], pinned } = thought.data;
+						const gridClass = `grid-${Math.min(images.length, 9)}`;
+
+						return (
+							<article
+								class={`thought-card ${pinned ? 'is-pinned' : ''}`}
+								data-tags={JSON.stringify(tags)}
+								id={`thought-${thought.id}`}
+							>
+								<!-- Card Header -->
+								<div class="card-header">
+									<div class="author-box">
+										<img
+											src="https://eryuemu.com/avatar.jpg"
+											alt="eryuemu"
+											class="card-avatar"
+											onerror="this.onerror=null; this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%23222%22/><circle cx=%2250%22 cy=%2238%22 r=%2220%22 fill=%22%23666%22/><path d=%22M20 85c0-20 15-30 30-30s30 10 30 30z%22 fill=%22%23666%22/></svg>';"
+										/>
+										<div>
+											<h3 class="author-name">eryuemu</h3>
+											<div class="post-time">
+												<FormattedDate date={pubDate} />
+											</div>
+										</div>
+									</div>
+
+									<div class="header-badges">
+										{pinned && (
+											<span class="badge pinned-badge">
+												<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+													<line x1="12" y1="17" x2="12" y2="22"></line>
+													<path d="M5 17h14v-1.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V6h1a1 1 0 0 0 0-2H8a1 1 0 0 0 0 2h1v4.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24Z"></path>
+												</svg>
+												置顶
+											</span>
+										)}
+										{mood && <span class="badge mood-badge">{mood}</span>}
+									</div>
+								</div>
+
+								<!-- Thought Body -->
+								<div class="thought-body prose">
+									<Content />
+								</div>
+
+								<!-- Image Grid (if any) -->
+								{images && images.length > 0 && (
+									<div class={`image-grid ${gridClass}`}>
+										{images.map((imgUrl: string, idx: number) => (
+											<img
+												src={imgUrl}
+												alt={`Dynamic image ${idx + 1}`}
+												class="grid-img"
+												loading="lazy"
+												data-lightbox={imgUrl}
+											/>
+										))}
+									</div>
+								)}
+
+								<!-- Card Footer -->
+								{(location || (tags && tags.length > 0)) && (
+									<div class="card-footer">
+										<div class="location-tag">
+											{location && (
+												<>
+													<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+														<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path>
+														<circle cx="12" cy="10" r="3"></circle>
+													</svg>
+													<span>{location}</span>
+												</>
+											)}
+										</div>
+
+										{tags && tags.length > 0 && (
+											<div class="tags-list">
+												{tags.map((tag: string) => (
+													<span class="tag-item">#{tag}</span>
+												))}
+											</div>
+										)}
+									</div>
+								)}
+							</article>
+						);
+					})
+				)}
+			</div>
+
+			<!-- Comments Area -->
+			<WalineComments />
+		</main>
+
+		<!-- Lightbox Modal for Fullscreen Image Preview -->
+		<div id="lightbox-modal" class="lightbox-modal" aria-hidden="true">
+			<img id="lightbox-target" src="" alt="Fullscreen Preview" />
+		</div>
+
+		<Footer />
+
+		<script>
+			document.addEventListener('astro:page-load', () => {
+				// ─── 1. Client-Side Tag Filter ───
+				const chipBtns = document.querySelectorAll<HTMLButtonElement>('.chip-btn');
+				const cards = document.querySelectorAll<HTMLElement>('.thought-card');
+
+				chipBtns.forEach((btn) => {
+					btn.addEventListener('click', () => {
+						chipBtns.forEach((b) => b.classList.remove('active'));
+						btn.classList.add('active');
+
+						const selectedTag = btn.dataset.tag;
+
+						cards.forEach((card) => {
+							if (selectedTag === 'all') {
+								card.style.display = 'block';
+							} else {
+								const cardTagsStr = card.dataset.tags || '[]';
+								try {
+									const cardTags: string[] = JSON.parse(cardTagsStr);
+									if (selectedTag && cardTags.includes(selectedTag)) {
+										card.style.display = 'block';
+									} else {
+										card.style.display = 'none';
+									}
+								} catch {
+									card.style.display = 'block';
+								}
+							}
+						});
+					});
+				});
+
+				// ─── 2. Fullscreen Lightbox Image Modal ───
+				const lightboxModal = document.getElementById('lightbox-modal');
+				const lightboxTarget = document.getElementById('lightbox-target') as HTMLImageElement | null;
+				const gridImgs = document.querySelectorAll<HTMLImageElement>('.grid-img');
+
+				gridImgs.forEach((img) => {
+					img.addEventListener('click', () => {
+						const src = img.dataset.lightbox || img.src;
+						if (lightboxModal && lightboxTarget) {
+							lightboxTarget.src = src;
+							lightboxModal.classList.add('active');
+							lightboxModal.setAttribute('aria-hidden', 'false');
+						}
+					});
+				});
+
+				if (lightboxModal) {
+					lightboxModal.addEventListener('click', () => {
+						lightboxModal.classList.remove('active');
+						lightboxModal.setAttribute('aria-hidden', 'true');
+					});
+				}
+
+				document.addEventListener('keydown', (e) => {
+					if (e.key === 'Escape' && lightboxModal?.classList.contains('active')) {
+						lightboxModal.classList.remove('active');
+						lightboxModal.setAttribute('aria-hidden', 'true');
+					}
+				});
+			});
+		</script>
+	</body>
+</html>

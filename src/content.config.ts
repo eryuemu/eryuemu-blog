@@ -19,4 +19,19 @@ const blog = defineCollection({
 		}),
 });
 
-export const collections = { blog };
+const thoughts = defineCollection({
+	// Load Markdown and MDX files in the `src/content/thoughts/` directory.
+	loader: glob({ base: './src/content/thoughts', pattern: '**/*.{md,mdx}' }),
+	schema: () =>
+		z.object({
+			pubDate: z.coerce.date(),
+			tags: z.array(z.string()).optional().default([]),
+			location: z.string().optional(),
+			mood: z.string().optional(),
+			images: z.array(z.string()).optional().default([]),
+			pinned: z.boolean().optional().default(false),
+		}),
+});
+
+export const collections = { blog, thoughts };
+
