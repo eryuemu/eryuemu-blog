@@ -1,0 +1,244 @@
+---
+import BaseHead from '../../components/BaseHead.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import WalineComments from '../../components/WalineComments.astro';
+import FormattedDate from '../../components/FormattedDate.astro';
+import { SITE_TITLE } from '../../consts';
+import { getCollection, render } from 'astro:content';
+
+export async function getStaticPaths() {
+	const thoughts = await getCollection('thoughts');
+	return thoughts.map((thought) => ({
+		params: { id: thought.id },
+		props: { thought },
+	}));
+}
+
+const { thought } = Astro.props;
+const { Content } = await render(thought);
+const { pubDate, tags = [], location, mood, images = [], pinned } = thought.data;
+const gridClass = `grid-${Math.min(images.length, 9)}`;
+---
+
+<!doctype html>
+<html lang="zh-CN">
+	<head>
+		<BaseHead
+			title={`心迹动态 — ${SITE_TITLE}`}
+			description="eryuemu（二月木）的单条心迹动态"
+		/>
+		<style>
+			main {
+				max-width: 740px;
+				margin: 0 auto;
+				padding-top: 6.5em;
+				padding-bottom: 4rem;
+			}
+
+			.back-link {
+				display: inline-flex;
+				align-items: center;
+				gap: 0.4rem;
+				font-size: 0.88rem;
+				color: var(--text-secondary);
+				margin-bottom: 1.5rem;
+				text-decoration: none;
+				transition: color 0.2s ease;
+			}
+
+			.back-link:hover {
+				color: var(--text-primary);
+			}
+
+			.thought-card {
+				background: var(--bg);
+				border: 1px solid var(--border);
+				border-radius: var(--radius, 12px);
+				padding: 1.5rem;
+				position: relative;
+				margin-bottom: 2rem;
+			}
+
+			.card-header {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				margin-bottom: 1rem;
+			}
+
+			.author-box {
+				display: flex;
+				align-items: center;
+				gap: 0.75rem;
+			}
+
+			.card-avatar {
+				width: 42px;
+				height: 42px;
+				border-radius: 50%;
+				object-fit: cover;
+				background: var(--bg-secondary);
+				border: 1px solid var(--border);
+			}
+
+			.author-name {
+				font-size: 0.95rem;
+				font-weight: 600;
+				color: var(--text-primary);
+				margin: 0;
+				line-height: 1.2;
+			}
+
+			.post-time {
+				font-size: 0.78rem;
+				color: var(--text-muted);
+			}
+
+			.thought-body {
+				font-size: 1rem;
+				line-height: 1.7;
+				color: var(--text-primary);
+				margin-bottom: 1rem;
+			}
+
+			.image-grid {
+				display: grid;
+				gap: 0.5rem;
+				margin-top: 0.8rem;
+				margin-bottom: 0.8rem;
+				border-radius: 8px;
+				overflow: hidden;
+			}
+
+			.image-grid.grid-1 {
+				grid-template-columns: 1fr;
+				max-width: 480px;
+			}
+			.image-grid.grid-2, .image-grid.grid-4 {
+				grid-template-columns: repeat(2, 1fr);
+				max-width: 480px;
+			}
+			.image-grid.grid-3, .image-grid.grid-5, .image-grid.grid-6, .image-grid.grid-7, .image-grid.grid-8, .image-grid.grid-9 {
+				grid-template-columns: repeat(3, 1fr);
+				max-width: 520px;
+			}
+
+			.grid-img {
+				width: 100%;
+				aspect-ratio: 1 / 1;
+				object-fit: cover;
+				border-radius: 6px;
+				cursor: zoom-in;
+				background: var(--bg-secondary);
+				border: 1px solid var(--border);
+			}
+
+			.card-footer {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				padding-top: 0.8rem;
+				border-top: 1px dashed var(--border);
+				font-size: 0.82rem;
+				color: var(--text-muted);
+			}
+
+			.location-tag {
+				display: flex;
+				align-items: center;
+				gap: 0.3rem;
+			}
+
+			.tags-list {
+				display: flex;
+				gap: 0.35rem;
+			}
+
+			.tag-item {
+				font-size: 0.75rem;
+				color: var(--text-secondary);
+				background: var(--bg-secondary);
+				padding: 0.1rem 0.45rem;
+				border-radius: 4px;
+				border: 1px solid var(--border);
+			}
+		</style>
+	</head>
+	<body>
+		<Header />
+		<main>
+			<a href={`${import.meta.env.BASE_URL.replace(/\/$/, '')}/thoughts`} class="back-link">
+				<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<line x1="19" y1="12" x2="5" y2="12"></line>
+					<polyline points="12 19 5 12 12 5"></polyline>
+				</svg>
+				返回心迹列表
+			</a>
+
+			<article class="thought-card">
+				<div class="card-header">
+					<div class="author-box">
+						<img
+							src="https://eryuemu.com/avatar.jpg"
+							alt="eryuemu"
+							class="card-avatar"
+							onerror="this.onerror=null; this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%23222%22/><circle cx=%2250%22 cy=%2238%22 r=%2220%22 fill=%22%23666%22/><path d=%22M20 85c0-20 15-30 30-30s30 10 30 30z%22 fill=%22%23666%22/></svg>';"
+						/>
+						<div>
+							<h3 class="author-name">eryuemu</h3>
+							<div class="post-time">
+								<FormattedDate date={pubDate} />
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="thought-body prose">
+					<Content />
+				</div>
+
+				{images && images.length > 0 && (
+					<div class={`image-grid ${gridClass}`}>
+						{images.map((imgUrl: string, idx: number) => (
+							<img
+								src={imgUrl}
+								alt={`Dynamic image ${idx + 1}`}
+								class="grid-img"
+								loading="lazy"
+							/>
+						))}
+					</div>
+				)}
+
+				{(location || (tags && tags.length > 0)) && (
+					<div class="card-footer">
+						<div class="location-tag">
+							{location && (
+								<>
+									<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+										<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path>
+										<circle cx="12" cy="10" r="3"></circle>
+									</svg>
+									<span>{location}</span>
+								</>
+							)}
+						</div>
+
+						{tags && tags.length > 0 && (
+							<div class="tags-list">
+								{tags.map((tag: string) => (
+									<span class="tag-item">#{tag}</span>
+								))}
+							</div>
+						)}
+					</div>
+				)}
+			</article>
+
+			<!-- Separate Waline Comments for this specific thought item -->
+			<WalineComments path={`/thoughts/${thought.id}`} />
+		</main>
+		<Footer />
+	</body>
+</html>

@@ -1,28 +1,36 @@
 ---
 import { WALINE_SERVER_URL } from '../consts';
+
+interface Props {
+  path?: string;
+  containerId?: string;
+  showDivider?: boolean;
+}
+
+const { path = '', containerId = 'waline-comment-box', showDivider = true } = Astro.props;
 ---
 
 <div class="comments-wrapper">
-  <div class="comments-divider">
-    <span class="divider-text">💬 评论区</span>
-  </div>
-  <div id="waline-comment-box"></div>
+  {showDivider && (
+    <div class="comments-divider">
+      <span class="divider-text">评论区</span>
+    </div>
+  )}
+  <div id={containerId}></div>
 </div>
 
-<script define:vars={{ serverURL: WALINE_SERVER_URL }}>
+<script define:vars={{ serverURL: WALINE_SERVER_URL, customPath: path, containerId }}>
   let walineInstance = null;
 
   async function initWaline() {
-    const el = document.getElementById('waline-comment-box');
+    const el = document.getElementById(containerId);
     if (!el) return;
 
-    // 检查是否配置了有效的服务 URL
     if (!serverURL || serverURL.includes('your-waline-server')) {
       el.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 2rem 0; font-size: 0.9rem; border: 1px dashed var(--border); border-radius: var(--radius);">⚠️ 请在 <code>src/consts.ts</code> 中配置您的 <code>WALINE_SERVER_URL</code> 以启用评论区。</div>';
       return;
     }
 
-    // 1. 动态加载 CSS (避免编译开销且保证按需加载)
     if (!document.getElementById('waline-css')) {
       const link = document.createElement('link');
       link.id = 'waline-css';
@@ -31,23 +39,23 @@ import { WALINE_SERVER_URL } from '../consts';
       document.head.appendChild(link);
     }
 
-    // 2. 动态引入 JS SDK
     try {
       const { init } = await import('https://unpkg.com/@waline/client@v3/dist/waline.js');
       
+      const targetPath = customPath || window.location.pathname;
+
       walineInstance = init({
-        el: '#waline-comment-box',
+        el: `#${containerId}`,
         serverURL: serverURL,
         lang: 'zh-CN',
         dark: 'html.dark',
-        path: window.location.pathname,
+        path: targetPath,
         emoji: [
           '//unpkg.com/@waline/emojis@1.2.0/weibo',
           '//unpkg.com/@waline/emojis@1.2.0/bilibili',
           '//unpkg.com/@waline/emojis@1.2.0/qq'
         ],
-        // 如果开启了 Pageview，可以让 Waline 统计阅读量
-        pageview: true,
+        pageview: false,
       });
     } catch (e) {
       console.error('Failed to load Waline: ', e);
@@ -55,10 +63,8 @@ import { WALINE_SERVER_URL } from '../consts';
     }
   }
 
-  // 页面首次加载时初始化
   initWaline();
 
-  // 监听 Astro View Transitions 切换事件，确保切换页面时重新渲染
   document.addEventListener('astro:after-swap', () => {
     if (walineInstance && typeof walineInstance.destroy === 'function') {
       walineInstance.destroy();
@@ -68,7 +74,6 @@ import { WALINE_SERVER_URL } from '../consts';
 </script>
 
 <style is:global>
-  /* ─── 将 Waline 的配色系统完美融入 MiMo 博客主题 ─── */
   :root {
     --waline-theme-color: var(--text-primary) !important;
     --waline-active-color: var(--text-primary) !important;
@@ -83,15 +88,15 @@ import { WALINE_SERVER_URL } from '../consts';
   }
 
   .comments-wrapper {
-    margin-top: 4rem;
-    padding-top: 1rem;
+    margin-top: 2rem;
+    padding-top: 0.5rem;
   }
 
   .comments-divider {
     display: flex;
     align-items: center;
     gap: 1.5rem;
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
   }
 
   .comments-divider::before,
@@ -103,21 +108,20 @@ import { WALINE_SERVER_URL } from '../consts';
   }
 
   .divider-text {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     font-weight: 600;
     color: var(--text-muted);
     letter-spacing: 0.05em;
   }
 
-  /* 适配极简 Mimo 设计风格的细节微调 */
   .wl-editor {
     background-color: var(--bg-secondary) !important;
     color: var(--text-primary) !important;
     border: 1px solid var(--border) !important;
     border-radius: var(--radius) !important;
     font-family: inherit !important;
-    font-size: 0.95rem !important;
-    padding: 12px !important;
+    font-size: 0.92rem !important;
+    padding: 10px !important;
   }
 
   .wl-input {
@@ -135,7 +139,7 @@ import { WALINE_SERVER_URL } from '../consts';
     background: var(--bg) !important;
     color: var(--text-secondary) !important;
     font-weight: 500 !important;
-    font-size: 0.88rem !important;
+    font-size: 0.85rem !important;
     transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
   }
 
@@ -172,7 +176,6 @@ import { WALINE_SERVER_URL } from '../consts';
     color: var(--text-primary) !important;
   }
 
-  /* 隐藏 Waline 版权标志，保持极致简约 */
   .wl-power {
     display: none !important;
   }

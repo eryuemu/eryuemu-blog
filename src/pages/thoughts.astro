@@ -4,7 +4,7 @@ import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import WalineComments from '../components/WalineComments.astro';
 import FormattedDate from '../components/FormattedDate.astro';
-import { SITE_TITLE } from '../consts';
+import { SITE_TITLE, WALINE_SERVER_URL } from '../consts';
 import { getCollection, render } from 'astro:content';
 
 const rawThoughts = await getCollection('thoughts');
@@ -241,6 +241,14 @@ const allTags = Array.from(
 				color: var(--text-muted);
 			}
 
+			.post-time a {
+				color: inherit;
+				text-decoration: none;
+			}
+			.post-time a:hover {
+				text-decoration: underline;
+			}
+
 			.header-badges {
 				display: flex;
 				align-items: center;
@@ -345,15 +353,17 @@ const allTags = Array.from(
 				color: var(--text-muted);
 			}
 
+			.footer-left-meta {
+				display: flex;
+				align-items: center;
+				gap: 0.6rem;
+			}
+
 			.location-tag {
 				display: flex;
 				align-items: center;
 				gap: 0.3rem;
 				color: var(--text-muted);
-			}
-
-			.location-tag svg {
-				flex-shrink: 0;
 			}
 
 			.tags-list {
@@ -368,6 +378,31 @@ const allTags = Array.from(
 				padding: 0.1rem 0.45rem;
 				border-radius: 4px;
 				border: 1px solid var(--border);
+			}
+
+			.comment-toggle-btn {
+				background: none;
+				border: none;
+				color: var(--text-muted);
+				cursor: pointer;
+				display: flex;
+				align-items: center;
+				gap: 0.35rem;
+				font-size: 0.82rem;
+				padding: 0.25rem 0.5rem;
+				border-radius: 6px;
+				transition: all 0.2s ease;
+			}
+
+			.comment-toggle-btn:hover {
+				background: var(--bg-secondary);
+				color: var(--text-primary);
+			}
+
+			.thought-comment-area {
+				margin-top: 1rem;
+				padding-top: 0.8rem;
+				border-top: 1px dashed var(--border);
 			}
 
 			/* ─── Lightbox Modal ─── */
@@ -496,6 +531,7 @@ const allTags = Array.from(
 						const { Content } = thought;
 						const { pubDate, tags = [], location, mood, images = [], pinned } = thought.data;
 						const gridClass = `grid-${Math.min(images.length, 9)}`;
+						const thoughtPath = `/thoughts/${thought.id}`;
 
 						return (
 							<article
@@ -515,7 +551,9 @@ const allTags = Array.from(
 										<div>
 											<h3 class="author-name">eryuemu</h3>
 											<div class="post-time">
-												<FormattedDate date={pubDate} />
+												<a href={`${import.meta.env.BASE_URL.replace(/\/$/, '')}${thoughtPath}`}>
+													<FormattedDate date={pubDate} />
+												</a>
 											</div>
 										</div>
 									</div>
@@ -555,19 +593,17 @@ const allTags = Array.from(
 								)}
 
 								<!-- Card Footer -->
-								{(location || (tags && tags.length > 0)) && (
-									<div class="card-footer">
-										<div class="location-tag">
-											{location && (
-												<>
-													<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-														<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path>
-														<circle cx="12" cy="10" r="3"></circle>
-													</svg>
-													<span>{location}</span>
-												</>
-											)}
-										</div>
+								<div class="card-footer">
+									<div class="footer-left-meta">
+										{location && (
+											<span class="location-tag">
+												<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+													<path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path>
+													<circle cx="12" cy="10" r="3"></circle>
+												</svg>
+												<span>{location}</span>
+											</span>
+										)}
 
 										{tags && tags.length > 0 && (
 											<div class="tags-list">
@@ -577,15 +613,24 @@ const allTags = Array.from(
 											</div>
 										)}
 									</div>
-								)}
+
+									<button class="comment-toggle-btn" data-thought-id={thought.id} data-path={thoughtPath}>
+										<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+											<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+										</svg>
+										<span>评论</span>
+									</button>
+								</div>
+
+								<!-- Inline Comment Box Container for this specific thought -->
+								<div id={`comment-area-${thought.id}`} class="thought-comment-area" style="display: none;">
+									<div id={`waline-box-${thought.id}`}></div>
+								</div>
 							</article>
 						);
 					})
 				)}
 			</div>
-
-			<!-- Comments Area -->
-			<WalineComments />
 		</main>
 
 		<!-- Lightbox Modal for Fullscreen Image Preview -->
@@ -595,11 +640,11 @@ const allTags = Array.from(
 
 		<Footer />
 
-		<script>
+		<script define:vars={{ serverURL: WALINE_SERVER_URL }}>
 			document.addEventListener('astro:page-load', () => {
 				// ─── 1. Client-Side Tag Filter ───
-				const chipBtns = document.querySelectorAll<HTMLButtonElement>('.chip-btn');
-				const cards = document.querySelectorAll<HTMLElement>('.thought-card');
+				const chipBtns = document.querySelectorAll('.chip-btn');
+				const cards = document.querySelectorAll('.thought-card');
 
 				chipBtns.forEach((btn) => {
 					btn.addEventListener('click', () => {
@@ -614,7 +659,7 @@ const allTags = Array.from(
 							} else {
 								const cardTagsStr = card.dataset.tags || '[]';
 								try {
-									const cardTags: string[] = JSON.parse(cardTagsStr);
+									const cardTags = JSON.parse(cardTagsStr);
 									if (selectedTag && cardTags.includes(selectedTag)) {
 										card.style.display = 'block';
 									} else {
@@ -628,10 +673,65 @@ const allTags = Array.from(
 					});
 				});
 
-				// ─── 2. Fullscreen Lightbox Image Modal ───
+				// ─── 2. Inline Card Comment Toggle & Dynamic Waline Init ───
+				const commentToggleBtns = document.querySelectorAll('.comment-toggle-btn');
+				const initializedWalineBoxes = new Set();
+
+				commentToggleBtns.forEach((btn) => {
+					btn.addEventListener('click', async () => {
+						const thoughtId = btn.dataset.thoughtId;
+						const path = btn.dataset.path;
+						if (!thoughtId) return;
+
+						const commentArea = document.getElementById(`comment-area-${thoughtId}`);
+						if (!commentArea) return;
+
+						const isHidden = commentArea.style.display === 'none';
+
+						if (isHidden) {
+							commentArea.style.display = 'block';
+
+							// Initialize Waline for this specific thought item path if not yet initialized
+							if (!initializedWalineBoxes.has(thoughtId)) {
+								initializedWalineBoxes.add(thoughtId);
+
+								try {
+									if (!document.getElementById('waline-css')) {
+										const link = document.createElement('link');
+										link.id = 'waline-css';
+										link.rel = 'stylesheet';
+										link.href = 'https://unpkg.com/@waline/client@v3/dist/waline.css';
+										document.head.appendChild(link);
+									}
+
+									const { init } = await import('https://unpkg.com/@waline/client@v3/dist/waline.js');
+									init({
+										el: `#waline-box-${thoughtId}`,
+										serverURL: serverURL,
+										lang: 'zh-CN',
+										dark: 'html.dark',
+										path: path,
+										emoji: [
+											'//unpkg.com/@waline/emojis@1.2.0/weibo',
+											'//unpkg.com/@waline/emojis@1.2.0/bilibili',
+											'//unpkg.com/@waline/emojis@1.2.0/qq'
+										],
+										pageview: false,
+									});
+								} catch (e) {
+									console.error('Failed to init inline Waline:', e);
+								}
+							}
+						} else {
+							commentArea.style.display = 'none';
+						}
+					});
+				});
+
+				// ─── 3. Fullscreen Lightbox Image Modal ───
 				const lightboxModal = document.getElementById('lightbox-modal');
-				const lightboxTarget = document.getElementById('lightbox-target') as HTMLImageElement | null;
-				const gridImgs = document.querySelectorAll<HTMLImageElement>('.grid-img');
+				const lightboxTarget = document.getElementById('lightbox-target');
+				const gridImgs = document.querySelectorAll('.grid-img');
 
 				gridImgs.forEach((img) => {
 					img.addEventListener('click', () => {
