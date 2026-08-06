@@ -1,0 +1,180 @@
+---
+// DefaultCover.astro - Persona 5 inspired minimalist vector cover for posts without custom hero images
+interface Props {
+	title: string;
+	category?: string;
+	type?: string;
+	index?: number;
+}
+
+const { category = '开发', index = 1 } = Astro.props;
+
+const isDev = category === '开发';
+const codeNum = String((index % 99) + 1).padStart(2, '0');
+---
+
+<div class={`persona-cover-banner ${isDev ? 'is-dev' : 'is-essay'}`}>
+	<!-- Persona Diagonal Stripe Mesh Pattern Background -->
+	<div class="persona-bg-pattern"></div>
+	
+	<!-- Angled Slash Graphic Overlay -->
+	<div class="persona-slash-shape"></div>
+	
+	<!-- Corner Index Tag (Persona style Nº.01...) -->
+	<div class="persona-corner-tag">
+		<span>Nº</span>{codeNum}
+	</div>
+
+	<!-- Center Skewed Badge -->
+	<div class="persona-badge-wrapper">
+		<div class="persona-badge-content">
+			{isDev ? (
+				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+					<polyline points="16 18 22 12 16 6"></polyline>
+					<polyline points="8 6 2 12 8 18"></polyline>
+				</svg>
+			) : (
+				<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+					<path d="M12 20h9"></path>
+					<path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+				</svg>
+			)}
+			<span class="persona-category-title">// {category}</span>
+		</div>
+	</div>
+</div>
+
+<style>
+	.persona-cover-banner {
+		width: 100%;
+		height: 100%;
+		position: relative;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		background: var(--bg-secondary);
+		overflow: hidden;
+		transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+	}
+
+	/* Light Mode Persona Banner Background */
+	.persona-cover-banner.is-dev {
+		background: linear-gradient(135deg, #f4f4f6 0%, #e6e8ee 100%);
+	}
+	.persona-cover-banner.is-essay {
+		background: linear-gradient(135deg, #f5f3f4 0%, #eae1e4 100%);
+	}
+
+	/* Dark Mode Persona Banner Background */
+	html.dark .persona-cover-banner.is-dev {
+		background: linear-gradient(135deg, #121216 0%, #1a1a26 100%);
+	}
+	html.dark .persona-cover-banner.is-essay {
+		background: linear-gradient(135deg, #161214 0%, #22181d 100%);
+	}
+
+	/* Persona Halftone Diagonal Stripe Mesh Pattern */
+	.persona-bg-pattern {
+		position: absolute;
+		inset: 0;
+		background-image: repeating-linear-gradient(
+			-45deg,
+			var(--border) 0,
+			var(--border) 1px,
+			transparent 1px,
+			transparent 8px
+		);
+		opacity: 0.5;
+		pointer-events: none;
+	}
+
+	html.dark .persona-bg-pattern {
+		opacity: 0.25;
+	}
+
+	/* Angled Slash Graphic Shape */
+	.persona-slash-shape {
+		position: absolute;
+		top: -20%;
+		right: -10%;
+		width: 55%;
+		height: 140%;
+		background: var(--bg);
+		opacity: 0.4;
+		transform: skewX(-18deg);
+		pointer-events: none;
+		transition: transform 0.4s ease, opacity 0.4s ease;
+	}
+
+	.grid-card-item:hover .persona-slash-shape {
+		transform: skewX(-18deg) translateX(-8px);
+		opacity: 0.6;
+	}
+
+	/* Persona Corner Tag (Nº01, Nº02...) */
+	.persona-corner-tag {
+		position: absolute;
+		top: 10px;
+		left: 12px;
+		font-size: 0.72rem;
+		font-weight: 800;
+		font-family: var(--font-sans);
+		letter-spacing: 0.08em;
+		color: var(--text-muted);
+		opacity: 0.75;
+		transform: skewX(-10deg);
+		z-index: 2;
+	}
+
+	.persona-corner-tag span {
+		font-size: 0.62rem;
+		margin-right: 2px;
+	}
+
+	/* Persona Skewed Center Badge */
+	.persona-badge-wrapper {
+		position: relative;
+		z-index: 3;
+		padding: 0.4rem 1rem;
+		background: var(--text-primary);
+		color: var(--bg);
+		transform: skewX(-12deg);
+		box-shadow: 3px 3px 0px rgba(0, 0, 0, 0.12);
+		transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+	}
+
+	html.dark .persona-badge-wrapper {
+		box-shadow: 3px 3px 0px rgba(255, 255, 255, 0.12);
+	}
+
+	/* Subtle accent border for Persona touch */
+	.persona-cover-banner.is-dev .persona-badge-wrapper {
+		border-left: 3px solid #6366f1;
+	}
+
+	.persona-cover-banner.is-essay .persona-badge-wrapper {
+		border-left: 3px solid #ec4899;
+	}
+
+	.persona-badge-content {
+		display: flex;
+		align-items: center;
+		gap: 0.45rem;
+		transform: skewX(12deg); /* Unskew text & icon */
+	}
+
+	.persona-category-title {
+		font-size: 0.8rem;
+		font-weight: 800;
+		letter-spacing: 0.06em;
+	}
+
+	.grid-card-item:hover .persona-badge-wrapper {
+		transform: skewX(-12deg) translateY(-2px);
+		box-shadow: 5px 5px 0px rgba(0, 0, 0, 0.18);
+	}
+
+	html.dark .grid-card-item:hover .persona-badge-wrapper {
+		box-shadow: 5px 5px 0px rgba(255, 255, 255, 0.2);
+	}
+</style>

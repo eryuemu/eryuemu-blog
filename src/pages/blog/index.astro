@@ -1,9 +1,12 @@
 ---
 import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
 import BaseHead from '../../components/BaseHead.astro';
 import Footer from '../../components/Footer.astro';
 import FormattedDate from '../../components/FormattedDate.astro';
 import Header from '../../components/Header.astro';
+import ViewToggle from '../../components/ViewToggle.astro';
+import DefaultCover from '../../components/DefaultCover.astro';
 import { SITE_DESCRIPTION, SITE_TITLE } from '../../consts';
 
 const posts = (await getCollection('blog')).sort(
@@ -17,6 +20,9 @@ const posts = (await getCollection('blog')).sort(
 		<BaseHead title={`文章 — ${SITE_TITLE}`} description={SITE_DESCRIPTION} />
 		<style>
 			.page-header {
+				display: flex;
+				justify-content: space-between;
+				align-items: flex-end;
 				padding: 1rem 0 2rem 0;
 			}
 
@@ -33,21 +39,22 @@ const posts = (await getCollection('blog')).sort(
 				margin: 0;
 			}
 
+			/* ─── 1. Original Minimal List View (100% Identical to Original) ─── */
 			.posts-list {
 				list-style: none;
 				margin: 0;
 				padding: 0;
 			}
 
-			.post-item {
+			.posts-list .post-item {
 				border-bottom: 1px solid var(--border);
 			}
 
-			.post-item:first-child {
+			.posts-list .post-item:first-child {
 				border-top: 1px solid var(--border);
 			}
 
-			.post-link {
+			.posts-list .post-link {
 				display: flex;
 				align-items: baseline;
 				gap: 1.2rem;
@@ -56,11 +63,11 @@ const posts = (await getCollection('blog')).sort(
 				transition: opacity 0.15s ease;
 			}
 
-			.post-link:hover {
+			.posts-list .post-link:hover {
 				opacity: 0.6;
 			}
 
-			.post-date {
+			.posts-list .post-date {
 				font-size: 0.85rem;
 				color: var(--text-muted);
 				white-space: nowrap;
@@ -68,19 +75,19 @@ const posts = (await getCollection('blog')).sort(
 				font-variant-numeric: tabular-nums;
 			}
 
-			.post-info {
+			.posts-list .post-info {
 				flex: 1;
 				min-width: 0;
 			}
 
-			.post-title-row {
+			.posts-list .post-title-row {
 				display: flex;
 				align-items: center;
 				gap: 0.5rem;
 				margin-bottom: 0.25rem;
 			}
 
-			.post-title {
+			.posts-list .post-title {
 				font-size: 1.05rem;
 				font-weight: 600;
 				color: var(--text-primary);
@@ -105,7 +112,7 @@ const posts = (await getCollection('blog')).sort(
 				color: var(--text-primary);
 			}
 
-			.post-excerpt {
+			.posts-list .post-excerpt {
 				font-size: 0.9rem;
 				color: var(--text-muted);
 				margin: 0;
@@ -115,15 +122,122 @@ const posts = (await getCollection('blog')).sort(
 				white-space: nowrap;
 			}
 
+			/* ─── 2. Persona 5 Styled Grid View ─── */
+			.posts-grid-view {
+				display: grid;
+				grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+				gap: 1.25rem;
+				padding: 0.5rem 0 1.5rem 0;
+			}
+
+			.posts-grid-view .grid-card-item {
+				background: var(--bg-secondary);
+				border: 1px solid var(--border);
+				border-radius: 12px;
+				overflow: hidden;
+				transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+				            box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+				            border-color 0.25s ease;
+			}
+
+			.posts-grid-view .grid-card-item:hover {
+				transform: translateY(-3px);
+				border-color: var(--border-hover);
+				box-shadow: 0 10px 24px rgba(0, 0, 0, 0.06);
+			}
+
+			html.dark .posts-grid-view .grid-card-item:hover {
+				box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+			}
+
+			.posts-grid-view .card-link {
+				display: flex;
+				flex-direction: column;
+				height: 100%;
+				text-decoration: none;
+				color: inherit;
+			}
+
+			.posts-grid-view .card-cover {
+				display: block;
+				width: 100%;
+				aspect-ratio: 16 / 9;
+				overflow: hidden;
+				position: relative;
+				background: var(--bg);
+				border-bottom: 1px solid var(--border);
+			}
+
+			.posts-grid-view .card-cover-img {
+				width: 100%;
+				height: 100%;
+				object-fit: cover;
+				transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+			}
+
+			.posts-grid-view .grid-card-item:hover .card-cover-img {
+				transform: scale(1.04);
+			}
+
+			.posts-grid-view .card-body {
+				padding: 1.2rem;
+				display: flex;
+				flex-direction: column;
+				flex: 1;
+				gap: 0.65rem;
+			}
+
+			.posts-grid-view .card-meta {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				width: 100%;
+			}
+
+			.posts-grid-view .card-date {
+				font-size: 0.8rem;
+				color: var(--text-muted);
+				font-variant-numeric: tabular-nums;
+			}
+
+			.posts-grid-view .card-title {
+				font-size: 1.05rem;
+				font-weight: 600;
+				color: var(--text-primary);
+				line-height: 1.4;
+				margin: 0;
+				display: -webkit-box;
+				-webkit-line-clamp: 2;
+				-webkit-box-orient: vertical;
+				overflow: hidden;
+			}
+
+			.posts-grid-view .card-desc {
+				display: -webkit-box;
+				-webkit-line-clamp: 2;
+				-webkit-box-orient: vertical;
+				overflow: hidden;
+				font-size: 0.88rem;
+				color: var(--text-secondary);
+				line-height: 1.55;
+				margin: 0;
+				opacity: 0.85;
+			}
+
 			@media (max-width: 768px) {
+				.page-header {
+					align-items: flex-start;
+					flex-direction: column;
+					gap: 1rem;
+				}
 				.page-title {
 					font-size: 1.4rem;
 				}
-				.post-link {
+				.posts-list .post-link {
 					flex-direction: column;
 					gap: 0.15rem;
 				}
-				.post-excerpt {
+				.posts-list .post-excerpt {
 					display: none;
 				}
 			}
@@ -133,11 +247,15 @@ const posts = (await getCollection('blog')).sort(
 		<Header />
 		<main>
 			<section class="page-header">
-				<h1 class="page-title">文章</h1>
-				<p class="page-desc">技术笔记与经验分享</p>
+				<div>
+					<h1 class="page-title">文章</h1>
+					<p class="page-desc">技术笔记与经验分享</p>
+				</div>
+				<ViewToggle containerId="blog-posts-wrapper" />
 			</section>
-			<section>
-				<ul class="posts-list">
+			<section id="blog-posts-wrapper">
+				<!-- 1. Original List View -->
+				<ul class="posts-list" id="blog-posts-list">
 					{
 						posts.map((post) => (
 							<li class="post-item">
@@ -159,8 +277,88 @@ const posts = (await getCollection('blog')).sort(
 						))
 					}
 				</ul>
+
+				<!-- 2. Persona 5 Styled Grid View -->
+				<div class="posts-grid-view" id="blog-posts-grid" style="display: none;">
+					{
+						posts.map((post, index) => (
+							<article class="grid-card-item">
+								<a href={`${import.meta.env.BASE_URL.replace(/\/$/, '')}/blog/${post.id}/`} class="card-link">
+									<div class="card-cover">
+										{post.data.heroImage ? (
+											<Image src={post.data.heroImage} alt={post.data.title} class="card-cover-img" width={600} height={337} format="webp" />
+										) : (
+											<DefaultCover title={post.data.title} category={post.data.category} type={post.data.type} index={index + 1} />
+										)}
+									</div>
+									<div class="card-body">
+										<div class="card-meta">
+											<span class="card-date">
+												<FormattedDate date={post.data.pubDate} />
+											</span>
+											<span class={`type-badge-inline ${post.data.type === 'original' ? 'is-original' : 'is-ai'}`}>
+												{post.data.type === 'original' ? '原创' : 'AI 整理'}
+											</span>
+										</div>
+										<h3 class="card-title">{post.data.title}</h3>
+										<p class="card-desc">{post.data.description}</p>
+									</div>
+								</a>
+							</article>
+						))
+					}
+				</div>
 			</section>
 		</main>
 		<Footer />
+
+		<script>
+			function setupBlogViewToggle() {
+				const STORAGE_KEY = 'eryuemu_blog_view_mode';
+				const listView = document.getElementById('blog-posts-list');
+				const gridView = document.getElementById('blog-posts-grid');
+				const toggleWrappers = document.querySelectorAll('.view-toggle-wrapper');
+				const savedView = localStorage.getItem(STORAGE_KEY) || 'list';
+
+				function setViewMode(mode: 'list' | 'grid') {
+					localStorage.setItem(STORAGE_KEY, mode);
+
+					if (mode === 'grid') {
+						if (listView) listView.style.display = 'none';
+						if (gridView) gridView.style.display = 'grid';
+					} else {
+						if (listView) listView.style.display = 'block';
+						if (gridView) gridView.style.display = 'none';
+					}
+
+					toggleWrappers.forEach(tw => {
+						const btns = tw.querySelectorAll('.view-btn');
+						btns.forEach(btn => {
+							if (btn.getAttribute('data-view') === mode) {
+								btn.classList.add('active');
+							} else {
+								btn.classList.remove('active');
+							}
+						});
+					});
+				}
+
+				toggleWrappers.forEach(tw => {
+					const btns = tw.querySelectorAll('.view-btn');
+					btns.forEach(btn => {
+						btn.addEventListener('click', () => {
+							const selectedMode = btn.getAttribute('data-view') as 'list' | 'grid';
+							if (selectedMode) {
+								setViewMode(selectedMode);
+							}
+						});
+					});
+				});
+
+				setViewMode(savedView as 'list' | 'grid');
+			}
+
+			document.addEventListener('astro:page-load', setupBlogViewToggle);
+		</script>
 	</body>
 </html>
