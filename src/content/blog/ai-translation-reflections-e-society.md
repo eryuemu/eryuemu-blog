@@ -1,7 +1,7 @@
 ---
 title: '关于ai汉化的一点点感慨'
 description: '楼主在玩小e社的悠刻的命运少女，记录一下从AI翻译版本槽点到使用AI Agent调试优化文本的折腾随记。'
-pubDate: '2026-08-08'
+pubDate: '2026-08-08T08:00:00'
 category: '开发'
 type: 'original'
 heroImage: '../../assets/yukoku-cover.jpg'
@@ -59,3 +59,10 @@ heroImage: '../../assets/yukoku-cover.jpg'
 前几天小e社的战巫的好结局就是用Claudecode先后尝试修改存档和内存 最后还是解包修改脚本逻辑实现的。
 
 只能说汉化这方面还是术业有专攻🤔。
+
+---
+
+## 相关笔记
+
+- [《悠刻のファムファタル》简体中文翻译 · 技术复盘与反思](/blog/yukoku-translation-tech-retrospective) ← 后篇：完整技术复盘与反思
+

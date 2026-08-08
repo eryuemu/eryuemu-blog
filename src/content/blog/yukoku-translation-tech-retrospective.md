@@ -1,7 +1,7 @@
 ---
 title: '《悠刻のファムファタル》简体中文翻译 · 技术复盘与反思'
 description: '记录 Escu:de 2024 年 galgame《悠刻のファムファタル》简体中文 AI 翻译项目走过的路、关键技术卡点、失败原因与思考。'
-pubDate: '2026-08-08'
+pubDate: '2026-08-08T18:14:00'
 category: '开发'
 type: 'ai-organized'
 ---
@@ -217,3 +217,10 @@ type: 'ai-organized'
 这份复盘不是为了辩解，而是为了下次能真正做出那个"更优秀的简体翻译"。
 
 —— 2026-08-08
+
+---
+
+## 相关笔记
+
+- [关于ai汉化的一点点感慨](/blog/ai-translation-reflections-e-society) ← 前篇：折腾随记与初步感想
+
