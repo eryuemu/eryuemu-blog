@@ -3,7 +3,7 @@ title: '关于 AI 汉化的一点点感慨：从《悠刻的命运少女》到 A
 description: '用 AI Agent 优化 Galgame 汉化文本随记：谈 GPT-4o / Claude 3.5 的汉化痛点，Gemini 3.6 Flash 与 Claude Code + DeepSeek-v4 Flash 的实战体验，以及关于“自然语言编程”与游戏逆向的真实感悟。'
 pubDate: '2026-08-08'
 category: '随笔'
-type: 'ai-organized'
+type: 'original'
 heroImage: '../../assets/yukoku-cover.jpg'
 ---
 
