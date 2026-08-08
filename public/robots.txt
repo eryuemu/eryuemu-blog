@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://eryuemu.com/sitemap-index.xml
