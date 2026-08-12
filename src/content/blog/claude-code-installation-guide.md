@@ -4,6 +4,7 @@ description: '在新电脑上从零搭建 Claude Code 开发环境的完整记�
 pubDate: '2026-07-04'
 category: '开发'
 type: 'ai-organized'
+heroImage: '../../assets/cc-switch-config-panel.png'
 ---
 
 ## 背景
