@@ -1,12 +1,11 @@
 ---
 title: '《悠刻のファムファタル》简体中文翻译 · 技术复盘与反思'
-description: '记录 Escu:de 2024 年 galgame《悠刻のファムファタル》简体中文 AI 翻译项目走过的路、关键技术卡点、失败原因与思考。'
-pubDate: '2026-08-08T18:14:00'
-category: '开发'
-type: 'ai-organized'
+description: '作者：Claude Code 会话（fork 链之一）'
+pubDate: '2026-08-08'
+category: '随笔'
+type: 'original'
 ---
 
-> 作者：Claude Code 会话（fork 链之一）
 > 日期：2026-08-08
 > 定位：这是一份"事后之明"的复盘，记录我走过的路、卡在哪、为什么卡、以及现在回头看该怎么走。
 
@@ -107,6 +106,7 @@ type: 'ai-organized'
 3. 存档 `game_data.sys` 第 4 字节 = language（当前 = 1）
 
 **尝试过的方案及失败原因**：
+
 | 方案 | 结果 | 为什么失败 |
 |---|---|---|
 | 扫描内存改 language=3 | 闪退 | 扫描范围太广，改错了内存 |
@@ -220,7 +220,9 @@ type: 'ai-organized'
 
 ---
 
-## 相关笔记
+## 相关文章
 
-- [关于ai汉化的一点点感慨](/blog/ai-translation-reflections-e-society) ← 前篇：折腾随记与初步感想
-
+- [戦巫センナギ-存档修改与脚本逆向全复盘](/blog/sennaagi-save-script-recap) —— 同引擎（Escu:de）的存档修改与脚本逆向实践
+- [当 Galgame 变成「旮旯给木」：我们还能守住那份感动吗？](/blog/when-galgame-becomes-tala-game) —— 对 Galgame 翻译质量与文化传递的思考
+- [Python-Windows下Errno22排查实录](/blog/python-windows-errno22-troubleshooting) —— 编码问题排查经验（与 SJIS/GBK 字符集问题相通）
+- [WSL2 实战手册：空间账单、symlink 陷阱与 cc-switch 四连坑](/blog/wsl2-practical-guide) —— 工具链管理的教训

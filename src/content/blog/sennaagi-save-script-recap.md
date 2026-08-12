@@ -1,13 +1,10 @@
 ---
 title: '《戦巫〈センナギ〉》存档修改与脚本逆向全复盘'
-description: '把神気率改满到 100% 解锁好结局：记录从 YU-RIS 引擎存档二进制修改到游戏脚本解包逆向与字节码重编译修改的完整技术复盘。'
+description: '目标：把神気率改满到 100%，解锁好结局。本文记录从存档二进制修改到游戏脚本逆向的完整技术路径，以及所有失败尝试的根因分析。'
 pubDate: '2026-08-06'
-category: '开发'
-type: 'ai-organized'
-heroImage: '../../assets/sennagi-cover.jpg'
+category: '随笔'
+type: 'original'
 ---
-
-> 目标：把神気率改满到 100%，解锁好结局。本文记录从存档二进制修改到游戏脚本逆向的完整技术路径，以及所有失败尝试的根因分析。
 
 ## 1. 背景
 
@@ -248,5 +245,5 @@ copy new_script.bin "D:\games\戦巫<...>\script.bin"
 
 ## 10. 相关链接
 
-- [当 Galgame 变成“旮旯给木”：我们还能守住那份感动吗？](/blog/when-galgame-becomes-tala-game) ← Galgame 文化思考
-- [Windows 环境下 Python 网络请求 [Errno 22] Invalid argument 排查实录](/blog/python-windows-errno22-troubleshooting) ← 另一篇技术排错复盘
+- **随笔/当 Galgame 变成「旮旯给木」：我们还能守住那份感动吗？** ← Galgame 文化思考
+- [Python-Windows下Errno22排查实录](/blog/python-windows-errno22-troubleshooting) ← 另一篇技术排错复盘

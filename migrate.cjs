@@ -25,8 +25,12 @@ const slugMap = {
   "eryuemu-blog 部署与评论系统搭建全复盘": "eryuemu-blog-deployment-comment-sys",
   "eryuemu.com 域名绑定与 DNS 踩坑实录": "eryuemu-domain-binding-and-dns-troubleshooting",
   "个人博客域名选购指南": "personal-blog-domain-buying-guide",
-  "当 Galgame 变成“旮旯给木”：我们还能守住那份感动吗？": "when-galgame-becomes-tala-game",
-  "杂谈——记上海galonly展": "shanghai-galonly-essay"
+  "悠刻汉化技术复盘": "youketsu-localization-recap",
+  "戦巫センナギ-存档修改与脚本逆向全复盘": "sennaagi-save-script-recap",
+  "当 Galgame 变成「旮旯给木」：我们还能守住那份感动吗？": "when-galgame-becomes-tala-game",
+  "杂谈——记上海galonly展": "shanghai-galonly-essay",
+  "水龙吟·观沪galonly展有感": "shuilongyin-galonly-essay",
+  "域名、GFW 与国内访问：一场测速引发的排查实录": "domain-gfw-and-china-access"
 };
 
 console.log('--- Starting Blog Migration ---');
