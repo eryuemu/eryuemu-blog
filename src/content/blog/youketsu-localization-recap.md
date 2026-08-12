@@ -2,7 +2,7 @@
 title: '《悠刻のファムファタル》简体中文翻译 · 技术复盘与反思'
 description: '作者：Claude Code 会话（fork 链之一）'
 pubDate: '2026-08-08'
-category: '随笔'
+category: '开发'
 type: 'original'
 ---
 
