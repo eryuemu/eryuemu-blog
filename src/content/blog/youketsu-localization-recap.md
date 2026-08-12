@@ -4,7 +4,6 @@ description: '作者：Claude Code 会话（fork 链之一）'
 pubDate: '2026-08-08'
 category: '随笔'
 type: 'original'
-heroImage: '../../assets/yukoku-cover.jpg'
 ---
 
 > 日期：2026-08-08
