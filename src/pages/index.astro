@@ -516,7 +516,7 @@ const posts = (await getCollection('blog'))
 						listItems.forEach(post => {
 							const postCategory = post.getAttribute('data-category');
 							if (selectedCategory === 'all' || postCategory === selectedCategory) {
-								if (listVisible < 10) {
+								if (listVisible < 12) {
 									(post as HTMLElement).style.display = 'block';
 									listVisible++;
 								} else {
@@ -531,7 +531,7 @@ const posts = (await getCollection('blog'))
 						gridItems.forEach(post => {
 							const postCategory = post.getAttribute('data-category');
 							if (selectedCategory === 'all' || postCategory === selectedCategory) {
-								if (gridVisible < 10) {
+								if (gridVisible < 12) {
 									(post as HTMLElement).style.display = 'flex';
 									gridVisible++;
 								} else {
