@@ -2,7 +2,7 @@
 title: '《戦巫〈センナギ〉》存档修改与脚本逆向全复盘'
 description: '目标：把神気率改满到 100%，解锁好结局。本文记录从存档二进制修改到游戏脚本逆向的完整技术路径，以及所有失败尝试的根因分析。'
 pubDate: '2026-08-06'
-category: '随笔'
+category: '开发'
 type: 'original'
 heroImage: '../../assets/sennagi-cover.jpg'
 ---
