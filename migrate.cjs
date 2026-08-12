@@ -112,6 +112,7 @@ for (const srcDir of srcDirs) {
     'sennaagi-save-script-recap': '../../assets/sennagi-cover.jpg',
     'youketsu-localization-recap': '../../assets/yukoku-cover.jpg',
     'shanghai-galonly-essay': '../../assets/东方明珠外滩.jpg',
+    'shuilongyin-galonly-essay': '../../assets/沪galonly展现场.jpg',
     'when-galgame-becomes-tala-game': '../../assets/c107-flat-cover-spine.jpg'
   };
 
