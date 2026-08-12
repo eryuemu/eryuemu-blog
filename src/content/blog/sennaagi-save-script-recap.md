@@ -4,6 +4,7 @@ description: '目标：把神気率改满到 100%，解锁好结局。本文记�
 pubDate: '2026-08-06'
 category: '随笔'
 type: 'original'
+heroImage: '../../assets/sennagi-cover.jpg'
 ---
 
 ## 1. 背景

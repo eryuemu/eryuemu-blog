@@ -104,6 +104,21 @@ for (const srcDir of srcDirs) {
     }
   }
 
+  const baseName = path.basename(file, '.md');
+  const destSlug = slugMap[baseName] || baseName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+
+  const heroImageMap = {
+    'claude-code-installation-guide': '../../assets/cc-switch-config-panel.png',
+    'sennaagi-save-script-recap': '../../assets/sennagi-cover.jpg',
+    'youketsu-localization-recap': '../../assets/yukoku-cover.jpg',
+    'shanghai-galonly-essay': '../../assets/东方明珠外滩.jpg',
+    'when-galgame-becomes-tala-game': '../../assets/c107-flat-cover-spine.jpg'
+  };
+
+  if (!heroImage && heroImageMap[destSlug]) {
+    heroImage = heroImageMap[destSlug];
+  }
+
   // Normalize categories: Merge galgame into 随笔
   if (category === 'galgame') {
     category = '随笔';
