@@ -1,7 +1,7 @@
 ---
 title: '关于ai汉化的一点点感慨'
 description: '楼主在玩小e社的悠刻的命运少女，记录一下从AI翻译版本槽点到使用AI Agent调试优化文本的折腾随记。'
-pubDate: '2026-08-08T08:00:00'
+pubDate: '2026-08-07T20:00:00'
 category: '开发'
 type: 'original'
 heroImage: '../../assets/yukoku-cover.jpg'
