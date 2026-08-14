@@ -217,6 +217,9 @@ GitHub Pages 的 CDN（Fastly）在大陆直连时反而有亚洲节点兜底—
 
 所以 `cn.colleges.chat` 不是「忘了更新的国内服务器」，是**刻意做的一条国内线路**——他们的读者全是国内大学生，访问体验是命根子。
 
+![cn.colleges.chat 国内加速线路入口（DNSPod 智能解析 + 新加坡 Aceville 免备案 CDN）](../../assets/cn-colleges-chat-site.png)
+*图：cn.colleges.chat 国内加速线路入口（DNSPod 智能解析 + 新加坡 Aceville 免备案 CDN）*
+
 ### 8.2 两个维度的区分（当时最容易混的点）
 
 | 维度 | 内容 | 关系 |
