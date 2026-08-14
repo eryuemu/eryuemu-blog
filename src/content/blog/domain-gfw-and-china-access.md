@@ -43,6 +43,18 @@ ITDOG 全国测速（264 个监测点）的现象：
 | `guide.hbuwiki.top` | 大部分绿，23 个超时 |
 | `eryuemu.github.io` | 大部分绿，94 个超时 |
 
+![eryuemu-blog.vercel.app 在 ITDOG 全国测速中全红超时（.vercel.app 后缀遭遇 DNS 污染）](../../assets/itdog-speedtest-vercel-app-all-red.png)
+*图：eryuemu-blog.vercel.app 在 ITDOG 全国测速中全红超时（.vercel.app 后缀遭遇 DNS 污染）*
+
+![eryuemu.com 自定义域名在 ITDOG 全国测速中全国大部分地区全绿秒开](../../assets/itdog-speedtest-eryuemu-com-green.png)
+*图：eryuemu.com 自定义域名在 ITDOG 全国测速中全国大部分地区全绿秒开*
+
+![guide.hbuwiki.top 自定义域名在 ITDOG 全国测速中基本畅通（仅 23 个线路超时）](../../assets/itdog-speedtest-guide-hbuwiki-top.png)
+*图：guide.hbuwiki.top 自定义域名在 ITDOG 全国测速中基本畅通（仅 23 个线路超时）*
+
+![eryuemu.github.io 默认域名受到部分省份 SNI 阻断干扰（94 个节点超时）](../../assets/itdog-speedtest-eryuemu-github-io.png)
+*图：eryuemu.github.io 默认域名受到部分省份 SNI 阻断干扰（94 个节点超时）*
+
 于是有了下面十一个问题。
 
 ---
