@@ -70,6 +70,12 @@ GitHub API 实测：
 | `MyXym` | **User**（个人用户） | `myxym.github.io` —— 他的 Hexo 个人博客 |
 | `CollegesChat` | **Organization**（组织） | `collegeschat.github.io` —— 「大学生活质量指北」 |
 
+![collegeschat.github.io 组织账号对应的「大学生活质量指北」项目前端网站](../../assets/collegeschat-org-pages-site.png)
+*图：collegeschat.github.io 组织账号对应的「大学生活质量指北」项目前端网站*
+
+![myxym.github.io 个人账号对应的 Hexo 个人博客（Theme Typography by Makito，PS：这个博客主题是真好看）](../../assets/myxym-personal-blog-theme.png)
+*图：myxym.github.io 个人账号对应的 Hexo 个人博客（Theme Typography by Makito，PS：这个博客主题是真好看）*
+
 GitHub Pages 默认域名规则是 `<用户名或组织名>.github.io`：项目放个人账号下用个人名，放组织下用组织名。他把项目放进了自己创建的组织里，所以 Pages 用组织名，和个人账号名无关。
 
 > 类比自己：HBU-Wiki 在个人账号下，Pages 是 `eryuemu.github.io/HBU-Wiki`。哪天建个 `hbu-wiki` 组织把项目迁进去，Pages 会自动变成 `hbu-wiki.github.io`。
