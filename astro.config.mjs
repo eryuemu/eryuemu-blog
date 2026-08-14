@@ -6,7 +6,7 @@ import { defineConfig, fontProviders } from 'astro/config';
 
 // https://astro.build/config
 export default defineConfig({
-	site: 'https://eryuemu.com',
+	site: 'https://www.eryuemu.com',
 	integrations: [mdx(), sitemap()],
 	markdown: {
 		shikiConfig: {
