@@ -138,7 +138,7 @@ eryuemu's blog                         ← [2] <title> 标签（蓝色大标题�
 
 ### 为什么 Bing 里 wiki 显示 9、blog 显示 1？
 - VitePress 生成**单层直属地图** `sitemap.xml`（直接列出 9 个页面）→ 一眼数出 9
-- Astro 生成**地图索引** `sitemap-index.xml`（只含 1 个指向子地图的链接）→ 显示 1，等引擎翻开子地图后变 25
+- Astro 生成**地图索引** `sitemap-index.xml`（只含 1 个指向子地图的链接）→ 显示 1，等引擎翻开子地图后变 28
 
 ![Bing Webmaster Tools 成功读取 HBU Wiki 的 sitemap.xml（状态成功，已发现 9 个 URL）](../../assets/bwt-sitemaps-success-9.png)
 *图：Bing Webmaster Tools 成功读取 HBU Wiki 的 sitemap.xml（状态成功，已发现 9 个 URL）*
@@ -187,9 +187,10 @@ eryuemu's blog                         ← [2] <title> 标签（蓝色大标题�
 
 ### 7.2 针对性代码修复
 
-在 `HBU-Wiki/.vitepress/config.mjs` 中进行两处优化：
-1. **标题扩充**：`title: "HBU Wiki - 河北大学生存指南"`，同时保留导航栏 `siteTitle: 'HBU Wiki'` 维持 UI 简洁。
+在 `HBU-Wiki/.vitepress/config.mjs` 中进行三处优化：
+1. **首页标题扩充**：`title: "HBU Wiki - 河北大学生存指南"`（8 → 16 字符，进入 Bing 建议的 15~60 区间），同时新增导航栏 `siteTitle: 'HBU Wiki'` 维持 UI 简洁。
 2. **Logo Alt 补全**：`logo: { src: '/hbuwiki.png', alt: 'HBU Wiki Logo' }`。
+3. **子页 Title 修正**：VitePress 的 `<title>` 由「frontmatter title | siteTitle」**自动拼接**，直接改 site title 会让所有子页 title 变成「xxx | HBU Wiki - 河北大学生存指南」（超长、且与 og:title 不一致，`transformHead` 返回 title 标签无效会产生重复标签）。改用官方 `titleTemplate` 机制：子页 →「xxx | HBU Wiki」，首页单独 `titleTemplate: false` 保持「HBU Wiki - 河北大学生存指南」，全站 `<title>` 与 og:title 完全一致。
 
 ### 7.3 Google Search Console vs Bing Webmaster Tools 的工具哲学
 
