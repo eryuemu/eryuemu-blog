@@ -145,7 +145,38 @@ eryuemu's blog                         ← [2] <title> 标签（蓝色大标题�
 
 ---
 
-## 七、数据看板：GSC vs Umami（上游 vs 下游）
+## 七、深度对比：Google 与 Bing 的收录哲学与 SEO 体检机制
+
+### 7.1 URL 检查实测：已成功编制索引
+
+提交第二天（8月15日），在 Bing 站长工具的「URL 检查」中输入 `https://guide.hbuwiki.top/`，返回状态：
+
+![Bing 站长工具 URL 检查显示已成功编制索引](../../assets/bwt-url-inspection-indexed-seo-warning.png)
+*图：Bing 站长工具 URL 检查显示「已成功编制索引」，同时提示 2 条 SEO 优化建议*
+
+- **✅ 绿色对勾「已成功编制索引」**：说明 Bing 后台已彻底完成抓取、解析并入库。之所以前台搜 `site:guide.hbuwiki.top` 暂无结果，仅因全球边缘节点 CDN 缓存刷新需要数小时至 1~2 天。
+- **⚠️ 下方「2 找到 SEO/GEO 问题」**：这是 Bing 内置的静态代码体检建议，**不影响已收录的事实**：
+  1. **标题太短（错误）**：首页 `<title>` 原为 `HBU Wiki`（8 个字符），Bing 建议 15~60 字符以覆盖更多搜索词。
+  2. **缺少图像 Alt 属性（通知）**：顶部导航栏 Logo 未设置 `alt` 文本。
+
+### 7.2 针对性代码修复
+
+在 `HBU-Wiki/.vitepress/config.mjs` 中进行两处优化：
+1. **标题扩充**：`title: "HBU Wiki - 河北大学生存指南"`，同时保留导航栏 `siteTitle: 'HBU Wiki'` 维持 UI 简洁。
+2. **Logo Alt 补全**：`logo: { src: '/hbuwiki.png', alt: 'HBU Wiki Logo' }`。
+
+### 7.3 Google Search Console vs Bing Webmaster Tools 的工具哲学
+
+| 维度 | Google Search Console (GSC) | Bing Webmaster Tools (BWT) |
+|---|---|---|
+| **核心定位** | **极简底线**：只报硬性致命故障（能否抓取/索引/移动端体验） | **全科体检**：兼职 SEO 审计工具（类似 Lighthouse 打分） |
+| **对待短标题** | 正常收录；前台由算法**动态提取网页正文最匹配段落**展示 | 正常收录；但后台面板会严格标红提示建议加长 |
+| **对待图片 Alt** | 正常收录；不主动报警 | 报通知项，建议补充无障碍与图片搜索信息 |
+| **一句话总结** | “只要能看我就收录，展示时我靠算法动态优化” | “收录归收录，但我会按规范白纸黑字给你做代码体检” |
+
+---
+
+## 八、数据看板：GSC vs Umami（上游 vs 下游）
 
 | | Google Search Console | Umami / Vercount |
 |---|---|---|
@@ -163,7 +194,7 @@ eryuemu's blog                         ← [2] <title> 标签（蓝色大标题�
 
 ---
 
-## 八、生效时间表与验证方法
+## 九、生效时间表与验证方法
 
 | 项目 | 预期时间 |
 |------|---------|
@@ -181,7 +212,7 @@ site:eryuemu.com
 
 ---
 
-## 九、后续维护（零成本）
+## 十、后续维护（零成本）
 
 - 新增文章/页面：**不需要任何额外配置**。VitePress/Astro 构建时自动把新链接加进 sitemap.xml，引擎下次爬取自动发现
 - 改标题/描述：blog 改 `consts.ts` 的 `SITE_TITLE/SITE_DESCRIPTION`；wiki 改 `config.mjs` → git push 即可，引擎 3~7 天内更新展示
