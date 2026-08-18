@@ -68,10 +68,10 @@ type: 'ai-organized'
 
 | 网址（URL） | 上次抓取日期（最近回访） | Google 判定状态 | 抓取路径与历史成因 |
 | :--- | :--- | :--- | :--- |
-| `https://eryuemu.com/blog/knowledge-base-and-blog-setup/` | **7 月 27 日** | 网页会自动重定向 | 7/20 绑域名后首周巡检，撞上 308 跳转 |
-| `https://eryuemu.com/blog/` | **8 月 05 日** | 网页会自动重定向 | 域名调整期例行回访，撞上 308 跳转 |
-| `https://eryuemu.com/about/` | **8 月 06 日** | 网页会自动重定向 | 域名调整期例行回访，撞上 308 跳转 |
-| `https://eryuemu.com/blog/hbu-wiki-dev-env-setup/` | **8 月 08 日** | 网页会自动重定向 | 域名调整期例行回访，撞上 308 跳转 |
+| `https://eryuemu.com/blog/knowledge-base-and-blog-setup/` | **7 月 27 日** | 网页会自动重定向 | 7/20 绑域名时开启了跳 www，爬虫撞上 308 跳转 |
+| `https://eryuemu.com/blog/` | **8 月 05 日** | 网页会自动重定向 | 爬虫抓取列表页，撞上 7/20 配好的 308 跳转 |
+| `https://eryuemu.com/about/` | **8 月 06 日** | 网页会自动重定向 | 爬虫抓取关于页，撞上 7/20 配好的 308 跳转 |
+| `https://eryuemu.com/blog/hbu-wiki-dev-env-setup/` | **8 月 08 日** | 网页会自动重定向 | 爬虫抓取文章页，撞上 7/20 配好的 308 跳转 |
 | `https://eryuemu.com/thoughts/2026-08-05-ai-and-curiosity/` | **8 月 10 日** | **✅ 成功编入索引** | 顺着首页内链抓取，无跳转阻碍 |
 | `https://eryuemu.com/`（博客首页） | **8 月 11 日** | **✅ 成功编入索引** | 7 月早已收录，8/11 为最近一次例行巡检刷新 |
 | `https://eryuemu.com/thoughts/`（心迹列表） | **8 月 15 日** | **✅ 成功编入索引** | 首页重点内链，最近一次回访直接收录 |
@@ -86,10 +86,10 @@ type: 'ai-organized'
   3. 8 月 10 日~11 日爬虫例行回访时，爬取了首页重点展示的「心迹」模块及当时最新的动态（8 月 5 日的 `2026-08-05-ai-and-curiosity`）。
   4. 这几个页面没有触发复杂的子域跳转，页面结构与原创内容完整，Googlebot 持续保持其在 `eryuemu.com` 索引库中的正常收录状态。
 
-- **路径 B（重定向记录通道）：7 月底至 8 月初的域名调整期**
-  1. 7 月 27 日 ~ 8 月 8 日期间，正值配置 DNS 解析与 Vercel 自定义域名阶段。
-  2. 在此期间，Vercel 开启了将 Apex 根域名向 `www` 的自动 308 跳转，或者当时 Astro 的 trailing slash（末尾斜杠）产生了路由规范化。
-  3. 爬虫在这一阶段爬取 `/blog/...` 与 `/about/` 时，每次请求都收到了服务器返回的 308 重定向响应，因此被真实记录为了「网页会自动重定向」。
+- **路径 B（重定向记录通道）：7 月 20 日绑定域名时默认开启的 308 跳转**
+  1. 7 月 20 日在 Vercel 绑定域名时，按照 Vercel 官方推荐的默认选项勾选了「Redirect apex domains to www」（根域名自动重定向到 www）。
+  2. 因此从 7 月 20 日上线起，Vercel 服务器一直执行着“访问 `eryuemu.com` 自动 308 永久重定向到 `www.eryuemu.com`”的规则。
+  3. Google 爬虫在 7 月 27 日、8 月 5 日、8 月 6 日、8 月 8 日这几天去爬取 `/blog/...` 与 `/about/` 时，每次请求都如实收到了服务器返回的 308 响应，因此被真实记录为了「网页会自动重定向」。
 
 ---
 
