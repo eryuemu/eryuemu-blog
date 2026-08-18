@@ -19,14 +19,24 @@ const { thought } = Astro.props;
 const { Content } = await render(thought);
 const { pubDate, tags = [], location, mood, images = [], pinned } = thought.data;
 const gridClass = `grid-${Math.min(images.length, 9)}`;
+
+// 动态提取心迹文本内容生成独特的 SEO Title 与 Description
+const rawBody = thought.body || '';
+const cleanText = rawBody.replace(/[\s\r\n#*`_>[\]()\-+!]+/g, ' ').trim();
+const seoTitle = cleanText 
+	? `心迹: “${cleanText.slice(0, 32)}${cleanText.length > 32 ? '...' : ''}” — ${SITE_TITLE}`
+	: `心迹动态 (${thought.id}) — ${SITE_TITLE}`;
+const seoDescription = cleanText 
+	? cleanText.slice(0, 140) 
+	: `eryuemu（二月木）于 ${pubDate.toISOString().slice(0, 10)} 发布的心迹动态`;
 ---
 
 <!doctype html>
 <html lang="zh-CN">
 	<head>
 		<BaseHead
-			title={`心迹动态 — ${SITE_TITLE}`}
-			description="eryuemu（二月木）的单条心迹动态"
+			title={seoTitle}
+			description={seoDescription}
 		/>
 		<style>
 			main {
