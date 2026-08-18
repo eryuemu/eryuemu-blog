@@ -170,34 +170,53 @@ Sitemap: https://eryuemu.com/sitemap-index.xml
 
 ---
 
-### 5.4 访问量统计服务（Vercount）无缝数据继承排坑
+### 5.4 访问量统计服务（Vercount vs Umami）的定位与无缝继承排坑
+
+在站长工具链中，很多开发者容易对 **Vercount** 与 **Umami** 这两套访客系统的分工产生混淆。其实在博客与 **HBU Wiki** 的架构实践中，它们是**各司其职的互补关系**：
+
+```
+┌───────────────────────────────────────────────────────────┐
+│                      访客流量进入站点                      │
+└───────────────┬───────────────────────────┬───────────────┘
+                │                           │
+                ▼                           ▼
+      【Vercount：前台门面】          【Umami：后台指挥部】
+   (events.vercount.one)          (cloud.umami.is)
+   • 极简轻量 API，零运维成本       • 专业可视化流量分析大屏
+   • 面向普通读者公开展示：         • 面向站长自己做深度洞察：
+     「访问人数 490 · 总访问量 2538」  • 访客来自哪个国家/城市？
+                                    • 用户用的是 Chrome 还是 iPhone？
+                                    • 从哪个网站跳转进来的（搜索/B站/GitHub）？
+                                    • 每篇文章平均停留了几分钟？
+```
+
+#### 为什么博客和 HBU Wiki 都选用了 Vercount 作为前台计数器？
+1. **轻量与响应速度**：Vercount 是类似不蒜子（busuanzi）的现代无服务器替代品。它只需要几行前端 JavaScript 发送一个微小的 POST 请求即可获取全站 UV/PV，无需配置复杂的后台鉴权 Token。
+2. **前后端解耦**：我们在 **HBU Wiki** 的指南子站（`guide.hbuwiki.top`）底部就是使用了这套 API 进行阅读量统计，因此博客也复用了相同的技术选型。
+
+#### ⚠️ 踩坑实录：主域名切换为何导致访问量瞬间重置？
 
 主域名切换为 `eryuemu.com` 后，博客底部的访问量计数器突然出现了一个现象：原本 7 月以来积累的 **490 访问人数与 2500+ 总访问量**，在页面上突然重置显示为 **「访问人数 2 · 总访问量 7」**。
 
 ![Vercount 统计数据因域名切换重置显示](../../assets/vercount-stats-reset-footer.png)
 *图：域名切换后，底部 Vercount 访问计数器因新域名账本独立而重置*
 
-#### 根因分析：
-Vercount（`events.vercount.one`）统计接口是严格按照请求报文中的 `url`（即 `window.location.href` 的 Hostname）分别独立记账的：
-- 原本在 `www.eryuemu.com` 下积累了 `site_uv: 490`、`site_pv: 2538`。
-- 换到 `eryuemu.com` 后，Vercount 认为这是一个全新的独立站点，开辟了新账本。
+- **根因分析**：Vercount（`events.vercount.one`）统计接口是严格按照请求报文中的 `url`（即 `window.location.href` 的 Hostname）分别独立记账的。原本在 `www.eryuemu.com` 下积累了 `site_uv: 490`、`site_pv: 2538`；换到 `eryuemu.com` 后，Vercount 认为这是一个全新的独立站点，开辟了新账本。
+- **代码修复方案**：在 `src/components/Footer.astro` 中，将上报统计的 URL 显式映射到历史统计标识：
+  ```typescript
+  // 将计数请求映射到历史统计标识（www.eryuemu.com），无缝继承 7 月以来积累的 490+ 人数与 2500+ 访问量
+  const statUrl = window.location.href.replace(/^https?:\/\/eryuemu\.com/, 'https://www.eryuemu.com');
 
-#### 代码修复方案：
-在 `src/components/Footer.astro` 中，将上报统计的 URL 显式映射到历史统计标识：
-```typescript
-// 将计数请求映射到历史统计标识（www.eryuemu.com），无缝继承 7 月以来积累的 490+ 人数与 2500+ 访问量
-const statUrl = window.location.href.replace(/^https?:\/\/eryuemu\.com/, 'https://www.eryuemu.com');
-
-const res = await fetch(API_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-        url: statUrl,
-        isNewUv: isNewUv
-    })
-});
-```
-修复部署后，页面刷新即可立即恢复 **490 访问人数 · 2538 总访问量**，后续所有新访问均在历史累计数据上继续自然递增。
+  const res = await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+          url: statUrl,
+          isNewUv: isNewUv
+      })
+  });
+  ```
+  修复部署后，页面刷新即可立即恢复 **490 访问人数 · 2538 总访问量**，后续所有新访问均在历史累计数据上继续自然递增。
 
 ---
 
