@@ -176,13 +176,8 @@ const formattedWords = totalWords >= 1000 ? (totalWords / 1000).toFixed(1) + 'k'
 		const VERC_COOKIE_PREFIX = 'vercount_uv_';
 		const API_URL = 'https://events.vercount.one/api/v2/log';
 
-		function getHostName() {
-			return window.location.host || 'unknown-host';
-		}
-
 		function getCookieName() {
-			const host = getHostName().replace(/[^a-zA-Z0-9_-]/g, '_');
-			return `${VERC_COOKIE_PREFIX}${host}`;
+			return `${VERC_COOKIE_PREFIX}eryuemu_com`;
 		}
 
 		function getCookie(name: string) {
@@ -213,6 +208,9 @@ const formattedWords = totalWords >= 1000 ? (totalWords / 1000).toFixed(1) + 'k'
 				setCookie(cookieName, '1');
 			}
 
+			// 将计数请求映射到历史统计标识（www.eryuemu.com），无缝继承 7 月以来积累的 490+ 人数与 2500+ 访问量
+			const statUrl = window.location.href.replace(/^https?:\/\/eryuemu\.com/, 'https://www.eryuemu.com');
+
 			try {
 				const res = await fetch(API_URL, {
 					method: 'POST',
@@ -220,7 +218,7 @@ const formattedWords = totalWords >= 1000 ? (totalWords / 1000).toFixed(1) + 'k'
 						'Content-Type': 'application/json'
 					},
 					body: JSON.stringify({
-						url: window.location.href,
+						url: statUrl,
 						isNewUv: isNewUv
 					})
 				});
