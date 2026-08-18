@@ -256,6 +256,42 @@ Sitemap: https://eryuemu.com/sitemap-index.xml
 
 ---
 
+### 5.5 「心迹」模块 SEO 实战：Google SERP 真实收录检验与动态 Title 优化
+
+在日常追踪中，我们在 Google 搜索框直接检索 `eryuemu心迹`，对心迹模块的收录情况进行了实战检验：
+
+![Google 搜索「eryuemu心迹」实测展现全部动态与图片卡片](../../assets/google-search-eryuemu-thoughts-serp.png)
+*图：Google 搜索「eryuemu心迹」实测结果——心迹主页、3 条心迹动态全部被 Google 收录并排名前列，下方还聚合展示了动态中的多张图片卡片*
+
+#### 1. 发现问题：千篇一律的「重复标题」痛点
+从上图的搜索结果中可以发现一个明显的 SEO 瑕疵：
+- 3 条动态的蓝色大标题全部显示为一模一样的 **`心迹动态`**、**`心迹动态`**、**`心迹动态`**。
+- **根因**：此前在 `src/pages/thoughts/[...id].astro` 中，写死了固定元数据 `<BaseHead title={"心迹动态 — " + SITE_TITLE} />`。
+- **危害**：在搜索引擎眼里，标题重复率 100% 的页面容易被算法判定为“模板重复页”，读者在搜索结果列表里也无法凭标题区分具体内容。
+
+#### 2. 优化方案：智能内容感知（Content-Aware）动态 SEO 标签
+在 `src/pages/thoughts/[...id].astro` 中，加入动态文本截取逻辑，自动抓取正文第一句话作为独一无二的 Title 与 Description：
+```typescript
+// 动态提取心迹文本内容生成独特的 SEO Title 与 Description
+const rawBody = thought.body || '';
+const cleanText = rawBody.replace(/[\s\r\n#*`_>[\]()\-+!]+/g, ' ').trim();
+const seoTitle = cleanText 
+	? `心迹: “${cleanText.slice(0, 32)}${cleanText.length > 32 ? '...' : ''}” — ${SITE_TITLE}`
+	: `心迹动态 (${thought.id}) — ${SITE_TITLE}`;
+const seoDescription = cleanText 
+	? cleanText.slice(0, 140) 
+	: `eryuemu（二月木）于 ${pubDate.toISOString().slice(0, 10)} 发布的心迹动态`;
+```
+
+#### 3. 优化效果：
+- 8 月 02 日动态：`心迹: “感觉自己这辈子也就这样了，Galgame 里的女主...” — eryuemu's blog`
+- 8 月 05 日动态：`心迹: “现在的小孩确实是挺幸运的，记得我小时候...” — eryuemu's blog`
+- 8 月 14 日动态：`心迹: “人生的意义在于什么呢，我在初高中思考过...” — eryuemu's blog`
+
+Google 爬虫在下一次周期性回访刷新快照后，搜索结果列表中的标题将变得极其生动且各具特色，大幅提升搜索点击率（CTR）与页面权重！
+
+---
+
 ## 六、复盘总结：老域名资产如何做到「零损耗无缝过渡」？
 
 ```
