@@ -298,64 +298,13 @@ IndexNow 模式： 网站发布新内容 ──> 主动向 IndexNow API 发送�
 
 ---
 
-### 7.7 实战排坑 ③：GSC 提示「网页会自动重定向」（4 个页面未编入索引）
+### 7.7 进阶排坑：GSC 提示「网页会自动重定向」未编入索引？
 
-在站长工具日常监控中，Google Search Console 的「网页索引编制」报告突然提示：**4 个网页未编入索引，原因为「网页会自动重定向」**。
+在站点上线运行一段时间后，若 Google Search Console（GSC）中提示某些网页因「网页会自动重定向」未编入索引，通常是由于**网址前缀资源（URL-prefix）视角差异、Apex 根域名与 www 规范化冲突、Vercel 308 重定向与 robots.txt Sitemap 引导链路**导致的。
 
-![Google Search Console 网页索引编制总览（未编入索引 4 vs 已编入索引 3）](../../assets/gsc-indexing-status-overview.png)
-*图：GSC 网页索引编制总览面板，显示 4 个网页因重定向未被编入索引*
+该问题的完整成因分析、根域名规范化抉择、Vercel 重定向配置与 GSC 资源管理实战，已单独整理成深度复盘专文：
 
-![Google Search Console 网页未编入索引的原因列表](../../assets/gsc-redirect-reasons-overview.png)
-*图：GSC 未编入索引原因明细列表，明确列出「网页会自动重定向」*
-
-点击进入「网页会自动重定向」详情页，可以看到受影响网页趋势与具体的示例网址：
-
-![Google Search Console 网页会自动重定向详情页](../../assets/gsc-page-redirect-drilldown.png)
-*图：GSC 网页会自动重定向详情页及受影响趋势*
-
-![Google Search Console 网页会自动重定向受影响的示例 URL 列表](../../assets/gsc-page-redirect-url-examples.png)
-*图：受影响的 4 个示例 URL 列表明细*
-
-受影响的具体 URL 为：
-- `https://eryuemu.com/blog/knowledge-base-and-blog-setup/`
-- `https://eryuemu.com/blog/hbu-wiki-dev-env-setup/`
-- `https://eryuemu.com/blog/`
-- `https://eryuemu.com/about/`
-
-#### 为什么会出现「网页会自动重定向」？
-
-很多站长一看到“未编入索引”就以为是网站配置故障，其实需要从**资源类型与重定向机制**两个层面来理解：
-
-1. **网址前缀资源（URL-prefix）的视角局限**：
-   - 当前在 GSC 中选中的资源是 `https://eryuemu.com/`（不带 `www` 的 Apex Domain 网址前缀资源）。
-   - 网站部署在 Vercel 上，配置了规范域名（Canonical Domain）为 `https://www.eryuemu.com`，服务器对所有非 `www` 请求执行了 **308 Permanent Redirect**。
-   - 当 Googlebot 访问 `https://eryuemu.com/blog/...` 时，服务器返回了 308 跳转到 `https://www.eryuemu.com/blog/...`。
-   - **对于 `https://eryuemu.com/` 这个资源而言，这 4 个 URL 确实发生了重定向，Google 正确识别并把索引权重传递给了带 `www` 的页面，因此不在当前非 www 资源下建立索引。这属于完全符合预期的正常现象。**
-
-2. **代码排查：为什么爬虫会优先抓取不带 `www` 的链接？**
-   - 排查博客代码发现，`public/robots.txt` 中遗留了一行旧配置：
-     ```txt
-     Sitemap: https://eryuemu.com/sitemap-index.xml
-     ```
-   - 爬虫读取 robots.txt 时，被引导去了不带 `www` 的地址，进而触发了整条重定向链。
-   - 站内部分名片、头像硬编码了 `https://eryuemu.com/...`，也为爬虫提供了非规范 URL 的线索。
-
-#### 闭环修复方案（以更简洁现代的「不带 www」为最终规范）
-
-1. **代码层面统一规范（Canonical）**：
-   - 个人博客更推荐使用视觉简洁现代的根域名 `https://eryuemu.com` 作为主域名。
-   - `astro.config.mjs` 配置 `site: 'https://eryuemu.com'`，Sitemap、Canonical、JSON-LD 均自动以 `https://eryuemu.com` 渲染。
-   - `public/robots.txt` 指向规范地址：
-     ```txt
-     User-agent: *
-     Allow: /
-
-     Sitemap: https://eryuemu.com/sitemap-index.xml
-     ```
-   - 友链名片配置统一为 `https://eryuemu.com/`，站内静态资源引用（如头像）使用相对路径 `/avatar.jpg`。
-2. **托管平台（Vercel）与 GSC 联动**：
-   - **Vercel 设置**：在项目域名设置中将 `eryuemu.com` 设为 **Primary Domain**（主域名），并将 `www.eryuemu.com` 设置为 301 重定向到 `eryuemu.com`。
-   - **GSC 监控**：在 Google Search Console 中直接以 `https://eryuemu.com/` 资源为主面板，并在「网页会自动重定向」详情页点击「**验证修正情况**」（Validate Fix）。Googlebot 在后续回访后即可将权重完整汇聚在不带 www 的根域名下。
+👉 **[GSC 提示「网页会自动重定向」未编入索引？根域名与 www 规范化全复盘](/blog/gsc-page-redirect-and-domain-canonical-guide)**
 
 ---
 
