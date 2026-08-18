@@ -270,6 +270,20 @@ IndexNow 模式： 网站发布新内容 ──> 主动向 IndexNow API 发送�
 - **Cloudflare 一键开启**：若站点接入了 Cloudflare，在后台 `Caching -> Configuration` 中找到 **Crawler Hints**（爬虫提示）勾选开启，Cloudflare 会通过 IndexNow 协议自动帮你的站点向 Bing 等引擎发送变更信号。
 - **构建脚本自动化**：在 GitHub Actions 或部署 Webhook 中，构建完成后调用 `https://api.indexnow.org/indexnow` 提交变更 URL 清单。
 
+#### 4. 实战放榜追踪（8月18日更新）：Bing 批处理广播完毕，前台成功登顶！
+之前在 7.1 中提到的“后台绿勾但前台 site: 搜不到”的同步延迟，在经过 2~3 天后正式完成全球缓存切片广播。
+
+在 Bing 搜索框直接输入核心关键词 `hbuwiki`：
+
+![Bing 搜索「hbuwiki」成功展示主站、指南与复盘文章](../../assets/bing-search-hbuwiki-success.png)
+*图：Bing 搜索「hbuwiki」结果——主站 hbuwiki.top 稳居第一，GitHub、贴吧、指南站点与博客本篇 SEO 复盘文章全部聚合展现*
+
+- **结果验证**：
+  1. 主站 `hbuwiki.top` 稳定霸榜第 1 位。
+  2. GitHub 开源仓库、百度贴吧发布贴、指南子站 `guide.hbuwiki.top` 紧随其后。
+  3. 博客 `eryuemu.com` 本篇复盘文章也被 Bing 正确抓取并展示。
+- **经验总结**：搜索引擎后端的倒排索引建立是第一步，前台 SERP 分发需要批处理周期。只要后台无硬性抓取报错，无需反复提交或焦虑修改，耐心理想等待即可。
+
 ---
 
 ### 7.6 Google Search Console vs Bing Webmaster Tools 的工具哲学
@@ -281,6 +295,63 @@ IndexNow 模式： 网站发布新内容 ──> 主动向 IndexNow API 发送�
 | **对待图片 Alt** | 正常收录；不主动报警 | 报通知项，建议补充无障碍与图片搜索信息 |
 | **快照展示** | 直接展示 Google 抓取渲染后的 DOM 与屏幕截图 | 分离「必应索引（历史精简）」与「实时 URL（全量直连）」 |
 | **一句话总结** | “只要能看我就收录，展示时我靠算法动态优化” | “收录归收录，但我会按规范白纸黑字给你做代码体检” |
+
+---
+
+### 7.7 实战排坑 ③：GSC 提示「网页会自动重定向」（4 个页面未编入索引）
+
+在站长工具日常监控中，Google Search Console 的「网页索引编制」报告突然提示：**4 个网页未编入索引，原因为「网页会自动重定向」**。
+
+![Google Search Console 网页索引编制总览（未编入索引 4 vs 已编入索引 3）](../../assets/gsc-indexing-status-overview.png)
+*图：GSC 网页索引编制总览面板，显示 4 个网页因重定向未被编入索引*
+
+![Google Search Console 网页未编入索引的原因列表](../../assets/gsc-redirect-reasons-overview.png)
+*图：GSC 未编入索引原因明细列表，明确列出「网页会自动重定向」*
+
+点击进入「网页会自动重定向」详情页，可以看到受影响网页趋势与具体的示例网址：
+
+![Google Search Console 网页会自动重定向详情页](../../assets/gsc-page-redirect-drilldown.png)
+*图：GSC 网页会自动重定向详情页及受影响趋势*
+
+![Google Search Console 网页会自动重定向受影响的示例 URL 列表](../../assets/gsc-page-redirect-url-examples.png)
+*图：受影响的 4 个示例 URL 列表明细*
+
+受影响的具体 URL 为：
+- `https://eryuemu.com/blog/knowledge-base-and-blog-setup/`
+- `https://eryuemu.com/blog/hbu-wiki-dev-env-setup/`
+- `https://eryuemu.com/blog/`
+- `https://eryuemu.com/about/`
+
+#### 为什么会出现「网页会自动重定向」？
+
+很多站长一看到“未编入索引”就以为是网站配置故障，其实需要从**资源类型与重定向机制**两个层面来理解：
+
+1. **网址前缀资源（URL-prefix）的视角局限**：
+   - 当前在 GSC 中选中的资源是 `https://eryuemu.com/`（不带 `www` 的 Apex Domain 网址前缀资源）。
+   - 网站部署在 Vercel 上，配置了规范域名（Canonical Domain）为 `https://www.eryuemu.com`，服务器对所有非 `www` 请求执行了 **308 Permanent Redirect**。
+   - 当 Googlebot 访问 `https://eryuemu.com/blog/...` 时，服务器返回了 308 跳转到 `https://www.eryuemu.com/blog/...`。
+   - **对于 `https://eryuemu.com/` 这个资源而言，这 4 个 URL 确实发生了重定向，Google 正确识别并把索引权重传递给了带 `www` 的页面，因此不在当前非 www 资源下建立索引。这属于完全符合预期的正常现象。**
+
+2. **代码排查：为什么爬虫会优先抓取不带 `www` 的链接？**
+   - 排查博客代码发现，`public/robots.txt` 中遗留了一行旧配置：
+     ```txt
+     Sitemap: https://eryuemu.com/sitemap-index.xml
+     ```
+   - 爬虫读取 robots.txt 时，被引导去了不带 `www` 的地址，进而触发了整条重定向链。
+   - 站内部分名片、头像硬编码了 `https://eryuemu.com/...`，也为爬虫提供了非规范 URL 的线索。
+
+#### 闭环修复方案
+
+1. **代码层面统一规范（Canonical）**：
+   - 修正 `public/robots.txt`，将 Sitemap 彻底指向正式权威域名：
+     ```diff
+     - Sitemap: https://eryuemu.com/sitemap-index.xml
+     + Sitemap: https://www.eryuemu.com/sitemap-index.xml
+     ```
+   - 将友链名片配置统一更新为 `https://www.eryuemu.com/`，站内静态资源引用（如头像）改为相对路径 `/avatar.jpg`，消除所有非规范内链。
+2. **GSC 后台操作**：
+   - **添加权威资源**：在 GSC 中添加 `https://www.eryuemu.com/` 网址前缀资源，或者直接通过 DNS TXT 记录添加全量「网域资源」`eryuemu.com`（自动合并 www 和非 www 数据），即可在正确的面板下查看已编入索引的 20+ 篇博客文章。
+   - **发起验证**：在「网页会自动重定向」详情页，点击「**验证修正情况**」（Validate Fix），Google 会排队重新验证重定向流。
 
 ---
 
