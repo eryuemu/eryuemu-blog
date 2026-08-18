@@ -36,7 +36,7 @@ type: 'ai-organized'
 - `SITE_DESCRIPTION` 改为贴合实际的：**二月木的个人博客 — 建站折腾 · AI 工具 · Galgame**
 - 补 `og:locale = zh_CN`、`og:site_name`、完整 Twitter Card（title/description/image）——主要影响**社交分享卡片**（发微信/推特时的预览），对排名影响不大
 - 注入 JSON-LD 结构化数据：`WebSite` + `SiteNavigationElement`（首页/文章/心迹/友链/关于）
-- **遗留修复**：canonical/sitemap/JSON-LD 统一到 `www.eryuemu.com`（线上 308 重定向后的正式域名）
+- **统一规范域名（Canonical）**：全站配置、sitemap、JSON-LD、内链统一收敛至更简洁现代的根域名 `https://eryuemu.com`（不带 www）
 
 ---
 
@@ -59,7 +59,7 @@ sitemap.xml（页面清单）  ← robots.txt 指路 ←  主动提交（登记�
 ## 四、核心知识 ②：展示三件套 —— 搜索结果每个字来自代码哪里
 
 ```
-🌐 www.eryuemu.com                     ← [1] canonical URL
+🌐 eryuemu.com                         ← [1] canonical URL
 eryuemu's blog                         ← [2] <title> 标签（蓝色大标题）
 二月木的个人博客 — 建站折腾 · AI 工具 · Galgame  ← [3] <meta name="description">（灰色摘要）
 ```
@@ -340,18 +340,22 @@ IndexNow 模式： 网站发布新内容 ──> 主动向 IndexNow API 发送�
    - 爬虫读取 robots.txt 时，被引导去了不带 `www` 的地址，进而触发了整条重定向链。
    - 站内部分名片、头像硬编码了 `https://eryuemu.com/...`，也为爬虫提供了非规范 URL 的线索。
 
-#### 闭环修复方案
+#### 闭环修复方案（以更简洁现代的「不带 www」为最终规范）
 
 1. **代码层面统一规范（Canonical）**：
-   - 修正 `public/robots.txt`，将 Sitemap 彻底指向正式权威域名：
-     ```diff
-     - Sitemap: https://eryuemu.com/sitemap-index.xml
-     + Sitemap: https://www.eryuemu.com/sitemap-index.xml
+   - 个人博客更推荐使用视觉简洁现代的根域名 `https://eryuemu.com` 作为主域名。
+   - `astro.config.mjs` 配置 `site: 'https://eryuemu.com'`，Sitemap、Canonical、JSON-LD 均自动以 `https://eryuemu.com` 渲染。
+   - `public/robots.txt` 指向规范地址：
+     ```txt
+     User-agent: *
+     Allow: /
+
+     Sitemap: https://eryuemu.com/sitemap-index.xml
      ```
-   - 将友链名片配置统一更新为 `https://www.eryuemu.com/`，站内静态资源引用（如头像）改为相对路径 `/avatar.jpg`，消除所有非规范内链。
-2. **GSC 后台操作**：
-   - **添加权威资源**：在 GSC 中添加 `https://www.eryuemu.com/` 网址前缀资源，或者直接通过 DNS TXT 记录添加全量「网域资源」`eryuemu.com`（自动合并 www 和非 www 数据），即可在正确的面板下查看已编入索引的 20+ 篇博客文章。
-   - **发起验证**：在「网页会自动重定向」详情页，点击「**验证修正情况**」（Validate Fix），Google 会排队重新验证重定向流。
+   - 友链名片配置统一为 `https://eryuemu.com/`，站内静态资源引用（如头像）使用相对路径 `/avatar.jpg`。
+2. **托管平台（Vercel）与 GSC 联动**：
+   - **Vercel 设置**：在项目域名设置中将 `eryuemu.com` 设为 **Primary Domain**（主域名），并将 `www.eryuemu.com` 设置为 301 重定向到 `eryuemu.com`。
+   - **GSC 监控**：在 Google Search Console 中直接以 `https://eryuemu.com/` 资源为主面板，并在「网页会自动重定向」详情页点击「**验证修正情况**」（Validate Fix）。Googlebot 在后续回访后即可将权重完整汇聚在不带 www 的根域名下。
 
 ---
 
