@@ -120,9 +120,86 @@ Bing 凭通行证确认：你是 3419144842@qq.com，权限通过 ✅
 
 ---
 
-## 七、实操结论
+## 八、进阶实战：第三方 SaaS 对“邮箱别名”与“多 OAuth 登录”的判定机制
+
+在搭建站点（如配置 Umami 访问统计、Vercel 部署、Supabase 数据库）时，经常会遇到更深入的鉴权疑问：
+1. **同一个 QQ 邮箱改了英文别名，在第三方平台算同一个账号吗？**
+2. **用同一个邮箱分别注册了 Google 和 GitHub，在第三方平台分别点击第三方登录，进的是同一个账号吗？**
+
+### 1. 邮箱别名（Alias）与第三方平台：字符串精确匹配
+
+在 QQ 邮箱体系中，数字主账号（如 `3419144842@qq.com`）与自定义英文别名（如 `eryuemu1213@qq.com`）在腾讯底层对应的是**同一个物理收件箱**。
+
+但在所有外部第三方平台（如 Umami、GitHub、各大 SaaS 服务商）眼中：
+- 它们没有腾讯内部的别名映射数据库，对用户唯一身份的判定标准是**字符串精确匹配（Exact String Match）**。
+- `3419144842@qq.com` 与 `eryuemu1213@qq.com` 字符完全不同，因此系统会将它们视为**两个截然独立、互不相通的用户实体**。
+
+```
+┌────────────────────────────────────────────────────────┐
+│                   腾讯 QQ 邮箱底层服务                  │
+│               [ 统一物理收件箱: eryuemu ]              │
+└──────────────────────────┬─────────────────────────────┘
+                           │
+             ┌─────────────┴─────────────┐
+             ▼                           ▼
+    【数字地址】3419144842@qq.com      【英文别名】eryuemu1213@qq.com
+             │                           │
+  ───────────┼───────────────────────────┼───────────────────────────
+             │ (第三方平台视角：字符串比对) │
+             ▼                           ▼
+    【Umami 账号 A (博客专享)】   【Umami 账号 B (HBU Wiki 专享)】
+```
+
+**💡 实战妙用：**
+许多海外现代 SaaS 平台（例如 Umami Cloud）为了防止滥用，限制“每个免费账号最多创建 1 个站点”。利用 QQ 邮箱的别名机制，你可以合规注册两个独立账号（分别挂载个人博客与校园 Wiki），各自享受完整的独立免费配额，而所有密码重置与安全验证邮件依然全部汇总在同一个 QQ 邮箱中，省去了维护多套邮箱的麻烦。
+
+---
+
+### 2. 多 OAuth 登录源的判定：账号自动合并（Account Linking）
+
+如果你用 `3419144842@qq.com` 注册了 Google 账号与 GitHub 账号，当你在支持两者的第三方平台（如 Umami 登录页）分别点击 **「Continue with Google」** 与 **「Continue with GitHub」** 时，系统是如何判定的？
+
+**核心结论：进的是同一个账号！**
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor User as 用户 (eryuemu)
+    participant Google as Google OAuth
+    participant GitHub as GitHub OAuth
+    participant SaaS as 第三方平台 (如 Umami / Supabase Auth)
+
+    Note over User,Google: 第一次：使用 Google 登录
+    User->>Google: 点击 Continue with Google 授权
+    Google-->>SaaS: 返回已验证身份（email="3419144842@qq.com", email_verified=true）
+    SaaS->>SaaS: 查数据库无记录 -> 创建新用户 -> 绑定 Google Provider ID
+
+    Note over User,GitHub: 第二次：使用 GitHub 登录
+    User->>GitHub: 点击 Continue with GitHub 授权
+    GitHub-->>SaaS: 返回已验证身份（email="3419144842@qq.com", email_verified=true）
+    SaaS->>SaaS: 查数据库发现该 email 已存在 -> 自动触发【账号合并 (Account Linking)】
+    SaaS-->>User: 登录成功，直接进入已有的同一个后台大盘！
+```
+
+#### 判定机制原理解析：
+1. **邮箱为主键（Primary Identity Anchor）**：在现代 Web 鉴权系统（如 NextAuth、Supabase Auth、Auth0）中，经过验证的邮箱（Verified Email）是用户的最高唯一标识。
+2. **权威第三方信任链**：Google 和 GitHub 作为顶级身份提供商（Identity Provider, IdP），其传回的 `email_verified: true` 具有极高公信力。
+3. **自动打通绑定**：第三方平台识别到两家大厂提供的是同一个邮箱字符串，就会自动把 Google ID 和 GitHub ID 关联到该用户的同一条记录上。
+
+---
+
+### 3. 为什么第三方 OAuth 登录的账号无法直接“输邮箱+密码”？
+
+当你通过 Google 一键登录后，如果在登录界面直接输入邮箱和自己的常用密码，系统会提示“密码错误”或“未设置密码”：
+- **原因**：OAuth 全程只传递授权 Token，第三方平台**从未保存过你的独立明文/哈希密码**。
+- **打通方式**：在登录页点击 **`Forgot password?`（忘记密码）**，通过收到的重置邮件设置一个独立密码。设置完成后，该账号即同时具备 **“OAuth 一键免密登录”** 与 **“账号密码手动登录”** 双通道，数据完全一致。
+
+---
+
+## 九、实操全景结论
 
 - **Bing 站长工具**：继续用谷歌账号登录，跟 Search Console 自动同步，最省事。
 - **对外邮件身份**：用 `eryuemu1213@outlook.com`（原生、正规、不依赖国内邮箱服务）。
-- **旧电脑的 QQ 邮箱微软账号**：放着不用管，不影响任何东西；想管理去 `account.microsoft.com`。
-- **记住一条**：微软消费级产品想登录先注册微软账号（outlook 邮箱足够用）；站长/开发者工具大概率支持谷歌一键登录，用最常用的账号即可。
+- **SaaS 多配额管理**：需要多个独立账号时，善用 QQ 邮箱的数字地址与英文别名（对外部平台是两个完全独立的身份，收信依然在同一个收件箱）。
+- **第三方登录（OAuth）**：只要底层绑定的主邮箱一致，无论点 Google 还是 GitHub 登录，现代化系统都会自动做 Account Linking，安全且不迷路。
+

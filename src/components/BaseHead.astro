@@ -4,7 +4,7 @@
 import '../styles/global.css';
 import type { ImageMetadata } from 'astro';
 import FallbackImage from '../assets/blog-placeholder-1.jpg';
-import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
+import { SITE_TITLE, SITE_DESCRIPTION, UMAMI_WEBSITE_ID } from '../consts';
 import { Font } from 'astro:assets';
 import { ClientRouter } from 'astro:transitions';
 
@@ -32,6 +32,15 @@ const { title, description, image = FallbackImage } = Astro.props;
 	href={new URL('rss.xml', Astro.site)}
 />
 <meta name="generator" content={Astro.generator} />
+
+{UMAMI_WEBSITE_ID && (
+	<!-- Umami Analytics -->
+	<script
+		defer
+		src="https://cloud.umami.is/script.js"
+		data-website-id={UMAMI_WEBSITE_ID}
+	></script>
+)}
 
 <Font cssVariable="--font-atkinson" preload />
 
