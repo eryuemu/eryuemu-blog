@@ -255,6 +255,40 @@ type: 'ai-organized'
    ```
    规范链接与站内跳转链接 100% 达成一致。
 
+### 5.2 连锁反应排坑：开启 cleanUrls 导致 Vercount 单页阅读量分流（105+ 变成 6）与规范化恢复
+
+开启 `cleanUrls: true` 并完成部署后，知识库的文章展示效果更加纯粹现代化，但细心的站长在巡检时发现了一个隐蔽的连锁反应：
+- 知识库底部的 **“全站总 PV（590+）”与“全站 UV（39）”数据完好无损**；
+- 但各个具体页面的 **“本文阅读量”却突然重置了**（例如《转专业数据全解》原本累计了 **105+ 次**，页面上却显示变成了 **6 次**；《数据探索器》原本有 **179+ 次**，却显示为 **7 次**）。
+
+#### 根因定位：
+1. **全站数据 vs 单页数据**：Vercount 对全站 PV/UV 是基于请求的主机名（`guide.hbuwiki.top`）进行聚合的，所以整站指标未受任何影响；
+2. **URL 字符串分流**：但对**单页阅读量（page_pv）**，Vercount 严格以 `window.location.href` 传入的完整字符串作为独立 key：
+   - 历史老账本：`https://guide.hbuwiki.top/academics/transfer.html`（记录了 105 次阅读）
+   - 新请求账本：`https://guide.hbuwiki.top/academics/transfer`（去掉了 `.html`，被当成了全新网页，从 1 重新计数）
+
+#### 代码修复方案：
+在 `HBU-Wiki/.vitepress/theme/components/PageView.vue` 中，在向 Vercount 发送请求前增加一层**URL 规范化映射**，自动补齐 `.html` 后缀以对齐历史账本：
+
+```javascript
+// 规范化统计 URL：统一映射到带 .html 的历史统计标识，无缝继承 cleanUrls 开启前的单页历史阅读量资产
+let statUrl = window.location.href.split('?')[0].split('#')[0].replace(/\/$/, '')
+if (!statUrl.endsWith('.html') && !statUrl.endsWith('.top') && !statUrl.endsWith('.io') && !statUrl.endsWith('.com')) {
+  statUrl = `${statUrl}.html`
+}
+
+const res = await fetch(API_URL, {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    url: statUrl,
+    isNewUv: isNewUv
+  })
+})
+```
+
+通过这层规范化映射，所有历史单页阅读量资产瞬间恢复，同时新访客在无后缀 URL 下的阅读也会继续累加到该总账本上，彻底实现了 SEO 美化与历史访问统计的完美兼得！
+
 ---
 
 ## 六、排坑插曲：WSL2 中 Git Push 遇 Connection Refused
@@ -308,6 +342,10 @@ Linux 系统会优先读取自身的 `/etc/hosts`，绕过 Windows 的本地加�
 - **原因**：Google 的「爬虫验证队列（需 1~2 周）」与「定期邮件报表机器人」是两个独立的异步系统。
 - **含义**：在验证期间，定期报表机器人按例行周期在站点地图维度生成了一份阶段性账单，触发了自动邮件通知。这属于系统时间差，绝不代表配置失效，无需重复操作。
 
+### Q5：开启 cleanUrls 后单页访问量为什么归零/变少了？
+- **原因**：前端轻量计数器（如 Vercount）默认将 URL 字符串作为单页独立主键。开启 cleanUrls 去掉 `.html` 后，原有的历史数据被锁定在旧 URL 账本中。
+- **解法**：在统计组件请求 API 前做一层 URL 后缀规范化映射，把请求参数统一补齐回历史标识，即可无缝继承 100% 的历史阅读量。
+
 ---
 
 ## 八、总结与站长心法
@@ -322,4 +360,5 @@ Linux 系统会优先读取自身的 `/etc/hosts`，绕过 Windows 的本地加�
    - **站内链接**（Menu/Sidebar）、**Sitemap 声明**、**页面 Canonical 头部**必须保持 100% 相同的 Clean URLs 格式，这是最干净、最稳妥的 SEO 实践。
 
 > 📖 **回到前篇**：[《GSC 提示「网页会自动重定向」未编入索引？根域名与 www 规范化全复盘》](/blog/gsc-page-redirect-and-domain-canonical-guide/)
+
 
