@@ -230,7 +230,7 @@ Sitemap: https://eryuemu.com/sitemap-index.xml
 1. **轻量与响应速度**：Vercount 是类似不蒜子（busuanzi）的现代无服务器替代品。它只需要几行前端 JavaScript 发送一个微小的 POST 请求即可获取全站 UV/PV，无需配置复杂的后台鉴权 Token。
 2. **前后端解耦**：我们在 **HBU Wiki** 的指南子站（`guide.hbuwiki.top`）底部就是使用了这套 API 进行阅读量统计，因此博客也复用了相同的技术选型。
 
-#### ⚠️ 踩坑实录：主域名切换为何导致访问量瞬间重置？
+#### ⚠️ 踩坑实录 ①：博客主域名切换导致整站访问量“归零”？
 
 主域名切换为 `eryuemu.com` 后，博客底部的访问量计数器突然出现了一个现象：原本 7 月以来积累的 **490 访问人数与 2500+ 总访问量**，在页面上突然重置显示为 **「访问人数 2 · 总访问量 7」**。
 
@@ -253,6 +253,35 @@ Sitemap: https://eryuemu.com/sitemap-index.xml
   });
   ```
   修复部署后，页面刷新即可立即恢复 **490 访问人数 · 2538 总访问量**，后续所有新访问均在历史累计数据上继续自然递增。
+
+#### ⚠️ 踩坑实录 ②：HBU Wiki 开启 cleanUrls 后单页阅读量骤降（105+ 变成 6）？
+
+在 HBU Wiki 项目中，为了美化 URL 开启了 VitePress 的 `cleanUrls: true`（让网页访问路径从 `/academics/transfer.html` 变为无扩展名的 `/academics/transfer`）。
+
+更新上线后，发现底部的 **“全站总 PV（590+）”与“全站 UV（39）”完好无损，但“本文阅读量”却突然从 105+ 变成了 6**。
+
+- **根因分析**：
+  - **全站 PV/UV**：是以域名（`guide.hbuwiki.top`）作为聚合维度的，因此不受单页路径变化影响；
+  - **本文阅读量（page_pv）**：Vercount 会把传入的完整 URL 字符串当作唯一 key。当浏览器中的 URL 由带 `.html` 变为不带 `.html` 时，Vercount 将其视为了一个“全新发布的网页”，从而开辟了全新的单页计数器，导致老页面积累的 100+ 阅读量被锁在带 `.html` 的旧标识中。
+- **代码修复方案**：
+  在 `HBU-Wiki/.vitepress/theme/components/PageView.vue` 中，在向 Vercount 发送请求前做一层 URL 规范化映射，自动补齐 `.html` 后缀以对齐历史账本：
+  ```javascript
+  // 规范化统计 URL：统一映射到带 .html 的历史统计标识，无缝继承 cleanUrls 开启前的单页历史阅读量资产
+  let statUrl = window.location.href.split('?')[0].split('#')[0].replace(/\/$/, '');
+  if (!statUrl.endsWith('.html') && !statUrl.endsWith('.top') && !statUrl.endsWith('.io') && !statUrl.endsWith('.com')) {
+    statUrl = `${statUrl}.html`;
+  }
+
+  const res = await fetch(API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      url: statUrl,
+      isNewUv: isNewUv
+    })
+  });
+  ```
+  通过这层简单优雅的映射，`/academics/transfer` 瞬间找回并累加了 **105+** 次历史阅读量，`/academics/data-explorer` 找回了 **179+** 次阅读量，`/about` 也找回了 **88+** 次阅读量，彻底解决 URL 美化与历史数据继承的冲突！
 
 ---
 
