@@ -218,6 +218,7 @@ const posts = (await getCollection('blog'))
 				white-space: nowrap;
 				flex-shrink: 0;
 				font-variant-numeric: tabular-nums;
+				width: 8.8rem;
 			}
 
 			.posts-list-view .post-title-wrapper {
@@ -396,6 +397,9 @@ const posts = (await getCollection('blog'))
 				.posts-list-view .post-item a {
 					flex-direction: column;
 					gap: 0.2rem;
+				}
+				.posts-list-view .post-date {
+					width: auto;
 				}
 			}
 		</style>

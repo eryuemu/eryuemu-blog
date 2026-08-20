@@ -73,6 +73,7 @@ const posts = (await getCollection('blog')).sort(
 				white-space: nowrap;
 				flex-shrink: 0;
 				font-variant-numeric: tabular-nums;
+				width: 8.8rem;
 			}
 
 			.posts-list .post-info {
@@ -236,6 +237,9 @@ const posts = (await getCollection('blog')).sort(
 				.posts-list .post-link {
 					flex-direction: column;
 					gap: 0.15rem;
+				}
+				.posts-list .post-date {
+					width: auto;
 				}
 				.posts-list .post-excerpt {
 					display: none;
