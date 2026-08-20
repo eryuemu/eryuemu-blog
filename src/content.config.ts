@@ -16,6 +16,7 @@ const blog = defineCollection({
 			heroImage: z.optional(image()),
 			category: z.string().optional(),
 			type: z.enum(['original', 'ai-organized']).optional().default('ai-organized'),
+			hideTime: z.boolean().optional().default(false),
 		}),
 });
 

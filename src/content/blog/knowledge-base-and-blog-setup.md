@@ -4,6 +4,7 @@ description: '与 Gemini 的一次深度对话：为什么有了本地知识库�
 pubDate: '2026-07-04T23:30:28+08:00'
 category: '开发'
 type: 'ai-organized'
+hideTime: true
 ---
 
 ## 一、核心比喻：后厨 vs 前厅
