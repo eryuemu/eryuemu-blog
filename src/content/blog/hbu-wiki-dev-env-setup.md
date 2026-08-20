@@ -1,7 +1,7 @@
 ---
 title: 'HBU-Wiki 开发环境搭建：从 fnm 到项目级 Node.js 隔离'
 description: '新电脑只有 Git 和 Python，需要开发一个 VitePress 项目（HBU-Wiki）。在不污染系统的前提下搭建本地开发环境，经历了三个方案的反复推演和一次编码翻车，最终实现了"双击即用、删文件夹即销毁"的终极隔离方案。'
-pubDate: '2026-07-04T19:45:10+08:00'
+pubDate: '2026-07-04T19:56:49+08:00'
 category: '开发'
 type: 'ai-organized'
 ---
