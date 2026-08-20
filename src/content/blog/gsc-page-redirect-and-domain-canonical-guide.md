@@ -1,7 +1,7 @@
 ---
 title: 'GSC 提示「网页会自动重定向」未编入索引？根域名与 www 规范化全复盘'
 description: '深度复盘 Google Search Console 报「网页会自动重定向」4 个页面未收录的根本原因。从网址前缀资源视角、robots.txt 诱因、带 www 与根域名规范化抉择，到 Vercel 308 重定向配置与 GSC 资源管理的完整实战。'
-pubDate: '2026-08-18'
+pubDate: '2026-08-18T17:56:08+08:00'
 category: '开发'
 type: 'ai-organized'
 ---

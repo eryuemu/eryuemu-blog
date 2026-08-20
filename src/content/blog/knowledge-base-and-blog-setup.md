@@ -1,7 +1,7 @@
 ---
 title: '本地知识库与博客搭建思路'
 description: '与 Gemini 的一次深度对话：为什么有了本地知识库还要写博客、公开分享技术到底"亏不亏"、以及下一代博客框架选型（最终锁定 Astro）。'
-pubDate: '2026-07-04T09:00:00'
+pubDate: '2026-07-04T23:30:28+08:00'
 category: '开发'
 type: 'ai-organized'
 ---

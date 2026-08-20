@@ -1,7 +1,7 @@
 ---
 title: '域名 & 访问速度 Q&A'
 description: '一问一答极简速查版：记录关于域名、GFW 封锁机制（DNS 污染 vs SNI 干扰）、Vercel 与 GitHub Pages 部署以及 CDN 加速的 14 个常见疑问精简解答。'
-pubDate: '2026-08-12'
+pubDate: '2026-08-12T18:21:35+08:00'
 category: '开发'
 type: 'ai-organized'
 ---

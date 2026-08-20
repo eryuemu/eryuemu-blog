@@ -1,7 +1,7 @@
 ---
 title: 'GSC 报警「备用网页」与「未编入索引」全复盘：VitePress Clean URLs 与多站 SEO 规范化'
 description: '接续 8 月 18 日博客根域名重定向排查。详细复盘 8 月 20 日 GSC 两封邮件的前后因果、博客与知识库问题的内在关联，以及在 VitePress 中落地 Clean URLs 解决备用网页的完整实战。'
-pubDate: '2026-08-20'
+pubDate: '2026-08-20T17:11:41+08:00'
 category: '开发'
 type: 'ai-organized'
 ---

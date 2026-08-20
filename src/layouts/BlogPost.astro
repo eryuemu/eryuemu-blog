@@ -164,7 +164,7 @@ const { title, description, pubDate, updatedDate, heroImage, wordCount, readingT
 								<line x1="8" y1="2" x2="8" y2="6"></line>
 								<line x1="3" y1="10" x2="21" y2="10"></line>
 							</svg>
-							<FormattedDate date={pubDate} />
+							<FormattedDate date={pubDate} includeTime={true} />
 						</span>
 						{readingTime && (
 							<span class="meta-item">
@@ -193,7 +193,7 @@ const { title, description, pubDate, updatedDate, heroImage, wordCount, readingT
 						{updatedDate && (
 							<span class="meta-item updated">
 								<span class="separator">·</span>
-								更新于 <FormattedDate date={updatedDate} />
+								更新于 <FormattedDate date={updatedDate} includeTime={true} />
 							</span>
 						)}
 					</div>

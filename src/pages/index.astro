@@ -447,7 +447,7 @@ const posts = (await getCollection('blog'))
 								<article class="post-item" data-category={post.data.category || '开发'} data-type={post.data.type || 'ai-organized'}>
 									<a href={`${import.meta.env.BASE_URL.replace(/\/$/, '')}/blog/${post.id}/`}>
 										<span class="post-date">
-											<FormattedDate date={post.data.pubDate} />
+											<FormattedDate date={post.data.pubDate} includeTime={true} />
 										</span>
 										<span class="post-title-wrapper">
 											<span class="post-title">{post.data.title}</span>
@@ -477,7 +477,7 @@ const posts = (await getCollection('blog'))
 										<div class="card-body">
 											<div class="card-meta">
 												<span class="card-date">
-													<FormattedDate date={post.data.pubDate} />
+													<FormattedDate date={post.data.pubDate} includeTime={true} />
 												</span>
 												<span class={`type-badge-inline ${post.data.type === 'original' ? 'is-original' : 'is-ai'}`}>
 													{post.data.type === 'original' ? '原创' : 'AI 整理'}

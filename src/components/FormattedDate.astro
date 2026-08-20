@@ -1,17 +1,33 @@
 ---
 interface Props {
 	date: Date;
+	includeTime?: boolean;
+	timeZone?: string;
 }
 
-const { date } = Astro.props;
+const { date, includeTime = false, timeZone = 'Asia/Shanghai' } = Astro.props;
+
+const dateStr = date.toLocaleDateString('en-US', {
+	year: 'numeric',
+	month: 'short',
+	day: 'numeric',
+	timeZone,
+});
+
+let formatted = dateStr;
+
+if (includeTime) {
+	const timeFormatter = new Intl.DateTimeFormat('zh-CN', {
+		hour: '2-digit',
+		minute: '2-digit',
+		hour12: false,
+		timeZone,
+	});
+	const timeStr = timeFormatter.format(date);
+	formatted = `${dateStr} ${timeStr}`;
+}
 ---
 
 <time datetime={date.toISOString()}>
-	{
-		date.toLocaleDateString('en-us', {
-			year: 'numeric',
-			month: 'short',
-			day: 'numeric',
-		})
-	}
+	{formatted}
 </time>

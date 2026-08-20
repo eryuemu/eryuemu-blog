@@ -1,7 +1,7 @@
 ---
 title: 'Windows 环境下 Python 网络请求 [Errno 22] Invalid argument 排查实录'
 description: '运行一个 Flask 项目时反复遇到 `[Errno 22] Invalid argument`，改了三四次代码都不生效。最后发现是 Windows 下旧进程没退出，端口被劫持，所有修改根本没被执行。'
-pubDate: '2026-07-16'
+pubDate: '2026-07-16T21:19:46+08:00'
 category: '开发'
 type: 'ai-organized'
 ---

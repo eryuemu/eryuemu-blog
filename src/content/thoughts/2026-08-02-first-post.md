@@ -1,5 +1,5 @@
 ---
-pubDate: 2026-08-02T13:54:00.000Z
+pubDate: 2026-08-02T13:54:10+08:00
 tags: ['随感']
 images:
   - '/images/thoughts/2026-08-02-1.png'

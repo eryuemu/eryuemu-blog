@@ -1,7 +1,7 @@
 ---
 title: '个人站点 SEO 从 0 到 1：HBU Wiki 被搜索引擎收录全复盘'
 description: '背景：eryuemu.com（blog，Astro + Vercel）谷歌/Bing 均能搜到；guide.hbuwiki.top（HBU Wiki，VitePress + GitHub Pages）两个引擎都搜不到。从诊断 → 代码修复 → 官方提交收录 → 预期效果，完整走了一遍新站 SEO 全流程。'
-pubDate: '2026-08-14'
+pubDate: '2026-08-14T17:08:45+08:00'
 category: '开发'
 type: 'ai-organized'
 ---
