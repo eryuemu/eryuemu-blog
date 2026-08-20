@@ -80,6 +80,11 @@ const { title, description, image = FallbackImage } = Astro.props;
 <title>{title}</title>
 <meta name="description" content={description} />
 
+<!-- Tencent QQ / WeChat Meta Tags -->
+<meta itemprop="name" content={title} />
+<meta itemprop="description" content={description} />
+<meta itemprop="image" content={new URL(image.src, Astro.url)} />
+
 <!-- Open Graph / Facebook -->
 <meta property="og:type" content="website" />
 <meta property="og:url" content={Astro.url} />
