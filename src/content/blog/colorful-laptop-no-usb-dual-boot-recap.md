@@ -1,18 +1,18 @@
 ---
-title: '七彩虹游戏本无 U 盘安装 Linux 双系统全复盘：Fedora 五次翻车，Ubuntu 26.04 终成正果'
-description: '七彩虹 P16 Pro（i9-13900HX + RTX 5060）无 U 盘安装 Linux 双系统的完整复盘：Fedora KDE 方案连闯五道坎（黑屏、卷标报错、自动断电、dracut 超时、Anaconda 整盘拉黑）最终放弃，转投 Ubuntu 26.04 LTS 同样连闯五道坎（解锁命令埋雷、安装器 500 崩溃、overlay 断粮、Wi-Fi 卡更新）后终成正果。从 Windows 端准备、虚拟安装盘制作、EasyUEFI 引导、safe graphics 启动、安装器 500/overlay 崩溃修复，到 NVIDIA 驱动 MOK 签名、双系统时差根治、代理与开发环境配置，全流程 + 原理 + 命令速查。'
+title: '七彩虹游戏本无 U 盘安装 Linux 双系统全复盘：Fedora 与 Ubuntu 26.04 LTS'
+description: '七彩虹 P16 Pro（i9-13900HX + RTX 5060）无 U 盘安装 Linux 双系统的完整复盘：Fedora KDE 方案连闯五道坎（黑屏、卷标报错、自动断电、dracut 超时、Anaconda 整盘拉黑）最终放弃，转投 Ubuntu 26.04 LTS 同样连闯五道坎（解锁命令埋雷、安装器 500 崩溃、overlay 断粮、Wi-Fi 卡更新）后终于装成。从 Windows 端准备、虚拟安装盘制作、EasyUEFI 引导、safe graphics 启动、安装器 500/overlay 崩溃修复，到 NVIDIA 驱动 MOK 签名、双系统时差根治、代理与开发环境配置，全流程 + 原理 + 命令速查。'
 pubDate: '2026-08-23T22:54:00+08:00'
-updatedDate: '2026-08-24T00:40:00+08:00'
+updatedDate: '2026-08-24T01:00:00+08:00'
 category: '开发'
 type: 'ai-organized'
 ---
 
 
-# 七彩虹游戏本无 U 盘安装 Linux 双系统全复盘：Fedora 五次翻车，Ubuntu 26.04 终成正果
+# 七彩虹游戏本无 U 盘安装 Linux 双系统全复盘：Fedora 与 Ubuntu 26.04 LTS
 
 > **设备**：七彩虹（隐星）P16 Pro · i9-13900HX + RTX 5060 8GB + Intel AX210 无线网卡 · 1TB NVMe 固态（安装时剩余约 490GB）· 预装 Windows 11
 > **目标**：保留 Win11，**无 U 盘硬盘直装** Linux 双系统，Windows 数据零风险
-> **结局**：Fedora KDE 方案连踩五坑后放弃 → 转投 **Ubuntu 26.04 LTS**（GNOME），同样连闯五道坎后终成正果：GRUB 双系统切换 + RTX 5060 官方驱动满血 + 代理/输入法/开发环境就绪
+> **结局**：Fedora KDE 方案连踩五坑后放弃 → 转投 **Ubuntu 26.04 LTS**（GNOME），同样连闯五道坎后终于装成：GRUB 双系统切换 + RTX 5060 官方驱动满血 + 代理/输入法/开发环境就绪
 > **本文定位**：流程复盘 + 踩坑百科 + 知识库。把"现象 → 排查 → 解决 → 原理"全部记录下来，供以后装任何 Linux 双系统时查阅。
 
 关联笔记：C 盘大扫除 · WSL2 实战手册 · 笔记本选型
