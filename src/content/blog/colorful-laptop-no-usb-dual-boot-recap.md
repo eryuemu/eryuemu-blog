@@ -159,6 +159,9 @@ EasyUEFI 是 Windows 下的 UEFI 启动项管理工具（试用版够用）。�
 
 **原因**：Fedora 官方 ISO 内部脚本（dracut）**硬编码**了启动时去找卷标为 `Fedora-KDE-Live-44-...` 的介质，而 8GB 分区在 Windows 里命名成了 `FEDORA`——名字对不上，启动脚本搜不到安装源。
 
+![Fedora GRUB 默认引导参数](../../assets/fedora-grub-edit-default-cdlabel.jpg)
+*图 1：Fedora GRUB 默认引导参数（硬编码了 `CDLABEL=Fedora-KDE-Live-44`）*
+
 **解决**：在 GRUB 菜单选中启动项后按 **`e`** 键编辑启动参数（按 e 编辑正是从这个阶段开始频繁使用的），找到以 `linux` 开头的那一行，把 `root=live:CDLABEL=Fedora-KDE-Live-44` 改成：
 
 ```
@@ -198,6 +201,10 @@ linux ($root)/boot/x86_64/loader/linux quiet rhgb root=live:LABEL=FEDORA rd.live
 **处理**：
 
 1. 在 `dracut:/#` 提示符下输入 `blkid`，列出所有分区的真实设备路径和 UUID（实测 8GB 分区是 `/dev/nvme0n1p4`，UUID `22DA-C279`）；
+
+![Fedora 引导失败掉入 dracut emergency shell 并执行 blkid](../../assets/fedora-dracut-emergency-shell-blkid.jpg)
+*图 2：Fedora 引导失败掉入 dracut emergency shell，执行 blkid 查看分区真实设备路径与 UUID*
+
 2. 按 `e` 编辑，把 root 参数直接替换为绝对设备路径：
 
 ```
@@ -205,6 +212,9 @@ linux ($root)/boot/x86_64/loader/linux quiet rhgb root=live:/dev/nvme0n1p4 rd.li
 ```
 
 > 小坑：手输参数时把 `nomodeset` 打成了 `nomodesset`（多了个 s）→ 逐个字符核对。
+
+![按 e 修改启动参数为绝对设备路径](../../assets/fedora-grub-edit-device-path-typo.jpg)
+*图 3：按 e 将启动参数修改为绝对设备路径 `/dev/nvme0n1p4` 与 `nouveau.modeset=0`（注意手输曾将 nomodeset 误打为 nomodesset）*
 
 **为什么无 U 盘引导这么容易出问题**：Live 系统的设计前提是"安装源在外部独立介质（U 盘/光盘）上"。把安装文件强行放在本机同一块 NVMe 固态的分区里引导，内核扫描磁盘总线时容易与固态控制器发生资源竞争，且 udev 规则不会自动为本地 FAT32 分区生成卷标链接——所以最终靠"绝对设备路径"才绕过去。
 
@@ -353,6 +363,9 @@ sudo umount -l -r -f /cdrom
 | 连上 Wi-Fi / 手机热点 | 让 snapd 完成组件初始化（联网后 500 不再复现） |
 | `sudo snap refresh snapd`<br>`sudo snap refresh ubuntu-desktop-bootstrap` | 把安装器组件更新到带修复补丁的版本 |
 
+![Ubuntu Live 终端排查 Subiquity 500 崩溃](../../assets/ubuntu-subiquity-installer-crash-debug.jpg)
+*图 4：Ubuntu Live 终端排查 Subiquity 500 崩溃与重启 snapd / 清理旧通信 socket*
+
 **效果**：折腾完后安装器终于不崩了，顺利进到分区界面——**磁盘正常显示，107.37 GB 空闲空间清清楚楚**。
 
 **但注意**：这些修复全部是在 **Live 内存环境**里做的。Live 系统重启即归零，**这些"修好的状态"重启后全部不存在**——这为坎 5 的"重启就好"埋了伏笔。
@@ -456,13 +469,23 @@ mount: 特殊设备 overlay 不存在
 
 - **rsync 卡住**：日志停在 `Running command ['rsync', '-aXHAS', ...]` 长时间不滚动——正常，正在后台解压几万个系统文件到固态，期间不输出进度，约 1~3 分钟；
 - **卡在"配置硬件/安全更新"**：连了 Wi-Fi 的话，安装器在后台连官方源下载安全更新（unattended-upgrades），国内网络容易超时等待。**最快解法：点右上角断开 Wi-Fi**，触发网络中断自动跳过，立刻进入安装 GRUB 引导阶段。不操作的话 5~10 分钟也会超时跳过；
+
+![Ubuntu 26.04 安装进行中](../../assets/ubuntu-installing-grub-progress.jpg)
+*图 5：Ubuntu 26.04 安装进行中（正在解压并配置 grub-efi 与 shim-signed 引导）*
+
 - 安装完成提示"立即重启"，若卡在黑底白字 `Please remove the installation medium, then press ENTER:`，直接按回车即可（无 U 盘场景没有介质要拔）。
+
+![Ubuntu 26.04 安装完成提示立即重启](../../assets/ubuntu-install-completed-reboot-prompt.jpg)
+*图 6：Ubuntu 26.04 安装顺利完成，弹出「立即重启」提示*
 
 ### 3.9 首次开机设置
 
 - 定位服务：保持关闭（隐私 + 省电）；
 - Ubuntu Pro：选择"现在跳过"；
 - 帮助改进 Ubuntu（遥测）：选"否，不发送系统信息"。
+
+![首次顺利进入 Ubuntu 26.04 桌面](../../assets/ubuntu-desktop-first-boot-success.jpg)
+*图 7：首次顺利进入 Ubuntu 26.04 桌面（双系统引导成功，硬件与输入法就绪）*
 
 ### 3.10 时间问题全家桶（双系统必读）
 
