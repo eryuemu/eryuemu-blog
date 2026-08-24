@@ -1,7 +1,7 @@
 ---
 title: 'WSL 开机自启排查全复盘：Win11 26200 + WSL 2.7.10 的 9P 静默唤醒'
 description: '游戏本每次开机 WSL 就自动启动、vmmemWSL 常驻占内存，而同样装 WSL 的轻薄本从不自启。一台 AI 查不动换另一台：Claude Code 先翻遍注册表启动项、计划任务、服务依赖，逐个禁用 Clash/iKuuu/Radmin/微软电脑管家/Intel Arc 均无效，4688 进程审计抓不到任何 wsl.exe 调用者，中途还因 State 语义误判把 WSL 搞到 0x8000000d 假死；转给 Antigravity 后补上 9P 证据链（plan9 进程 / p9np.dll / vp9fs.dll），尝试关闭 systemd、清理 Recent、隐藏导航节点全部无效后回退；结论带回 Claude Code 交叉验证，最终锁定：Windows 资源管理器通过 9P 文件系统访问 \\wsl.localhost 静默唤醒 WSL——内建行为，无官方开关。完整时间线、排除清单、证据链、最终方案与三条备选路线全记录。'
-pubDate: '2026-08-24T20:00:00+08:00'
+pubDate: '2026-08-24T21:36:41+08:00'
 category: '开发'
 type: 'ai-organized'
 ---
