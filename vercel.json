@@ -1,4 +1,5 @@
 {
+	"trailingSlash": true,
 	"redirects": [
 		{
 			"source": "/blog/sennagi-save-mod-and-script-reverse-engineering/:path*",
