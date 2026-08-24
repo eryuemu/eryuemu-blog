@@ -1,6 +1,6 @@
 ---
 pubDate: 2026-08-02T13:54:10+08:00
-tags: ['随感']
+tags: ['随感', 'Galgame']
 images:
   - '/images/thoughts/2026-08-02-1.png'
   - '/images/thoughts/2026-08-02-2.jpg'
