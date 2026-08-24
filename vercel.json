@@ -1,0 +1,19 @@
+{
+	"redirects": [
+		{
+			"source": "/blog/sennagi-save-mod-and-script-reverse-engineering/:path*",
+			"destination": "/blog/sennaagi-save-script-recap/",
+			"permanent": true
+		},
+		{
+			"source": "/blog/yukoku-translation-tech-retrospective/:path*",
+			"destination": "/blog/youketsu-localization-recap/",
+			"permanent": true
+		},
+		{
+			"source": "/blog/shui-long-yin-shanghai-galonly/:path*",
+			"destination": "/blog/shuilongyin-galonly-essay/",
+			"permanent": true
+		}
+	]
+}
