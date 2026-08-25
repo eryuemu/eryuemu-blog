@@ -531,7 +531,7 @@ const allTags = Array.from(
 						const { Content } = thought;
 						const { pubDate, tags = [], location, mood, images = [], pinned } = thought.data;
 						const gridClass = `grid-${Math.min(images.length, 9)}`;
-						const thoughtPath = `/thoughts/${thought.id}`;
+						const thoughtPath = `/thoughts/${thought.id}/`;
 
 						return (
 							<article

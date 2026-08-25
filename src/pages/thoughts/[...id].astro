@@ -356,7 +356,7 @@ const getPreviewText = (body?: string) => {
 	<body>
 		<Header />
 		<main>
-			<a href={`${import.meta.env.BASE_URL.replace(/\/$/, '')}/thoughts`} class="back-link">
+			<a href={`${import.meta.env.BASE_URL.replace(/\/$/, '')}/thoughts/`} class="back-link">
 				<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 					<line x1="19" y1="12" x2="5" y2="12"></line>
 					<polyline points="12 19 5 12 12 5"></polyline>
@@ -433,7 +433,7 @@ const getPreviewText = (body?: string) => {
 			<!-- 前后心迹导航条（增加内链互通与内容实体厚度） -->
 			<div class="thought-navigation">
 				{prevThought ? (
-					<a href={`${import.meta.env.BASE_URL.replace(/\/$/, '')}/thoughts/${prevThought.id}`} class="nav-card prev">
+					<a href={`${import.meta.env.BASE_URL.replace(/\/$/, '')}/thoughts/${prevThought.id}/`} class="nav-card prev">
 						<span class="nav-direction">
 							<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 								<polyline points="15 18 9 12 15 6"></polyline>
@@ -447,7 +447,7 @@ const getPreviewText = (body?: string) => {
 				)}
 
 				{nextThought ? (
-					<a href={`${import.meta.env.BASE_URL.replace(/\/$/, '')}/thoughts/${nextThought.id}`} class="nav-card next">
+					<a href={`${import.meta.env.BASE_URL.replace(/\/$/, '')}/thoughts/${nextThought.id}/`} class="nav-card next">
 						<span class="nav-direction">
 							下一条心迹
 							<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -473,7 +473,7 @@ const getPreviewText = (body?: string) => {
 					</h4>
 					<div class="related-list">
 						{relatedThoughts.map((item) => (
-							<a href={`${import.meta.env.BASE_URL.replace(/\/$/, '')}/thoughts/${item.id}`} class="related-item">
+							<a href={`${import.meta.env.BASE_URL.replace(/\/$/, '')}/thoughts/${item.id}/`} class="related-item">
 								<span class="related-text">{getPreviewText(item.body)}</span>
 								<span class="related-date">
 									<FormattedDate date={item.data.pubDate} />
@@ -485,7 +485,7 @@ const getPreviewText = (body?: string) => {
 			)}
 
 			<!-- Separate Waline Comments for this specific thought item -->
-			<WalineComments path={`/thoughts/${thought.id}`} />
+			<WalineComments path={`/thoughts/${thought.id}/`} />
 		</main>
 		<Footer />
 	</body>
