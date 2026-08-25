@@ -1,12 +1,12 @@
 ---
-title: 'URL 尾斜杠之谜：加与不加的区别、静态站点“包裹”寻址与本地 404 避坑全指南'
+title: 'URL 尾斜杠：加与不加的区别、静态站点“包裹”寻址与本地 404 避坑指南'
 description: '从一次本地 404 报错引发的深度思考：网页末尾加不加 / 有什么区别？为什么源码是单个 .md 文件打包后却成了文件夹“包裹”？对比 VitePress 的 Clean URLs（信件模式）与 Astro 的 Directory Index（包裹模式），深度剖析 Web 服务器底层寻址逻辑、相对路径陷阱、Vercel 301 边缘重定向与 Google SEO 规范化实践。'
 pubDate: '2026-08-25T20:45:00+08:00'
 category: '开发'
 type: 'ai-organized'
 ---
 
-# URL 尾斜杠之谜：加与不加的区别、静态站点“包裹”寻址与本地 404 避坑全指南
+# URL 尾斜杠：加与不加的区别、静态站点“包裹”寻址与本地 404 避坑指南
 
 > **核心背景**：在发布心迹动态时，点击独立页面与返回列表突发本地 404 报错，由此引出了一连串深层次疑问：URL 结尾到底该不该加 `/`？加与不加有什么本质区别？为什么开发源码明明只是单一 `.md` 文件，却说它是个“目录/包裹”？为什么同为静态站，HBU Wiki（VitePress）末尾没有斜杠也没有 `.html`，而个人博客（Astro）却必须带斜杠？
 > **本文定位**：底层原理 + 框架对比 + 踩坑复盘 + SEO 避坑指南。把“现象 $\rightarrow$ 原理 $\rightarrow$ 对比 $\rightarrow$ 实战”一次性讲透，作为长期查阅的建站与 Web 体系知识沉淀。
@@ -121,7 +121,7 @@ src/content/thoughts/                 dist/thoughts/
 
 ---
 
-## 四、双雄对比：HBU Wiki (VitePress) vs 个人博客 (Astro)
+## 四、方案对比：HBU Wiki (VitePress) vs 个人博客 (Astro)
 
 为什么 [HBU Wiki（河北大学生存指南）](https://guide.hbuwiki.top/) 之前消除了 `.html` 后末尾**没有斜杠**，而个人博客却**必须带斜杠**？
 
@@ -140,7 +140,7 @@ src/content/thoughts/                 dist/thoughts/
 
 ---
 
-## 五、复盘实战：本地 404 迷雾与 SEO 影响终极答疑
+## 五、复盘实战：本地 404 报错溯源与 SEO 影响分析
 
 ### 5.1 为什么之前线上一切正常，今天本地 `astro dev` 却报 404？
 
