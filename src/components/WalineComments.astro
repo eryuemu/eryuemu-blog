@@ -42,7 +42,8 @@ const { path = '', containerId = 'waline-comment-box', showDivider = true } = As
     try {
       const { init } = await import('https://unpkg.com/@waline/client@v3/dist/waline.js');
       
-      const targetPath = customPath || window.location.pathname;
+      const rawPath = customPath || window.location.pathname;
+      const targetPath = rawPath.replace(/\/+$/, '') || '/';
 
       walineInstance = init({
         el: `#${containerId}`,

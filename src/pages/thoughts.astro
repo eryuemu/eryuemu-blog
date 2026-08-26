@@ -705,12 +705,13 @@ const allTags = Array.from(
 									}
 
 									const { init } = await import('https://unpkg.com/@waline/client@v3/dist/waline.js');
+									const targetPath = (path || window.location.pathname).replace(/\/+$/, '') || '/';
 									init({
 										el: `#waline-box-${thoughtId}`,
 										serverURL: serverURL,
 										lang: 'zh-CN',
 										dark: 'html.dark',
-										path: path,
+										path: targetPath,
 										emoji: [
 											'//unpkg.com/@waline/emojis@1.2.0/weibo',
 											'//unpkg.com/@waline/emojis@1.2.0/bilibili',
