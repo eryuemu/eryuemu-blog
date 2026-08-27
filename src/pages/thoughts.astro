@@ -4,7 +4,7 @@ import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import WalineComments from '../components/WalineComments.astro';
 import FormattedDate from '../components/FormattedDate.astro';
-import { SITE_TITLE, WALINE_SERVER_URL } from '../consts';
+import { SITE_TITLE, WALINE_SERVER_URL, UMAMI_DASHBOARD_URL } from '../consts';
 import { getCollection, render } from 'astro:content';
 
 const rawThoughts = await getCollection('thoughts');
@@ -60,6 +60,14 @@ const allTags = Array.from(
 				height: 170px;
 				background: linear-gradient(to bottom, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.35) 100%), url('/images/thoughts-cover.jpg') center 30% / cover no-repeat;
 				position: relative;
+				cursor: pointer;
+				user-select: none;
+				-webkit-user-select: none;
+				transition: filter 0.15s ease, transform 0.15s ease;
+			}
+
+			.moments-cover:active {
+				filter: brightness(1.08);
 			}
 
 			:global(html.dark) .moments-cover {
@@ -445,6 +453,51 @@ const allTags = Array.from(
 				font-size: 0.92rem;
 			}
 
+			/* ─── Easter Egg Toast ─── */
+			.easter-egg-toast {
+				position: fixed;
+				bottom: 2.2rem;
+				left: 50%;
+				transform: translateX(-50%) translateY(20px) scale(0.95);
+				background: rgba(255, 255, 255, 0.92);
+				color: var(--text-primary);
+				border: 1px solid var(--border);
+				box-shadow: 0 12px 36px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.06);
+				padding: 0.65rem 1.25rem;
+				border-radius: 9999px;
+				backdrop-filter: blur(16px);
+				-webkit-backdrop-filter: blur(16px);
+				display: flex;
+				align-items: center;
+				gap: 0.55rem;
+				font-size: 0.88rem;
+				font-weight: 500;
+				z-index: 10000;
+				pointer-events: none;
+				opacity: 0;
+				visibility: hidden;
+				transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+			}
+
+			:global(html.dark) .easter-egg-toast {
+				background: rgba(20, 20, 20, 0.92);
+				box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45), 0 2px 8px rgba(0, 0, 0, 0.3);
+			}
+
+			.easter-egg-toast.show {
+				opacity: 1;
+				visibility: visible;
+				transform: translateX(-50%) translateY(0) scale(1);
+			}
+
+			.easter-egg-toast .toast-icon {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				color: #3b82f6;
+				flex-shrink: 0;
+			}
+
 			@media (max-width: 768px) {
 				main {
 					padding-top: 5rem;
@@ -638,9 +691,20 @@ const allTags = Array.from(
 			<img id="lightbox-target" src="" alt="Fullscreen Preview" />
 		</div>
 
+		<!-- Easter Egg Toast Notification -->
+		<div id="easter-egg-toast" class="easter-egg-toast" aria-live="polite">
+			<span class="toast-icon">
+				<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<path d="M3 3v18h18"></path>
+					<path d="m19 9-5 5-4-4-3 3"></path>
+				</svg>
+			</span>
+			<span id="toast-message">欢迎进入 Umami 访客统计系统！</span>
+		</div>
+
 		<Footer />
 
-		<script define:vars={{ serverURL: WALINE_SERVER_URL }}>
+		<script define:vars={{ serverURL: WALINE_SERVER_URL, umamiDashboardURL: UMAMI_DASHBOARD_URL }}>
 			document.addEventListener('astro:page-load', () => {
 				// ─── 1. Client-Side Tag Filter ───
 				const chipBtns = document.querySelectorAll('.chip-btn');
@@ -758,6 +822,53 @@ const allTags = Array.from(
 						lightboxModal.setAttribute('aria-hidden', 'true');
 					}
 				});
+
+				// ─── 4. Moments Wallpaper 5-Click Easter Egg (Umami Analytics) ───
+				const momentsCover = document.querySelector('.moments-cover');
+				const toastEl = document.getElementById('easter-egg-toast');
+				const toastMsg = document.getElementById('toast-message');
+
+				if (momentsCover && toastEl && toastMsg) {
+					let clickCount = 0;
+					let lastClickTime = 0;
+					let toastTimer = null;
+
+					const showToast = (msg, duration = 2200) => {
+						toastMsg.textContent = msg;
+						toastEl.classList.add('show');
+						if (toastTimer) clearTimeout(toastTimer);
+						toastTimer = setTimeout(() => {
+							toastEl.classList.remove('show');
+						}, duration);
+					};
+
+					momentsCover.addEventListener('click', () => {
+						const now = Date.now();
+						// Reset counter if interval between clicks exceeds 2.5s
+						if (now - lastClickTime > 2500) {
+							clickCount = 1;
+						} else {
+							clickCount++;
+						}
+						lastClickTime = now;
+
+						if (clickCount >= 5) {
+							clickCount = 0;
+							showToast('🎉 欢迎进入 Umami 访客统计系统！正在跳转...', 3000);
+							const targetUrl = umamiDashboardURL || 'https://cloud.umami.is';
+							setTimeout(() => {
+								const opened = window.open(targetUrl, '_blank', 'noopener,noreferrer');
+								if (!opened || opened.closed || typeof opened.closed === 'undefined') {
+									window.location.href = targetUrl;
+								}
+							}, 600);
+						} else if (clickCount === 3) {
+							showToast('✨ 再点击 2 次解锁 Umami 统计后台...', 1500);
+						} else if (clickCount === 4) {
+							showToast('🚀 再点击 1 次即可进入！', 1500);
+						}
+					});
+				}
 			});
 		</script>
 	</body>
