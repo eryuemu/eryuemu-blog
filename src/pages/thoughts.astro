@@ -828,10 +828,13 @@ const allTags = Array.from(
 				const toastEl = document.getElementById('easter-egg-toast');
 				const toastMsg = document.getElementById('toast-message');
 
-				if (momentsCover && toastEl && toastMsg) {
+				if (momentsCover && toastEl && toastMsg && !momentsCover.dataset.eggBound) {
+					momentsCover.dataset.eggBound = 'true';
+
 					let clickCount = 0;
 					let lastClickTime = 0;
 					let toastTimer = null;
+					let isTriggering = false;
 
 					const showToast = (msg, duration = 2200) => {
 						toastMsg.textContent = msg;
@@ -843,6 +846,8 @@ const allTags = Array.from(
 					};
 
 					momentsCover.addEventListener('click', () => {
+						if (isTriggering) return;
+
 						const now = Date.now();
 						// Reset counter if interval between clicks exceeds 2.5s
 						if (now - lastClickTime > 2500) {
@@ -854,14 +859,15 @@ const allTags = Array.from(
 
 						if (clickCount >= 5) {
 							clickCount = 0;
+							isTriggering = true;
 							showToast('🎉 欢迎进入 Umami 访客统计系统！正在跳转...', 3000);
 							const targetUrl = umamiDashboardURL || 'https://cloud.umami.is';
 							setTimeout(() => {
-								const opened = window.open(targetUrl, '_blank', 'noopener,noreferrer');
-								if (!opened || opened.closed || typeof opened.closed === 'undefined') {
-									window.location.href = targetUrl;
-								}
-							}, 600);
+								window.open(targetUrl, '_blank');
+								setTimeout(() => {
+									isTriggering = false;
+								}, 1500);
+							}, 400);
 						} else if (clickCount === 3) {
 							showToast('✨ 再点击 2 次解锁 Umami 统计后台...', 1500);
 						} else if (clickCount === 4) {
