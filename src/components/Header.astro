@@ -3,7 +3,7 @@ import { SITE_TITLE } from '../consts';
 import HeaderLink from './HeaderLink.astro';
 ---
 
-<header class="site-header">
+<header class="site-header" transition:persist="site-header" transition:name="site-header">
 	<nav>
 		<a href={import.meta.env.BASE_URL} class="logo">{SITE_TITLE}</a>
 		<div class="nav-links">
@@ -54,6 +54,7 @@ import HeaderLink from './HeaderLink.astro';
 		left: 0;
 		width: 100%;
 		z-index: 1000;
+		isolation: isolate;
 		background: rgba(255, 255, 255, 0.85);
 		backdrop-filter: blur(12px);
 		-webkit-backdrop-filter: blur(12px);
@@ -224,6 +225,24 @@ import HeaderLink from './HeaderLink.astro';
 		});
 	}
 
-	// Setup toggle event handler for every navigation swap
+	// Update the "active" nav highlight on every navigation. The header is
+	// persisted (`transition:persist`) so its server-rendered `active` class would
+	// otherwise stay frozen on the first page we loaded.
+	function updateActiveNav() {
+		const pathname = window.location.pathname;
+		const links = document.querySelectorAll('.nav-links a');
+		links.forEach((link) => {
+			const href = link.getAttribute('href') || '';
+			const cleanHref = href.replace(/\/$/, '');
+			const cleanPathname = pathname.replace(/\/$/, '');
+			const isActive =
+				cleanHref === cleanPathname ||
+				(cleanHref !== '' && cleanPathname.startsWith(cleanHref));
+			link.classList.toggle('active', isActive);
+		});
+	}
+
+	// Setup toggle event handler and nav highlight for every navigation swap
 	document.addEventListener('astro:page-load', setupThemeToggle);
+	document.addEventListener('astro:page-load', updateActiveNav);
 </script>

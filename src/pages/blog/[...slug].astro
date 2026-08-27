@@ -22,6 +22,6 @@ const readingTime = Math.max(1, Math.ceil(wordCount / 350)); // ~350 chars per m
 
 ---
 
-<BlogPost {...post.data} headings={headings} wordCount={wordCount} readingTime={readingTime}>
+<BlogPost {...post.data} id={post.id} headings={headings} wordCount={wordCount} readingTime={readingTime}>
 	<Content />
 </BlogPost>

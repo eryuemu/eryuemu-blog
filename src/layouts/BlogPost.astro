@@ -11,6 +11,7 @@ import WalineComments from '../components/WalineComments.astro';
 import avatar from '../assets/avatar.jpg';
 
 type Props = CollectionEntry<'blog'>['data'] & {
+	id?: string;
 	wordCount?: number;
 	readingTime?: number;
 	headings?: MarkdownHeading[];
@@ -22,6 +23,7 @@ const {
 	pubDate,
 	updatedDate,
 	heroImage,
+	id,
 	wordCount,
 	readingTime,
 	type,
@@ -42,7 +44,7 @@ const filteredHeadings = headings.filter((h) => h.depth >= 2 && h.depth <= 3);
 				width: 100% !important;
 				max-width: 1360px !important;
 				margin: 0 auto !important;
-				padding: 6.5rem 1.5rem 4rem 1.5rem !important;
+				padding: 6rem 1.5rem 4rem 1.5rem !important;
 				display: grid !important;
 				grid-template-columns: 220px minmax(0, 1fr) 240px !important;
 				gap: 2.5rem !important;
@@ -703,12 +705,12 @@ const filteredHeadings = headings.filter((h) => h.depth >= 2 && h.depth <= 3);
 				<article>
 					{heroImage && (
 						<div class="hero-image">
-							<Image src={heroImage} alt="" />
+							<Image src={heroImage} alt="" data-vt-slug={id} transition:name={`post-cover-${id}`} />
 						</div>
 					)}
 
 					<div class="article-header">
-						<h1>{title}</h1>
+						<h1 transition:name={id ? `post-title-${id}` : undefined} data-vt-slug={id}>{title}</h1>
 						<div class="article-meta">
 							<span class="meta-item">
 								<svg class="meta-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">

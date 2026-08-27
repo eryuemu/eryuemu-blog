@@ -40,6 +40,10 @@ html.dark {
 html {
 	max-width: 100%;
 	overflow-x: clip;
+	/* Prevent horizontal layout shift from the scrollbar appearing/disappearing
+	   when navigating between short and long pages. */
+	overflow-y: scroll;
+	scrollbar-gutter: stable;
 }
 
 body {
@@ -66,7 +70,7 @@ main {
 	width: var(--max-width);
 	max-width: calc(100% - 3em);
 	margin: auto;
-	padding: 7em 0 4em 0;
+	padding: 6rem 0 4rem 0;
 	min-width: 0;
 }
 
@@ -412,7 +416,7 @@ hr {
 		font-size: 16px;
 	}
 	main {
-		padding-top: 5em;
+		padding-top: 5rem;
 		padding-left: 1.2em;
 		padding-right: 1.2em;
 		width: 100%;
@@ -441,19 +445,138 @@ hr {
 }
 
 /* ─── View Transitions · Shared Element Morphing ─── */
+
+/* 1. Default shared-element morph timing (also covers the dynamic
+   `post-title-*` / `post-cover-*` names generated per post). Declared first so
+   the specific group rules below can override it. */
+::view-transition-group(*) {
+	animation-duration: 0.7s;
+	animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Clean shared-element crossfade. Overrides Astro's default 180ms
+   `plus-lighter` fade, which double-exposes (ghosts/blurs) text while it
+   morphs between two font sizes. Kept in sync with the morph duration above. */
+::view-transition-old(*) {
+	animation: vt-shared-out 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+::view-transition-new(*) {
+	animation: vt-shared-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes vt-shared-out {
+	to { opacity: 0; }
+}
+
+@keyframes vt-shared-in {
+	from { opacity: 0; }
+}
+
+/* 2. Root cross-fade ─────────────────────────────────────────────
+   ⚠️ Never set `animation: none` (or a 0s duration) on
+   `::view-transition-group(root)`: Chromium then treats the whole transition
+   as instantly finished and destroys every shared-element animation (title /
+   cover / avatar) at frame 0. Keep the group duration positive. */
+::view-transition-group(root) {
+	animation-duration: 0.7s;
+	animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* The outgoing page fades out quickly so full-page text never lingers at a
+   half-opacity "double screenshot" (the blurry/ghosted-text bug). */
+::view-transition-old(root) {
+	animation: vt-root-exit 0.22s cubic-bezier(0.4, 0, 1, 1) both;
+}
+
+/* The incoming page slides up 12px + fades in — a gentle entrance instead of
+   a hard pop — while staying vector-crisp. */
+::view-transition-new(root) {
+	animation: vt-root-enter 0.66s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes vt-root-exit {
+	to { opacity: 0; }
+}
+
+@keyframes vt-root-enter {
+	from {
+		opacity: 0;
+		transform: translateY(12px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+/* 3. Header: the frosted-glass nav is persisted at DOM level and given its own
+   layer + a named group, so it never re-renders, jumps, or flickers. */
+::view-transition-group(site-header) {
+	animation-duration: 0.3s;
+	animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* 4. Hero ↔ Sidebar morph (avatar / name / motto). */
 ::view-transition-group(hero-avatar),
 ::view-transition-group(hero-name),
 ::view-transition-group(hero-motto) {
-	animation-duration: 0.45s;
-	animation-timing-function: cubic-bezier(0.25, 1, 0.5, 1);
+	animation-duration: 0.78s;
+	animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
+::view-transition-old(hero-avatar),
+::view-transition-old(hero-name),
+::view-transition-old(hero-motto) {
+	animation-duration: 0.78s;
+}
+
+::view-transition-new(hero-avatar),
+::view-transition-new(hero-name),
+::view-transition-new(hero-motto) {
+	animation-duration: 0.78s;
+}
+
+/* On the way BACK to the homepage, the avatar & name take the full, slower path
+   back to the center hero. */
+[data-astro-transition='back']::view-transition-group(hero-avatar),
+[data-astro-transition='back']::view-transition-group(hero-name),
+[data-astro-transition='back']::view-transition-group(hero-motto) {
+	animation-duration: 0.9s;
+}
+
+[data-astro-transition='back']::view-transition-old(hero-avatar),
+[data-astro-transition='back']::view-transition-old(hero-name),
+[data-astro-transition='back']::view-transition-old(hero-motto),
+[data-astro-transition='back']::view-transition-new(hero-avatar),
+[data-astro-transition='back']::view-transition-new(hero-name),
+[data-astro-transition='back']::view-transition-new(hero-motto) {
+	animation-duration: 0.9s;
+}
+
+/* Keep the avatar a perfect circle throughout the morph. */
 ::view-transition-old(hero-avatar),
 ::view-transition-new(hero-avatar) {
 	border-radius: 50%;
 	overflow: hidden;
+	object-fit: cover;
+	mix-blend-mode: normal;
 }
 
+/* 5. Orphaned elements (present only on the outgoing page — e.g. the sidebar
+   avatar when navigating to 心迹 / 友链) exit fast & clean instead of lingering
+   as a slow ghost in the corner. `:only-child` matches the old image when its
+   image-pair has no new counterpart. */
+::view-transition-old(*):only-child {
+	animation: vt-exit 0.1s cubic-bezier(0.4, 0, 1, 1) both;
+}
+
+@keyframes vt-exit {
+	to { opacity: 0; }
+}
+
+/* view-transition-name bindings (mirrored by the `transition:name` directives
+   in the templates; keeping both in sync keeps the shared elements stable). */
 .hero-avatar, .sidebar-avatar {
 	view-transition-name: hero-avatar;
 }

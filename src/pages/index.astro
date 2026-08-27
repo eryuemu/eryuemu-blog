@@ -454,7 +454,7 @@ const posts = (await getCollection('blog'))
 											<FormattedDate date={post.data.pubDate} includeTime={!post.data.hideTime} />
 										</span>
 										<span class="post-title-wrapper">
-											<span class="post-title">{post.data.title}</span>
+											<span class="post-title" data-vt-slug={post.id} transition:name={`post-title-${post.id}`}>{post.data.title}</span>
 											<span class={`type-badge-inline ${post.data.type === 'original' ? 'is-original' : 'is-ai'}`}>
 												{post.data.type === 'original' ? '原创' : 'AI 整理'}
 											</span>
@@ -473,7 +473,7 @@ const posts = (await getCollection('blog'))
 									<a href={`${import.meta.env.BASE_URL.replace(/\/$/, '')}/blog/${post.id}/`} class="card-link">
 										<div class="card-cover">
 											{post.data.heroImage ? (
-												<Image src={post.data.heroImage} alt={post.data.title} class="card-cover-img" width={600} height={337} format="webp" />
+												<Image src={post.data.heroImage} alt={post.data.title} class="card-cover-img" width={600} height={337} format="webp" data-vt-slug={post.id} transition:name={`post-cover-${post.id}`} />
 											) : (
 												<DefaultCover title={post.data.title} category={post.data.category} type={post.data.type} index={index + 1} />
 											)}

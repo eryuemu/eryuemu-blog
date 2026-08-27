@@ -47,7 +47,91 @@ const { title, description, image = FallbackImage } = Astro.props;
 
 <!-- Canonical URL -->
 <link rel="canonical" href={canonicalURL} />
+
+<!--
+  Force Astro's own View Transition on back/forward navigation.
+  Chromium may offer a *native* history-navigation transition: when it does, the
+  `popstate` event reports hasUAVisualTransition=true and Astro's ClientRouter
+  deliberately skips `document.startViewTransition()`, which also skips every
+  shared-element morph (avatar / name / motto / title) on the way Back.
+  Re-declaring the getter to `false` makes Astro always run its own transition.
+-->
+<script is:inline>
+	try {
+		Object.defineProperty(PopStateEvent.prototype, 'hasUAVisualTransition', {
+			get() {
+				return false;
+			},
+			configurable: true,
+		});
+	} catch {}
+</script>
+
 <ClientRouter />
+
+<!--
+  Firefox compatibility: Firefox skips the *entire* View Transition when the
+  incoming page carries many "new-only" shared elements (view-transition-names
+  that did not exist on the outgoing page). The homepage / blog list declares
+  one `post-title-<slug>` / `post-cover-<slug>` name per post (28 + 6), so any
+  transition INTO those pages (e.g. article → home) gets swallowed and even the
+  hero avatar/name/motto fly-back disappears.
+
+  On Firefox only we collapse the per-post shared elements to *one* article at
+  a time: clicking an article link activates that slug's title/cover and
+  disables all the others, and the incoming page is trimmed to the same slug
+  just before the swap (`astro:before-swap`, which exposes `newDocument`).
+  Because the same slug exists on both sides, the title/cover fly back and
+  forth exactly like in Chromium, while "new-only" count stays 0 — so Firefox
+  never skips the transition. Hero shared elements are unaffected.
+-->
+<script>
+	const isFirefox = () => /firefox/i.test(navigator.userAgent);
+	const pageSlug = () => {
+		const m = window.location.pathname.match(/^\/blog\/([^\/]+)\/$/);
+		return m ? decodeURIComponent(m[1]) : null;
+	};
+	function applyPostVT(root, activeSlug) {
+		if (!isFirefox()) return;
+		root.querySelectorAll('[data-vt-slug]').forEach((el) => {
+			const slug = el.getAttribute('data-vt-slug');
+			if (activeSlug !== null && slug === activeSlug) {
+				// 清掉内联禁用 → Astro 注入的 view-transition-name 生效
+				el.style.viewTransitionName = '';
+			} else {
+				// 内联禁用(优先于 Astro 注入的样式)
+				el.style.viewTransitionName = 'none';
+			}
+		});
+	}
+	let targetSlug = null;
+	// 捕获阶段监听点击(Astro 的导航处理之前):确定目标文章并准备当前页面
+	document.addEventListener(
+		'click',
+		(e) => {
+			if (!isFirefox()) return;
+			const a = e.target instanceof Element ? e.target.closest('a') : null;
+			if (!a) return;
+			const m = (a.href || '').match(/\/blog\/([^\/]+)\//);
+			targetSlug = m ? decodeURIComponent(m[1]) : pageSlug();
+			applyPostVT(document, targetSlug);
+		},
+		true
+	);
+	// 新页面在 swap 之前按目标文章裁剪(此时新快照尚未捕获)
+	document.addEventListener('astro:before-swap', (e) => {
+		if (!isFirefox()) return;
+		applyPostVT(e.newDocument, targetSlug);
+	});
+	// 当前页面(首次加载 + 每次导航后)收敛到自身文章,非文章页全部禁用
+	function syncPostVT() {
+		if (!isFirefox()) return;
+		targetSlug = pageSlug();
+		applyPostVT(document, targetSlug);
+	}
+	syncPostVT();
+	document.addEventListener('astro:page-load', syncPostVT);
+</script>
 
 <!-- Theme Setup Script -->
 <script is:inline>
