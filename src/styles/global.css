@@ -230,10 +230,15 @@ hr {
 	margin-bottom: 1.4rem;
 }
 
-.prose h1, .prose h2, .prose h3, .prose h4 {
+.prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
 	color: var(--text-primary);
-	margin-top: 2rem;
+	margin-top: 2.2rem;
 	margin-bottom: 0.8rem;
+	scroll-margin-top: 80px;
+}
+
+.prose > h1:first-child {
+	display: none;
 }
 
 .prose h2 {
@@ -326,29 +331,10 @@ hr {
 }
 
 /* ─── Animation Effects ─── */
-
-@keyframes fadeInUp {
-	from {
-		opacity: 0;
-		transform: translateY(16px);
-	}
-	to {
-		opacity: 1;
-		transform: translateY(0);
-	}
-}
-
-main > * {
-	animation: fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-/* Stagger delay */
-main > section:nth-of-type(1) { animation-delay: 0.05s; }
-main > section:nth-of-type(2) { animation-delay: 0.15s; }
-main > section:nth-of-type(3) { animation-delay: 0.25s; }
-
 @media (prefers-reduced-motion: reduce) {
-	main > * {
+	::view-transition-group(*),
+	::view-transition-old(*),
+	::view-transition-new(*) {
 		animation: none !important;
 	}
 }
@@ -402,3 +388,32 @@ main > section:nth-of-type(3) { animation-delay: 0.25s; }
 	clip-path: inset(50%);
 	white-space: nowrap;
 }
+
+/* ─── View Transitions · Shared Element Morphing ─── */
+::view-transition-group(hero-avatar),
+::view-transition-group(hero-name),
+::view-transition-group(hero-motto) {
+	animation-duration: 0.45s;
+	animation-timing-function: cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+::view-transition-old(hero-avatar),
+::view-transition-new(hero-avatar) {
+	border-radius: 50%;
+	overflow: hidden;
+}
+
+.hero-avatar, .sidebar-avatar {
+	view-transition-name: hero-avatar;
+}
+
+.hero-motto, .sidebar-motto {
+	view-transition-name: hero-motto;
+}
+
+.hero-author-name, .sidebar-name-text {
+	view-transition-name: hero-name;
+}
+
+
+

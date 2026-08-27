@@ -410,11 +410,11 @@ const posts = (await getCollection('blog'))
 		<main>
 			<section class="hero">
 				<div class="hero-avatar-container">
-					<Image src={avatar} alt="eryuemu's avatar" class="hero-avatar" loading="eager" />
-					<p class="hero-motto">事在人为 圆融自洽</p>
+					<Image src={avatar} alt="eryuemu's avatar" class="hero-avatar" loading="eager" transition:name="hero-avatar" />
+					<p class="hero-motto" transition:name="hero-motto">事在人为 圆融自洽</p>
 				</div>
 				<div class="hero-content">
-					<h1 class="hero-title">你好，我是 eryuemu（二月木）</h1>
+					<h1 class="hero-title">你好，我是 <span class="hero-author-name" transition:name="hero-name">eryuemu（二月木）</span></h1>
 					<p class="hero-desc">
 						主修自动化专业。重度软硬件折腾控、赛博洁癖患者。这里记录了我折腾大模型、WSL2、eSIM、QQ 机器人、书法与二次元的日常。
 					</p>

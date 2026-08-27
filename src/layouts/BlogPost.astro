@@ -1,41 +1,267 @@
 ---
 import { Image } from 'astro:assets';
 import type { CollectionEntry } from 'astro:content';
+import type { MarkdownHeading } from 'astro';
 import BaseHead from '../components/BaseHead.astro';
 import Footer from '../components/Footer.astro';
 import FormattedDate from '../components/FormattedDate.astro';
 import Header from '../components/Header.astro';
 import { SITE_TITLE } from '../consts';
 import WalineComments from '../components/WalineComments.astro';
+import avatar from '../assets/avatar.jpg';
 
 type Props = CollectionEntry<'blog'>['data'] & {
 	wordCount?: number;
 	readingTime?: number;
+	headings?: MarkdownHeading[];
 };
 
-const { title, description, pubDate, updatedDate, heroImage, wordCount, readingTime, type, hideTime = false } = Astro.props;
+const {
+	title,
+	description,
+	pubDate,
+	updatedDate,
+	heroImage,
+	wordCount,
+	readingTime,
+	type,
+	hideTime = false,
+	headings = [],
+} = Astro.props;
+
+// Filter headings for TOC (H2 and H3)
+const filteredHeadings = headings.filter((h) => h.depth >= 2 && h.depth <= 3);
 ---
 
 <html lang="zh-CN">
 	<head>
 		<BaseHead title={`${title} — ${SITE_TITLE}`} description={description} image={heroImage} />
 		<style>
-			main {
-				max-width: 720px;
-				padding-top: 7em;
+			/* ─── 3-Column Page Layout Container ─── */
+			main.article-container {
+				width: 100% !important;
+				max-width: 1360px !important;
+				margin: 0 auto !important;
+				padding: 6.5rem 1.5rem 4rem 1.5rem !important;
+				display: grid !important;
+				grid-template-columns: 220px minmax(0, 1fr) 240px !important;
+				gap: 2.5rem !important;
+				align-items: start !important;
+				box-sizing: border-box !important;
+			}
+
+			/* ─── Left Sidebar: Author & Info ─── */
+			.sidebar-left {
+				position: sticky;
+				top: 5rem;
+				display: flex;
+				flex-direction: column;
+				gap: 1.25rem;
+				max-height: calc(100vh - 6rem);
+				overflow-y: auto;
+				scrollbar-width: none;
+			}
+
+			.sidebar-left::-webkit-scrollbar {
+				display: none;
+			}
+
+			.back-btn {
+				display: inline-flex;
+				align-items: center;
+				gap: 0.4rem;
+				font-size: 0.88rem;
+				font-weight: 500;
+				color: var(--text-muted);
+				text-decoration: none;
+				padding: 0.4rem 0.75rem;
+				border-radius: 8px;
+				background: var(--bg-secondary);
+				border: 1px solid var(--border);
+				transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+				width: fit-content;
+			}
+
+			.back-btn:hover {
+				color: var(--text-primary);
+				border-color: var(--border-hover);
+				transform: translateX(-2px);
+			}
+
+			.author-card {
+				background: var(--bg-secondary);
+				border: 1px solid var(--border);
+				border-radius: 12px;
+				padding: 1.25rem 1.1rem;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				text-align: center;
+				gap: 0.75rem;
+				transition: border-color 0.2s ease, box-shadow 0.2s ease;
+			}
+
+			.author-card:hover {
+				border-color: var(--border-hover);
+				box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+			}
+
+			.sidebar-avatar-link {
+				display: block;
+				width: 76px;
+				height: 76px;
+				border-radius: 50%;
+				overflow: hidden;
+				flex-shrink: 0;
+			}
+
+			.sidebar-avatar {
+				width: 100%;
+				height: 100%;
+				border-radius: 50%;
+				object-fit: cover;
+				border: 1px solid var(--border);
+				transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+			}
+
+			.sidebar-avatar-link:hover .sidebar-avatar {
+				transform: scale(1.05);
+			}
+
+			.author-info {
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				gap: 0.3rem;
+			}
+
+			.sidebar-author-name {
+				font-size: 1.02rem;
+				font-weight: 700;
+				color: var(--text-primary);
+				line-height: 1.3;
+				text-decoration: none;
+			}
+
+			.sidebar-name-text {
+				display: inline-block;
+			}
+
+			.sidebar-author-name:hover {
+				opacity: 0.8;
+			}
+
+			.sidebar-motto {
+				font-size: 0.8rem;
+				color: var(--text-muted);
+				margin: 0;
+				font-weight: 500;
+				letter-spacing: 0.04em;
+				white-space: nowrap;
+				display: block;
+			}
+
+			.author-card-divider {
+				width: 100%;
+				height: 1px;
+				background: var(--border);
+				margin: 0.2rem 0;
+			}
+
+			.sidebar-meta-list {
+				display: flex;
+				flex-direction: column;
+				gap: 0.5rem;
+				width: 100%;
+				font-size: 0.8rem;
+			}
+
+			.sidebar-meta-item {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				color: var(--text-muted);
+			}
+
+			.sidebar-meta-val {
+				color: var(--text-secondary);
+				font-weight: 500;
+				font-variant-numeric: tabular-nums;
+			}
+
+			.sidebar-quick-nav {
+				display: flex;
+				gap: 0.4rem;
+				width: 100%;
+			}
+
+			.quick-nav-btn {
+				flex: 1;
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				gap: 0.3rem;
+				padding: 0.45rem 0;
+				font-size: 0.78rem;
+				font-weight: 500;
+				color: var(--text-muted);
+				background: var(--bg);
+				border: 1px solid var(--border);
+				border-radius: 6px;
+				text-decoration: none;
+				cursor: pointer;
+				transition: all 0.15s ease;
+			}
+
+			.quick-nav-btn:hover {
+				color: var(--text-primary);
+				border-color: var(--border-hover);
+			}
+
+			/* ─── Center Column: Article Main ─── */
+			.article-main {
+				width: 100%;
+				max-width: 780px;
+				margin: 0 auto;
+				min-width: 0;
+			}
+
+			.mobile-header-bar {
+				display: none;
+				align-items: center;
+				justify-content: space-between;
+				margin-bottom: 1.5rem;
+				padding-bottom: 0.8rem;
+				border-bottom: 1px solid var(--border);
+			}
+
+			.mobile-toc-toggle-btn {
+				display: inline-flex;
+				align-items: center;
+				gap: 0.35rem;
+				padding: 0.35rem 0.75rem;
+				font-size: 0.82rem;
+				font-weight: 500;
+				background: var(--bg-secondary);
+				border: 1px solid var(--border);
+				border-radius: 6px;
+				color: var(--text-primary);
+				cursor: pointer;
 			}
 
 			.article-header {
-				margin-bottom: 2.5rem;
+				margin-bottom: 2.2rem;
 				padding-bottom: 1.5rem;
 				border-bottom: 1px solid var(--border);
 			}
 
 			.article-header h1 {
-				font-size: 2rem;
+				font-size: 2.1rem;
 				font-weight: 700;
-				line-height: 1.3;
-				margin: 0 0 0.8rem 0;
+				line-height: 1.35;
+				margin: 0 0 1rem 0;
+				color: var(--text-primary);
+				letter-spacing: -0.01em;
 			}
 
 			.article-meta {
@@ -57,7 +283,7 @@ const { title, description, pubDate, updatedDate, heroImage, wordCount, readingT
 				color: var(--text-muted);
 				opacity: 0.8;
 				flex-shrink: 0;
-				margin-bottom: -1px; /* Align slightly */
+				margin-bottom: -1px;
 			}
 
 			.separator {
@@ -87,36 +313,6 @@ const { title, description, pubDate, updatedDate, heroImage, wordCount, readingT
 				object-fit: contain;
 			}
 
-			.prose {
-				color: var(--text-secondary);
-				font-size: 1.05rem;
-				line-height: 1.8;
-			}
-
-			.back-link {
-				display: inline-flex;
-				align-items: center;
-				gap: 0.3rem;
-				margin-bottom: 2rem;
-				font-size: 0.9rem;
-				color: var(--text-muted);
-			}
-
-			.type-badge {
-				font-size: 0.76rem;
-				font-weight: 500;
-				padding: 0.1rem 0.45rem;
-				border-radius: 4px;
-				line-height: 1.2;
-				border: 1px solid var(--border);
-				background: var(--bg-secondary);
-				color: var(--text-muted);
-			}
-
-			.type-badge.type-original {
-				color: var(--text-primary);
-			}
-
 			.creation-notice {
 				margin-top: 1.2rem;
 				padding: 0.75rem 1rem;
@@ -133,9 +329,236 @@ const { title, description, pubDate, updatedDate, heroImage, wordCount, readingT
 				color: var(--text-primary);
 			}
 
+			/* ─── Right Sidebar: Table of Contents (TOC) ─── */
+			.sidebar-right {
+				position: sticky;
+				top: 5rem;
+				display: flex;
+				flex-direction: column;
+				max-height: calc(100vh - 6rem);
+			}
+
+			.toc-card {
+				background: var(--bg-secondary);
+				border: 1px solid var(--border);
+				border-radius: 12px;
+				padding: 1.1rem 1rem;
+				display: flex;
+				flex-direction: column;
+				gap: 0.75rem;
+				max-height: calc(100vh - 6.5rem);
+			}
+
+			.toc-header-row {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				padding-bottom: 0.6rem;
+				border-bottom: 1px solid var(--border);
+			}
+
+			.toc-title-box {
+				display: flex;
+				align-items: center;
+				gap: 0.4rem;
+				font-size: 0.9rem;
+				font-weight: 600;
+				color: var(--text-primary);
+			}
+
+			.toc-progress-val {
+				font-size: 0.78rem;
+				font-weight: 600;
+				color: var(--text-muted);
+				font-variant-numeric: tabular-nums;
+			}
+
+			.toc-mini-track {
+				width: 100%;
+				height: 2px;
+				background: var(--border);
+				border-radius: 1px;
+				overflow: hidden;
+				margin-top: -0.4rem;
+			}
+
+			.toc-mini-progress {
+				height: 100%;
+				width: 0%;
+				background: var(--text-primary);
+				transition: width 0.1s ease;
+			}
+
+			.toc-scroll-area {
+				overflow-y: auto;
+				padding-right: 0.2rem;
+				scrollbar-width: thin;
+			}
+
+			.toc-scroll-area::-webkit-scrollbar {
+				width: 4px;
+			}
+			.toc-scroll-area::-webkit-scrollbar-thumb {
+				background: var(--border);
+				border-radius: 4px;
+			}
+
+			.toc-list {
+				list-style: none;
+				margin: 0;
+				padding: 0;
+				display: flex;
+				flex-direction: column;
+				gap: 0.2rem;
+				position: relative;
+			}
+
+			.toc-item {
+				line-height: 1.4;
+			}
+
+			.toc-link {
+				display: block;
+				padding: 0.35rem 0.6rem;
+				font-size: 0.82rem;
+				color: var(--text-muted);
+				text-decoration: none;
+				border-radius: 6px;
+				transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+				overflow: hidden;
+				text-overflow: ellipsis;
+				white-space: nowrap;
+				border-left: 2px solid transparent;
+			}
+
+			.toc-item.depth-2 .toc-link {
+				font-weight: 500;
+				color: var(--text-secondary);
+			}
+
+			.toc-item.depth-3 .toc-link {
+				padding-left: 1.2rem;
+				font-size: 0.78rem;
+			}
+
+			.toc-link:hover {
+				color: var(--text-primary);
+				background: var(--bg);
+				opacity: 1;
+			}
+
+			.toc-link.active {
+				color: var(--text-primary) !important;
+				font-weight: 600;
+				background: var(--bg);
+				border-left-color: var(--text-primary);
+			}
+
+			/* ─── Mobile Drawer for TOC ─── */
+			.mobile-toc-drawer {
+				position: fixed;
+				inset: 0;
+				background: rgba(0, 0, 0, 0.6);
+				backdrop-filter: blur(4px);
+				z-index: 2000;
+				display: none;
+				align-items: flex-end;
+				opacity: 0;
+				transition: opacity 0.25s ease;
+			}
+
+			.mobile-toc-drawer.open {
+				display: flex;
+				opacity: 1;
+			}
+
+			.mobile-toc-sheet {
+				width: 100%;
+				max-height: 75vh;
+				background: var(--bg);
+				border-top-left-radius: 16px;
+				border-top-right-radius: 16px;
+				padding: 1.5rem;
+				border-top: 1px solid var(--border);
+				display: flex;
+				flex-direction: column;
+				gap: 1rem;
+				box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.2);
+				transform: translateY(100%);
+				transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+			}
+
+			.mobile-toc-drawer.open .mobile-toc-sheet {
+				transform: translateY(0);
+			}
+
+			.mobile-sheet-header {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+			}
+
+			.mobile-sheet-title {
+				font-size: 1.05rem;
+				font-weight: 600;
+				color: var(--text-primary);
+			}
+
+			.mobile-sheet-close {
+				background: var(--bg-secondary);
+				border: 1px solid var(--border);
+				border-radius: 50%;
+				width: 30px;
+				height: 30px;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				cursor: pointer;
+				color: var(--text-muted);
+			}
+
+			/* ─── Responsive Breakpoints ─── */
+			@media (max-width: 1200px) {
+				main.article-container {
+					grid-template-columns: 200px minmax(0, 1fr) 210px !important;
+					gap: 1.8rem !important;
+					padding-left: 1.2rem !important;
+					padding-right: 1.2rem !important;
+				}
+			}
+
+			@media (max-width: 1024px) {
+				main.article-container {
+					grid-template-columns: 190px minmax(0, 1fr) !important;
+					gap: 1.8rem !important;
+				}
+				.sidebar-right {
+					display: none;
+				}
+				.mobile-header-bar {
+					display: flex;
+				}
+			}
+
 			@media (max-width: 768px) {
+				main.article-container {
+					grid-template-columns: 1fr !important;
+					padding-top: 5.5rem !important;
+					padding-left: 1rem !important;
+					padding-right: 1rem !important;
+					gap: 1.5rem !important;
+				}
+				.sidebar-left {
+					display: none;
+				}
+				.sidebar-right {
+					display: none;
+				}
+				.mobile-header-bar {
+					display: flex;
+				}
 				.article-header h1 {
-					font-size: 1.6rem;
+					font-size: 1.65rem;
 				}
 			}
 		</style>
@@ -144,105 +567,420 @@ const { title, description, pubDate, updatedDate, heroImage, wordCount, readingT
 	<body>
 		<div id="reading-progress"></div>
 		<Header />
-		<main>
-			<a href={`${import.meta.env.BASE_URL.replace(/\/$/, '')}/blog`} class="back-link">← 返回文章列表</a>
 
-			<article>
-				{heroImage && (
-					<div class="hero-image">
-						<Image src={heroImage} alt="" />
+		<main class="article-container">
+			<!-- 1. Left Sidebar: Author & Navigation -->
+			<aside class="sidebar-left">
+				<a href={`${import.meta.env.BASE_URL.replace(/\/$/, '')}/blog/`} class="back-btn">
+					<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+						<line x1="19" y1="12" x2="5" y2="12"></line>
+						<polyline points="12 19 5 12 12 5"></polyline>
+					</svg>
+					<span>返回文章列表</span>
+				</a>
+
+				<div class="author-card">
+					<a href={import.meta.env.BASE_URL} class="sidebar-avatar-link" aria-label="返回首页">
+						<Image
+							src={avatar}
+							alt="eryuemu's avatar"
+							class="sidebar-avatar"
+							loading="eager"
+							transition:name="hero-avatar"
+						/>
+					</a>
+					<div class="author-info">
+						<a href={import.meta.env.BASE_URL} class="sidebar-author-name">
+							<span class="sidebar-name-text" transition:name="hero-name">eryuemu（二月木）</span>
+						</a>
+						<p class="sidebar-motto" transition:name="hero-motto">事在人为 圆融自洽</p>
 					</div>
-				)}
 
-				<div class="article-header">
-					<h1>{title}</h1>
-					<div class="article-meta">
-						<span class="meta-item">
-							<svg class="meta-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-								<rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-								<line x1="16" y1="2" x2="16" y2="6"></line>
-								<line x1="8" y1="2" x2="8" y2="6"></line>
-								<line x1="3" y1="10" x2="21" y2="10"></line>
-							</svg>
-							<FormattedDate date={pubDate} includeTime={!hideTime} />
-						</span>
+					<div class="author-card-divider"></div>
+
+					<div class="sidebar-meta-list">
+						<div class="sidebar-meta-item">
+							<span>发布日期</span>
+							<span class="sidebar-meta-val"><FormattedDate date={pubDate} includeTime={false} /></span>
+						</div>
 						{readingTime && (
-							<span class="meta-item">
-								<span class="separator">·</span>
-								<svg class="meta-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-									<circle cx="12" cy="12" r="10"></circle>
-									<polyline points="12 6 12 12 16 14"></polyline>
-								</svg>
-								{readingTime} 分钟阅读
-							</span>
+							<div class="sidebar-meta-item">
+								<span>预计阅读</span>
+								<span class="sidebar-meta-val">{readingTime} 分钟</span>
+							</div>
 						)}
 						{wordCount && (
-							<span class="meta-item">
-								<span class="separator">·</span>
-								<svg class="meta-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-									<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-									<polyline points="14 2 14 8 20 8"></polyline>
-									<line x1="16" y1="13" x2="8" y2="13"></line>
-									<line x1="16" y1="17" x2="8" y2="17"></line>
-									<polyline points="10 9 9 9 8 9"></polyline>
-								</svg>
-								{wordCount.toLocaleString()} 字
-							</span>
-						)}
-
-						{updatedDate && (
-							<span class="meta-item updated">
-								<span class="separator">·</span>
-								更新于 <FormattedDate date={updatedDate} includeTime={true} />
-							</span>
+							<div class="sidebar-meta-item">
+								<span>全文字数</span>
+								<span class="sidebar-meta-val">{wordCount.toLocaleString()} 字</span>
+							</div>
 						)}
 					</div>
-					{type && (
-						<div class="creation-notice">
-							<span class="notice-title">创作说明：</span>
-							{type === 'original' ? (
-								<span>本文由作者独立撰写，记录真实的开发实践与个人思考。</span>
-							) : (
-								<span>本文基于作者与 AI 的调试对话整理生成，完整保留问题排查思路与技术细节。</span>
-							)}
-						</div>
-					)}
+
+					<div class="author-card-divider"></div>
+
+					<div class="sidebar-quick-nav">
+						<a href={import.meta.env.BASE_URL} class="quick-nav-btn" title="返回首页">
+							<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+								<path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+								<polyline points="9 22 9 12 15 12 15 22"></polyline>
+							</svg>
+							<span>首页</span>
+						</a>
+						<a href={`${import.meta.env.BASE_URL.replace(/\/$/, '')}/about/`} class="quick-nav-btn" title="关于作者">
+							<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+								<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+								<circle cx="12" cy="7" r="4"></circle>
+							</svg>
+							<span>关于</span>
+						</a>
+						<button type="button" id="btn-scroll-top" class="quick-nav-btn" title="回到文章顶部">
+							<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+								<line x1="12" y1="19" x2="12" y2="5"></line>
+								<polyline points="5 12 12 5 19 12"></polyline>
+							</svg>
+							<span>置顶</span>
+						</button>
+					</div>
+				</div>
+			</aside>
+
+			<!-- 2. Main Center Column: Article Content -->
+			<div class="article-main">
+				<div class="mobile-header-bar">
+					<a href={`${import.meta.env.BASE_URL.replace(/\/$/, '')}/blog/`} class="back-btn">
+						<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+							<line x1="19" y1="12" x2="5" y2="12"></line>
+							<polyline points="12 19 5 12 12 5"></polyline>
+						</svg>
+						<span>返回列表</span>
+					</a>
+					<button id="mobile-toc-toggle-btn" class="mobile-toc-toggle-btn" type="button">
+						<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<line x1="8" y1="6" x2="21" y2="6"></line>
+							<line x1="8" y1="12" x2="21" y2="12"></line>
+							<line x1="8" y1="18" x2="21" y2="18"></line>
+							<line x1="3" y1="6" x2="3.01" y2="6"></line>
+							<line x1="3" y1="12" x2="3.01" y2="12"></line>
+							<line x1="3" y1="18" x2="3.01" y2="18"></line>
+						</svg>
+						<span>文章目录</span>
+					</button>
 				</div>
 
-				<div class="prose">
-					<slot />
+				<article>
+					{heroImage && (
+						<div class="hero-image">
+							<Image src={heroImage} alt="" />
+						</div>
+					)}
+
+					<div class="article-header">
+						<h1>{title}</h1>
+						<div class="article-meta">
+							<span class="meta-item">
+								<svg class="meta-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+									<rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+									<line x1="16" y1="2" x2="16" y2="6"></line>
+									<line x1="8" y1="2" x2="8" y2="6"></line>
+									<line x1="3" y1="10" x2="21" y2="10"></line>
+								</svg>
+								<FormattedDate date={pubDate} includeTime={!hideTime} />
+							</span>
+							{readingTime && (
+								<span class="meta-item">
+									<span class="separator">·</span>
+									<svg class="meta-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+										<circle cx="12" cy="12" r="10"></circle>
+										<polyline points="12 6 12 12 16 14"></polyline>
+									</svg>
+									{readingTime} 分钟阅读
+								</span>
+							)}
+							{wordCount && (
+								<span class="meta-item">
+									<span class="separator">·</span>
+									<svg class="meta-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+										<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+										<polyline points="14 2 14 8 20 8"></polyline>
+										<line x1="16" y1="13" x2="8" y2="13"></line>
+										<line x1="16" y1="17" x2="8" y2="17"></line>
+										<polyline points="10 9 9 9 8 9"></polyline>
+									</svg>
+									{wordCount.toLocaleString()} 字
+								</span>
+							)}
+
+							{updatedDate && (
+								<span class="meta-item updated">
+									<span class="separator">·</span>
+									更新于 <FormattedDate date={updatedDate} includeTime={true} />
+								</span>
+							)}
+						</div>
+						{type && (
+							<div class="creation-notice">
+								<span class="notice-title">创作说明：</span>
+								{type === 'original' ? (
+									<span>本文由作者独立撰写，记录真实的开发实践与个人思考。</span>
+								) : (
+									<span>本文基于作者与 AI 的调试对话整理生成，完整保留问题排查思路与技术细节。</span>
+								)}
+							</div>
+						)}
+					</div>
+
+					<div class="prose">
+						<slot />
+					</div>
+					<WalineComments />
+				</article>
+			</div>
+
+			<!-- 3. Right Sidebar: Table of Contents (TOC) -->
+			<aside class="sidebar-right" id="sidebar-toc">
+				<div class="toc-card">
+					<div class="toc-header-row">
+						<div class="toc-title-box">
+							<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+								<line x1="8" y1="6" x2="21" y2="6"></line>
+								<line x1="8" y1="12" x2="21" y2="12"></line>
+								<line x1="8" y1="18" x2="21" y2="18"></line>
+								<line x1="3" y1="6" x2="3.01" y2="6"></line>
+								<line x1="3" y1="12" x2="3.01" y2="12"></line>
+								<line x1="3" y1="18" x2="3.01" y2="18"></line>
+							</svg>
+							<span>目录</span>
+						</div>
+						<span class="toc-progress-val" id="toc-progress-text">0%</span>
+					</div>
+
+					<div class="toc-mini-track">
+						<div class="toc-mini-progress" id="toc-mini-progress"></div>
+					</div>
+
+					<nav class="toc-scroll-area" id="toc-scroll-area">
+						<ul class="toc-list" id="toc-list">
+							{filteredHeadings.map((heading) => (
+								<li class={`toc-item depth-${heading.depth}`}>
+									<a href={`#${heading.slug}`} class="toc-link" data-slug={heading.slug} title={heading.text}>
+										{heading.text}
+									</a>
+								</li>
+							))}
+						</ul>
+					</nav>
 				</div>
-				<WalineComments />
-			</article>
+			</aside>
 		</main>
+
+		<!-- Mobile TOC Drawer -->
+		<div class="mobile-toc-drawer" id="mobile-toc-drawer">
+			<div class="mobile-toc-sheet">
+				<div class="mobile-sheet-header">
+					<div class="mobile-sheet-title">文章目录</div>
+					<button class="mobile-sheet-close" id="mobile-toc-close-btn" type="button" aria-label="关闭目录">
+						<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<line x1="18" y1="6" x2="6" y2="18"></line>
+							<line x1="6" y1="6" x2="18" y2="18"></line>
+						</svg>
+					</button>
+				</div>
+				<div class="toc-scroll-area">
+					<ul class="toc-list" id="mobile-toc-list">
+						{filteredHeadings.map((heading) => (
+							<li class={`toc-item depth-${heading.depth}`}>
+								<a href={`#${heading.slug}`} class="toc-link mobile-link" data-slug={heading.slug}>
+									{heading.text}
+								</a>
+							</li>
+						))}
+					</ul>
+				</div>
+			</div>
+		</div>
+
 		<Footer />
 
 		<script>
-			function setupBlogPost() {
+			function setupBlogPostPage() {
 				// 1. Reading progress bar handler
 				const progressBar = document.getElementById('reading-progress');
-				if (progressBar) {
-					const updateProgress = () => {
-						const scrollTop = window.scrollY || document.documentElement.scrollTop;
-						const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-						const scrollPercent = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
-						progressBar.style.width = scrollPercent + '%';
-					};
-					window.addEventListener('scroll', updateProgress, { passive: true });
-					updateProgress(); // initialize
+				const tocProgressText = document.getElementById('toc-progress-text');
+				const tocMiniProgress = document.getElementById('toc-mini-progress');
+
+				const updateProgress = () => {
+					const scrollTop = window.scrollY || document.documentElement.scrollTop;
+					const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+					const scrollPercent = scrollHeight > 0 ? Math.min(100, Math.max(0, (scrollTop / scrollHeight) * 100)) : 0;
+					const rounded = Math.round(scrollPercent);
+
+					if (progressBar) progressBar.style.width = scrollPercent + '%';
+					if (tocProgressText) tocProgressText.textContent = rounded + '%';
+					if (tocMiniProgress) tocMiniProgress.style.width = scrollPercent + '%';
+				};
+
+				window.addEventListener('scroll', updateProgress, { passive: true });
+				updateProgress();
+
+				// 2. Dynamic Heading Extraction Fallback (if headings not pre-rendered)
+				const tocList = document.getElementById('toc-list');
+				const mobileTocList = document.getElementById('mobile-toc-list');
+				const rightSidebar = document.getElementById('sidebar-toc');
+
+				if (tocList && tocList.children.length === 0) {
+					const headingsInDoc = document.querySelectorAll('.prose h2, .prose h3');
+					if (headingsInDoc.length > 0) {
+						headingsInDoc.forEach((h, idx) => {
+							if (!h.id) {
+								h.id = 'heading-' + idx;
+							}
+							const depth = h.tagName === 'H2' ? 2 : 3;
+							const text = h.textContent?.trim() || '';
+
+							const li = document.createElement('li');
+							li.className = `toc-item depth-${depth}`;
+							const a = document.createElement('a');
+							a.href = '#' + h.id;
+							a.className = 'toc-link';
+							a.setAttribute('data-slug', h.id);
+							a.textContent = text;
+							li.appendChild(a);
+							tocList.appendChild(li);
+
+							if (mobileTocList) {
+								const mobileLi = li.cloneNode(true) as HTMLElement;
+								mobileTocList.appendChild(mobileLi);
+							}
+						});
+					} else if (rightSidebar) {
+						rightSidebar.style.display = 'none';
+					}
 				}
 
-				// 2. Code block copy buttons
+				// 3. Scrollspy for Active Heading Highlight
+				const contentHeadings = Array.from(document.querySelectorAll('.prose h2, .prose h3'));
+				const tocLinks = Array.from(document.querySelectorAll('.toc-link'));
+				const scrollArea = document.getElementById('toc-scroll-area');
+
+				function updateActiveHeading() {
+					if (contentHeadings.length === 0 || tocLinks.length === 0) return;
+
+					const scrollY = window.scrollY;
+					const headerOffset = 100;
+
+					let activeHeadingId = '';
+					for (let i = 0; i < contentHeadings.length; i++) {
+						const el = contentHeadings[i] as HTMLElement;
+						const top = el.offsetTop;
+						if (scrollY >= top - headerOffset) {
+							activeHeadingId = el.id;
+						} else {
+							break;
+						}
+					}
+
+					if (!activeHeadingId && contentHeadings.length > 0) {
+						activeHeadingId = (contentHeadings[0] as HTMLElement).id;
+					}
+
+					let currentActiveLink: HTMLElement | null = null;
+					tocLinks.forEach((link) => {
+						const slug = link.getAttribute('data-slug');
+						if (slug === activeHeadingId) {
+							link.classList.add('active');
+							if (!link.classList.contains('mobile-link')) {
+								currentActiveLink = link as HTMLElement;
+							}
+						} else {
+							link.classList.remove('active');
+						}
+					});
+
+					// Auto-scroll TOC to keep active link centered if TOC list is scrollable
+					if (currentActiveLink && scrollArea) {
+						const linkTop = (currentActiveLink as HTMLElement).offsetTop;
+						const linkHeight = (currentActiveLink as HTMLElement).offsetHeight;
+						const areaScroll = scrollArea.scrollTop;
+						const areaHeight = scrollArea.clientHeight;
+
+						if (linkTop < areaScroll || linkTop + linkHeight > areaScroll + areaHeight) {
+							scrollArea.scrollTo({
+								top: linkTop - areaHeight / 2 + linkHeight / 2,
+								behavior: 'smooth',
+							});
+						}
+					}
+				}
+
+				window.addEventListener('scroll', updateActiveHeading, { passive: true });
+				updateActiveHeading();
+
+				// 4. Smooth Anchor Scrolling for TOC Links
+				tocLinks.forEach((link) => {
+					link.addEventListener('click', (e) => {
+						const href = link.getAttribute('href');
+						if (!href || !href.startsWith('#')) return;
+
+						const targetId = href.substring(1);
+						const targetEl = document.getElementById(targetId);
+						if (targetEl) {
+							e.preventDefault();
+							targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+							window.history.pushState(null, '', href);
+
+							// Close mobile drawer if open
+							const drawer = document.getElementById('mobile-toc-drawer');
+							if (drawer && drawer.classList.contains('open')) {
+								drawer.classList.remove('open');
+							}
+						}
+					});
+				});
+
+				// 5. Scroll to Top Button
+				const btnScrollTop = document.getElementById('btn-scroll-top');
+				if (btnScrollTop) {
+					btnScrollTop.addEventListener('click', () => {
+						window.scrollTo({ top: 0, behavior: 'smooth' });
+					});
+				}
+
+				// 6. Mobile Drawer Toggle
+				const mobileToggleBtn = document.getElementById('mobile-toc-toggle-btn');
+				const mobileDrawer = document.getElementById('mobile-toc-drawer');
+				const mobileCloseBtn = document.getElementById('mobile-toc-close-btn');
+
+				if (mobileToggleBtn && mobileDrawer) {
+					mobileToggleBtn.addEventListener('click', () => {
+						mobileDrawer.classList.add('open');
+					});
+				}
+
+				if (mobileCloseBtn && mobileDrawer) {
+					mobileCloseBtn.addEventListener('click', () => {
+						mobileDrawer.classList.remove('open');
+					});
+				}
+
+				if (mobileDrawer) {
+					mobileDrawer.addEventListener('click', (e) => {
+						if (e.target === mobileDrawer) {
+							mobileDrawer.classList.remove('open');
+						}
+					});
+				}
+
+				// 7. Code Block Copy Buttons
 				const codeBlocks = document.querySelectorAll('pre');
 				codeBlocks.forEach((codeBlock) => {
-					// Guard against duplicate wraps on page-load swaps
 					if (codeBlock.parentElement && codeBlock.parentElement.classList.contains('code-block-wrapper')) {
 						return;
 					}
 
 					const wrapper = document.createElement('div');
 					wrapper.className = 'code-block-wrapper';
-					
+
 					if (codeBlock.parentNode) {
 						codeBlock.parentNode.insertBefore(wrapper, codeBlock);
 						wrapper.appendChild(codeBlock);
@@ -276,7 +1014,7 @@ const { title, description, pubDate, updatedDate, heroImage, wordCount, readingT
 			}
 
 			// Runs on initial page load and after every page swap in Astro View Transitions
-			document.addEventListener('astro:page-load', setupBlogPost);
+			document.addEventListener('astro:page-load', setupBlogPostPage);
 		</script>
 	</body>
 </html>
