@@ -68,10 +68,13 @@ const getPreviewText = (body?: string) => {
 		<script type="application/ld+json" set:html={JSON.stringify({
 			"@context": "https://schema.org",
 			"@type": "SocialMediaPosting",
+			"url": new URL(Astro.url.pathname, Astro.site).href,
 			"headline": seoTitle,
 			"articleBody": cleanText,
 			"datePublished": pubDate.toISOString(),
 			"dateModified": pubDate.toISOString(),
+			"inLanguage": "zh-CN",
+			...(images && images.length > 0 ? { "image": images.map((img: string) => new URL(img, Astro.site).href) } : {}),
 			"author": {
 				"@type": "Person",
 				"name": "eryuemu",
