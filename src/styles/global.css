@@ -37,6 +37,11 @@ html.dark {
 	box-sizing: border-box;
 }
 
+html {
+	max-width: 100%;
+	overflow-x: clip;
+}
+
 body {
 	font-family: var(--font-sans);
 	margin: 0;
@@ -46,6 +51,8 @@ body {
 	line-height: 1.7;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
+	max-width: 100%;
+	overflow-x: clip;
 }
 
 /* Smooth theme transition */
@@ -60,6 +67,7 @@ main {
 	max-width: calc(100% - 3em);
 	margin: auto;
 	padding: 7em 0 4em 0;
+	min-width: 0;
 }
 
 /* ─── Typography ─── */
@@ -112,6 +120,8 @@ code {
 	border-radius: 4px;
 	font-size: 0.88em;
 	color: var(--text-primary);
+	overflow-wrap: break-word;
+	word-break: break-word;
 }
 
 pre {
@@ -121,10 +131,15 @@ pre {
 	overflow-x: auto;
 	font-size: 0.9em;
 	line-height: 1.5;
+	max-width: 100%;
+	-webkit-overflow-scrolling: touch;
 }
 pre > code {
 	all: unset;
 	font-family: inherit;
+	white-space: pre;
+	word-break: normal;
+	overflow-wrap: normal;
 }
 
 /* Shiki light/dark variable mapping */
@@ -224,6 +239,11 @@ hr {
 	color: var(--text-secondary);
 	font-size: 1.05rem;
 	line-height: 1.8;
+	width: 100%;
+	max-width: 100%;
+	min-width: 0;
+	overflow-wrap: break-word;
+	word-break: break-word;
 }
 
 .prose p {
@@ -235,6 +255,8 @@ hr {
 	margin-top: 2.2rem;
 	margin-bottom: 0.8rem;
 	scroll-margin-top: 80px;
+	overflow-wrap: break-word;
+	word-break: break-word;
 }
 
 .prose > h1:first-child {
@@ -259,6 +281,8 @@ hr {
 
 .prose li {
 	margin-bottom: 0.5rem;
+	overflow-wrap: break-word;
+	word-break: break-word;
 }
 
 .prose ul {
@@ -271,12 +295,24 @@ hr {
 	margin-bottom: 0.5rem;
 }
 
-/* Table styling */
+/* Table styling with responsive wrapper */
+.table-wrapper {
+	width: 100%;
+	max-width: 100%;
+	overflow-x: auto;
+	-webkit-overflow-scrolling: touch;
+	margin: 1.8rem 0;
+	border: 1px solid var(--border);
+	border-radius: var(--radius, 8px);
+	background: var(--bg);
+}
+
 .prose table {
 	width: 100%;
+	min-width: 480px;
 	border-collapse: collapse;
-	margin: 2rem 0;
-	font-size: 0.95rem;
+	font-size: 0.92rem;
+	margin: 0;
 }
 
 .prose th, .prose td {
@@ -284,16 +320,31 @@ hr {
 	text-align: left;
 	border-bottom: 1px solid var(--border);
 	transition: background-color 0.2s ease;
+	white-space: normal;
 }
 
 .prose th {
 	font-weight: 600;
 	color: var(--text-primary);
 	background-color: var(--bg-secondary);
+	white-space: nowrap;
+}
+
+.prose tr:last-child td {
+	border-bottom: none;
 }
 
 .prose tr:hover td {
 	background-color: var(--bg-secondary);
+}
+
+/* Media, diagrams and embedded content */
+.prose img,
+.prose svg,
+.prose iframe,
+.prose video {
+	max-width: 100%;
+	height: auto;
 }
 
 /* Keyboards & Highlighting */
