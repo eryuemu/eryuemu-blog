@@ -38,6 +38,29 @@ const filteredHeadings = headings.filter((h) => h.depth >= 2 && h.depth <= 3);
 <html lang="zh-CN">
 	<head>
 		<BaseHead title={`${title} — ${SITE_TITLE}`} description={description} image={heroImage} />
+		<script type="application/ld+json" set:html={JSON.stringify({
+			"@context": "https://schema.org",
+			"@type": "BlogPosting",
+			"headline": title,
+			"description": description,
+			"datePublished": pubDate ? pubDate.toISOString() : undefined,
+			"dateModified": updatedDate ? updatedDate.toISOString() : (pubDate ? pubDate.toISOString() : undefined),
+			"mainEntityOfPage": {
+				"@type": "WebPage",
+				"@id": Astro.url.href
+			},
+			"author": {
+				"@type": "Person",
+				"name": "eryuemu",
+				"url": "https://eryuemu.com/about"
+			},
+			"publisher": {
+				"@type": "Person",
+				"name": "eryuemu",
+				"url": "https://eryuemu.com"
+			},
+			...(heroImage ? { "image": new URL(heroImage.src, Astro.url).href } : {})
+		})} />
 		<style>
 			/* ─── 3-Column Page Layout Container ─── */
 			main.article-container {
