@@ -23,5 +23,5 @@ Consult these guides before working on related tasks:
 
 ## Network & Git Environment in WSL2
 
-See [`WSL_NETWORK_PROXY_GUIDE.md`](./WSL_NETWORK_PROXY_GUIDE.md) for details on WSL2 networking and Git proxy guidelines.
+See [`WSL_NETWORK_PROXY_GUIDE.md`](../WSL_NETWORK_PROXY_GUIDE.md) for details on WSL2 networking and Git proxy guidelines.
 **Crucial Rule**: Do NOT set global `http.proxy` or `https.proxy` in Git config, as it triggers GnuTLS TLS 1.3 handshake failures (`fatal: unable to access ...: GnuTLS, handshake failed`). Keep proxy unset to use direct routing.
