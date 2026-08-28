@@ -1,6 +1,6 @@
 ---
-title: 'Bing 站长提示 Meta 描述过短与前台搜不到？「已索引未投放」沙盒机制、Sitemap 唤醒与 URL 批量推送全复盘'
-description: '深度复盘 8 月 29 日针对 Bing Webmaster Tools 提示「Meta descriptions too short」、后台显示已成功编制索引但前台搜不到（幽灵索引 / 0 结果）的完整排查实录。从 Google 满分收录与 AI 概览对比、Bing 机械字符计数与高 DA 域名压制、国内版与国际版合规过滤差异，到手动刷新两层 Sitemap（sitemap-0.xml）及全站 42 条 URL 批量提交破局实战。'
+title: 'Bing 站长提示 Meta 过短与旧 www 残留多个 h1？错误由 3 降至 2、前台「已索引未投放」沙盒机制与全站批量推送全复盘'
+description: '深度复盘 8 月 29 日针对 Bing Webmaster Tools 提示「Meta 描述过短」与旧 www 域名残留「多个 h1 标记」的排查实录。从 Recommendations 错误总数由 3 降至 2（标题过短彻底消除）、旧 www 历史残影与新根域名 0 错误对比、Google 满分第一与 AI 概览对比，到 Bing 机械字符计数、前台「已索引未投放」沙盒机制、双层 Sitemap（sitemap-0.xml）唤醒及全站 42 条 URL 批量提交破局实战。'
 pubDate: '2026-08-29T00:08:00+08:00'
 category: '开发'
 type: 'ai-organized'
@@ -8,37 +8,45 @@ type: 'ai-organized'
 
 ## 💡 简明省流版（30 秒速览）
 
-> **一句话总括**：在日常查看 Bing Webmaster Tools（必应站长工具）时，后台针对根域名 `https://eryuemu.com/` 再次弹出了「Meta descriptions on many of your pages are too short.」（Meta 描述过短）的中等警告；而在 Bing 前台搜索测试时，无论是搜 `eryuemu`、`eryuemu博客` 还是输入 `site:eryuemu.com`，均出现了**前台完全搜不到（0 结果）**的诡异现象。与此同时，Google 搜索却呈现了**全网排名第一、带专属头像卡片并生成完整 AI Overview（AI 概览）的满分状态**。
+> **一句话总括**：在日常查看 Bing Webmaster Tools（必应站长工具）时，后台 Recommendations 看板迎来了关键更新：**总错误数已从 8 月 22 日的 3 个降为 2 个（「页面标题过短」已彻底消除解决）**。剩下的 2 个错误中，高严重性的「多个 `<h1>`」实为**旧 `www` 域名重定向前的历史残影缓存**，中等严重性的「Meta 描述过短」则是**西方 150 英文机械计数器与 78 字中文高密度语义的判定差异**。
 > 
-> 经过深入剖析与抓包取证，确认网站完全未受任何降权：后台早已成功完成抓取入库（0 SEO 问题），前台搜不到的根本原因是**从 `www` 切换到根域名的 308 重定向静默沙盒期**、**Indexer（入库引擎）与 Serving Engine（前台投放系统）的数据分发延时**，以及**Sitemap 上次抓取时间停滞在 14 天前的旧快照**。通过深入解析 Astro 双层 Sitemap 机制、手动提交 `sitemap-0.xml` 唤醒蜘蛛，并借助 URL Submission 接口完成全站 **42 个完整页面**的即时批量推送，彻底打破了幽灵索引僵局！
+> 与此同时，针对 Bing 前台搜索搜不到（0 结果）的现象，排查证实新根域名主站底层早已成功抓取入库（质量检测 0 错误全绿），搜不到的根本原因是**从 `www` 切换到根域名的 308 重定向静默沙盒期**与**Sitemap 爬网停滞在 14 天前的旧快照**。通过显式提交 Astro 子地图 `sitemap-0.xml` 唤醒爬虫，并借助 URL Submission 接口完成全站 **42 个完整页面**的即时批量推送，彻底打破了幽灵索引僵局！
 
 ---
 
-## 一、现象：后台报错与前台“搜不到”的迷雾
+## 一、现象：Recommendations 看板更新与多端搜索迷雾
 
-2026 年 8 月 28 日深夜至 29 日凌晨，在登录微软必应站长工具（Bing Webmaster Tools）巡检站点状态时，遇到了一系列耐人寻味的现象：
+2026 年 8 月 28 日深夜至 29 日凌晨，在登录微软必应站长工具（Bing Webmaster Tools）巡检站点状态时，遇到了一系列耐人寻味的现象与看板更新：
 
-### 1. 站长后台：Meta 描述过短警告卷土重来
+### 1. 站长后台：Recommendations 错误总数从 3 个降至 2 个
 
-在 Bing 站长工具的 Recommendations（建议与报错）面板中，针对刚完成 308 域名规范化不久的新根域名主站 `https://eryuemu.com/`，赫然提示了一条中等严重性警告：
+在 Bing 站长工具的 SEO 建议（Recommendations）面板中，最新的离线体检账单显示错误总数已成功减少：
 
-![Bing 站长平台 Recommendations 提示 Meta 描述过短](../../assets/bwt-seo-rule118-meta-too-short.png)
-*图 1：Bing 站长平台 SEO 建议面板提示「Meta descriptions on many of your pages are too short.」（规则编号 118，受影响页面 1，错误数 1）*
+![Bing 站长后台最新 Recommendations 看板](../../assets/bwt-seo-recommendations-aug29-2errors.png)
+*图 1：Bing 站长平台 SEO 建议面板最新概览（错误总数降为 2，包含 1 个高严重性、1 个中等严重性）*
 
-点击展开受影响的 URL 清单，出现问题的正是博客的主站根目录：
+点击展开具体错误明细，当前包含的两个项目如下：
+1. 🔴 **高严重性**：`该页面上存在多个 <h1> 标记。`（受影响页面数：1）
+2. 🟡 **中等严重性**：`Meta descriptions on many of your pages are too short.`（受影响页面数：1）
 
-![受影响 URL 列表明细](../../assets/bwt-seo-rule118-affected-url-eryuemu.png)
-*图 2：受影响的 URL 指向根域名主站 `https://eryuemu.com/`*
+![错误详情：多个 h1 报错指向旧 www 域名](../../assets/bwt-seo-multiple-h1-www-historical-cache.png)
+*图 2：点击展开「多个 <h1> 标记」报错详情，受影响 URL 赫然指向已做 308 重定向的旧域名 `https://www.eryuemu.com/`*
+
+![错误详情：Meta 描述过短报错总览](../../assets/bwt-seo-rule118-meta-too-short.png)
+*图 3：Bing 站长平台提示「Meta descriptions on many of your pages are too short.」（规则编号 118）*
+
+![受影响 URL 指向根域名主站](../../assets/bwt-seo-rule118-affected-url-eryuemu.png)
+*图 4：展开 Meta 描述过短的受影响列表，指向根域名新主站 `https://eryuemu.com/`*
 
 ### 2. Google vs Bing：天差地别的多端搜索对比
 
-为了排查该警告是否对线上搜索展现造成了破坏，我们立即在各大主流搜索引擎进行了实测对比：
+为了排查后台建议是否对线上搜索展现造成了破坏，我们立即在各大主流搜索引擎进行了实测对比：
 
 #### 🟢 Google 搜索表现：满分教科书级展现
-在 Google 隐身窗口中搜索 `eryuemu`，结果堪称完美：
+在 Google 隐身窗口中搜索 `eryuemu`，结果堪称顶级水准：
 
 ![Google 搜索 eryuemu 的顶级呈现效果](../../assets/google-search-eryuemu-rank1-and-ai-overview.png)
-*图 3：Google 搜索 eryuemu 位列第一，带专属彩色头像缩略图，78 字 Meta 描述 100% 精确渲染，并成功生成 Google AI Overview（AI 概览）*
+*图 5：Google 搜索 eryuemu 位列第一，带专属彩色头像缩略图，78 字 Meta 描述 100% 精确渲染，并成功生成 Google AI Overview（AI 概览）*
 
 * **首位登顶**：直接力压 GitHub、B 站等所有第三方大站，稳居 SERP 搜索第一位；
 * **元数据完全吻合**：78 个汉字的个人介绍 Meta Description 一字不差地精准展示，标点完全对应；
@@ -48,40 +56,57 @@ type: 'ai-organized'
 但在 Bing（国内版）中搜索相同的关键词，却呈现出完全不同的景象：
 
 ![Bing 国内版搜索 eryuemu 结果](../../assets/bing-cn-search-eryuemu-authority-ranking.png)
-*图 4：Bing 国内版搜索 `eryuemu`，前排完全被 GitHub、百度贴吧、B 站占据；但右侧已成功生成「深入了解 eryuemu」实体推荐卡片*
+*图 6：Bing 国内版搜索 `eryuemu`，前排完全被 GitHub、百度贴吧、B 站占据；但右侧已成功生成「深入了解 eryuemu」实体推荐卡片*
 
 ![Bing 国内版搜索 eryuemu博客 结果](../../assets/bing-cn-search-eryuemu-blog-github-first.png)
-*图 5：Bing 国内版搜索 `eryuemu博客`，排在第一位的是 GitHub 仓库 `github.com/eryuemu/eryuemu-blog`，而非独立域名*
+*图 7：Bing 国内版搜索 `eryuemu博客`，排在第一位的是 GitHub 仓库 `github.com/eryuemu/eryuemu-blog`，而非独立域名*
 
 ![Bing 国内版输入 site 指令查询结果](../../assets/bing-cn-site-search-eryuemu-empty.png)
-*图 6：Bing 国内版输入 `site:eryuemu.com`，直接返回「没有与此相关的结果: site:eryuemu.com」（前台 0 结果）*
+*图 8：Bing 国内版输入 `site:eryuemu.com`，直接返回「没有与此相关的结果: site:eryuemu.com」（前台 0 结果）*
 
-这一系列反差极大的信号极易让人产生恐慌：**为什么 Google 满分第一，而 Bing 前台连用 `site:` 指令都搜不到？难道根域名被 Bing 屏蔽或降权了？**
+这一系列反差极大的信号极易让人产生困惑：**后台的报错到底要不要改？为什么 Google 满分第一，而 Bing 前台连用 `site:` 指令都搜不到？难道根域名被 Bing 屏蔽或降权了？**
 
 ---
 
-## 二、底层破案：为什么后台显示“已索引”，前台却 0 结果？
+## 二、底层破案：新旧报错对比与“已索引未投放”真相
 
 为了彻底查清真相，我们打开了 Bing Webmaster Tools 的「URL 检查（URL Inspection）」面板，对 `https://eryuemu.com/` 进行了底层抓包诊断。
 
-诊断结果出乎意料——**在 Bing 底层数据库中，页面不仅早就成功收录，而且质量得分全满！**
+诊断结果出乎意料——**在 Bing 底层数据库中，新主站不仅早就成功收录，而且质量得分全满（0 SEO 错误）！**
 
 ![Bing 站长后台已编制索引面板](../../assets/bwt-url-inspect-cached-indexed-green.png)
-*图 7：Bing 站长平台已编制索引面板显示：今天 18:03 爬网成功、页面提取成功、允许编制索引，且「未找到 SEO/GEO 问题」全绿*
+*图 9：Bing 站长平台已编制索引面板显示：今天 18:03 爬网成功、页面提取成功、允许编制索引，且「未找到 SEO/GEO 问题」全绿*
 
 ![Bing 站长平台实时 URL 检查面板](../../assets/bwt-url-inspect-live-test-green.png)
-*图 8：Bing 站长平台实时 URL 检查（23:47 测试）：绿勾全通，同样明确标注「未找到 SEO/GEO 问题」*
+*图 10：Bing 站长平台实时 URL 检查（23:47 测试）：绿勾全通，同样明确标注「未找到 SEO/GEO 问题」*
 
 ![Bing 国际版搜索 eryuemu 结果](../../assets/bing-global-search-eryuemu-results.png)
-*图 9：Bing 国际版搜索 `eryuemu`，展示了 GitHub 与 VSCO 等高权重主页，独立新域名同样暂未排在前列*
+*图 11：Bing 国际版搜索 `eryuemu`，展示了 GitHub 与 VSCO 等高权重主页，独立新域名同样暂未排在前列*
 
-结合上述实测抓包，真相浮出水面。这背后涉及现代搜索引擎五大核心架构机制的交织碰撞：
+结合实测抓包与时间线演变，背后的全套逻辑彻底水落石出：
+
+### 1. Recommendations 新旧两版演变全貌
+
+| 错误类型 | 8 月 22 日（旧账单） | 8 月 29 日（最新截图） | 演变真相与处置策略 |
+| :--- | :--- | :--- | :--- |
+| **错误总数** | **3 个错误** | **降为 2 个错误** 📉 | **持续好转**，证明上次针对标题与结构的优化已生效 |
+| 🟡 **许多页面标题过短** | 存在（`www.eryuemu.com`） | **🎉 彻底消除（已解决）** | 首页中英双语长标题完全被 Bing 认可并消除了告警 |
+| 🔴 **该页面上存在多个 `<h1>`** | 存在（`www.eryuemu.com`） | **依然显示（`www.eryuemu.com`）** | **旧 www 域名的历史残影**！新根域名主站早已 0 错误通过，无需任何修改 |
+| 🟡 **Meta 描述过短** | 存在（`www.eryuemu.com`） | **转移至 `eryuemu.com`** | 纯粹由于西方 150 英文机械计数器与 78 字中文高密度的算法差异，无需修改 |
+
+### 2. 为什么旧 www 域名的“多个 `<h1>`”无需修改？
+
+* **新主站早已修复**：我们在代码中早已将开屏动画 `Splash.astro` 的 `<h1>` 降级为 `<div>`。新主站 `https://eryuemu.com/` 在图 9 和图 10 的实时质检中为 **0 错误**；
+* **308 重定向导致旧快照冻结**：8 月 18 日将 `www` 设为 308 永久重定向后，爬虫访问 `www.eryuemu.com` 只会收到 308 跳转指令，不会再获取 HTML 内容。因此，Bing 的离线系统无法对旧 URL 进行“重新体检”，只能一直挂着重定向前的最后一次历史体检报告；
+* **处置策略**：**完全不需要修改**。等 Bing 定期清理归档旧 308 域名后，该历史记录会自动蒸发。
+
+### 3. 为什么后台显示“已编制索引”，前台却 0 结果？
 
 ```mermaid
 flowchart TD
     subgraph Bing_Backend ["Bing 后端索引中心 (Indexer)"]
         A["8月18日: 域名 308 重定向反转"] --> B["8月28日 18:03: 成功抓取首页"]
-        B --> C["解析 HTML、Meta 与 Schema<br/>👉 状态:『已成功编制索引』<br/>👉 SEO/GEO 问题: 0 个 (图7/图8)"]
+        B --> C["解析 HTML、Meta 与 Schema<br/>👉 状态:『已成功编制索引』<br/>👉 SEO/GEO 问题: 0 个 (图9/图10)"]
     end
 
     subgraph Serving_Gate ["前台投放准入过滤网 (Serving Quality Gate)"]
@@ -90,43 +115,14 @@ flowchart TD
     end
 
     subgraph Front_Search ["用户前台搜索端 (SERP)"]
-        E --> F["搜『eryuemu』: 被 GitHub (DA 96) 压制 (图4/图9)"]
-        E --> G["搜『site:eryuemu.com』: 显示 0 结果 (图6)"]
+        E --> F["搜『eryuemu』: 被 GitHub (DA 96) 压制 (图6/图11)"]
+        E --> G["搜『site:eryuemu.com』: 显示 0 结果 (图8)"]
     end
 ```
 
-### 1. 机制一：Indexer（入库引擎）与 Serving Engine（前台投放服务）的分离
-
-许多站长误以为“爬虫抓了页面 = 搜索框立马能搜到”。其实在大型搜索引擎架构中，两者由完全独立的子系统负责：
-* **Indexer（入库引擎）**：负责并发调度爬虫、下载 HTML、解析标签并存入倒排索引库。图 7 证明你的网页早在今天 18:03 就已经完好无损地躺在微软数据中心里了；
-* **Serving Engine（前台检索服务）**：负责接收用户在搜索框输入的 Query，并在毫秒级内从全球边缘缓存节点返回结果。从 Indexer 中心库把新站数据同步分发到全球 Serving 节点，通常存在 **24 ~ 72 小时的分发延时**。
-
-### 2. 机制二：8 月 18 日从 `www` 切换到根域名的“新主机名静默沙盒”
-
-* 8 月 18 日之前，主站为 `www.eryuemu.com`，Bing 已为其建立了成熟的前台投放快照；
-* 8 月 18 日反转为主域名 `eryuemu.com`（旧 `www` 返回 308 永久重定向）后，Bing 立即从前台撤下了旧 `www`；
-* 但对于新的根域名 `eryuemu.com`，Bing 的反作弊系统将其视作一个“新主机名”，自动触发了 **1~2 周的静默观察期（Silent Sandboxing）**。在观察期内，系统会持续抓取建库，但前台暂时抑制展示，直到确认该域名安全稳定。
-
-### 3. 机制三：中文信息密度 vs 英文“机械字符计数”
-
-为什么 Recommendations 面板会提示 Meta 描述过短？
-* **Bing 的死板阈值**：规则建议标准为 `150 ~ 160 characters`（专为英文设计，约 25~30 个单词）；
-* **当前线上描述**：
-  ```html
-  <meta name="description" content="你好，我是 eryuemu（二月木）。主修自动化专业。重度软硬件折腾控、赛博洁癖患者。这里记录了我折腾大模型、WSL2、eSIM、QQ 机器人、书法与二次元的日常。" />
-  ```
-* **中文冲突**：这段文案共 **78 个汉字**，在中文语境下信息量极其充实，在移动端和 PC 端正好显示为完整的两行摘要（Google 100% 满分采纳即是铁证）；但 Bing 质检脚本直接使用 `length < 150` 机械计数，因而贴上了黄色建议标签。**在最新的图 7 和图 8 质检中，该项已被标记为 0 问题通过**。
-
-### 4. 机制四：高权重平台（GitHub DA 96 / VSCO DA 92）的域名压制
-
-在搜索单词 `eryuemu` 或 `eryuemu博客` 时：
-* 竞品是 `github.com`（域名权威度 **96**）和 `vsco.co`（域名权威度 **92**）；
-* 独立新域名 `eryuemu.com` 上线仅一个月且刚经历重定向，在 Bing 基于反向链接（Backlinks）的 PageRank 算法中，单字词很难瞬间超越权重 96 的 GitHub 仓库；
-* 但注意图 4 右侧的 **“深入了解 eryuemu”**（关联了官网、博客、GitHub、贴吧），说明 **Bing 的知识图谱大模型已经将博主识别为一个独立的实体（Entity）**。
-
-### 5. 机制五：国内版（`cn.bing.com`）与国际版的过滤差异
-
-国内版针对未备案、部署于海外边缘节点（Vercel）的新域名，有更为严苛的展示沙盒策略。结合 `site:` 高级语法在 Bing 前台本身的抽样不稳定性，造成了前台 0 结果的错觉。
+* **Indexer（入库引擎）vs Serving Engine（前台投放服务）分离**：后台的“已编制索引”说明网页早已存入微软数据中心；前台搜不到是因为数据从中心库同步分发到全球边缘 Serving 节点存在 **24 ~ 72 小时的分发延时**；
+* **新主机名静默沙盒（Silent Sandboxing）**：8 月 18 日反转为主域名后，Bing 前台迅速下架了旧 `www`，同时对新根域名 `eryuemu.com` 开启了 **1~2 周的防作弊静默观察期**；
+* **高权重域名压制**：面对单字词 `eryuemu`，Bing 传统 PageRank 算法优先展示了 GitHub（DA 96）和 VSCO（DA 92）等老牌权威大站（但图 6 右侧已生成“深入了解”实体卡片，说明大模型已完成实体建构）。
 
 ---
 
@@ -139,7 +135,7 @@ flowchart TD
 在排查站长工具的「网站地图」看板时，发现了一个重大滞后因素：
 
 ![网站地图抓取停留在 8 月 14 日](../../assets/bwt-sitemaps-stale-aug14-snapshot.png)
-*图 10：Bing 网站地图后台显示 `sitemap-index.xml` 的「上次爬网时间」定格在 2026/8/14，仅收录了旧版的 29 个 URL*
+*图 12：Bing 网站地图后台显示 `sitemap-index.xml` 的「上次爬网时间」定格在 2026/8/14，仅收录了旧版的 29 个 URL*
 
 * 自 8 月 14 日以来，Bing 的地图定时调度器整整 14 天未曾拉取过全站新地图；
 * 期间发布的 10 余篇新文章与时间戳更新完全未被地图系统感知。
@@ -161,19 +157,19 @@ Bing 爬虫有时抓取总索引后不会立即下钻子地图。为此，我们
 提交后，Bing 立即全量解析，数据瞬间刷新：
 
 ![重新提交子地图成功刷新 42 个 URL](../../assets/bwt-sitemaps-refresh-success-42-urls.png)
-*图 12：重新提交 `sitemap-0.xml` 后，上次爬网时间成功刷新至今天（8 月 28 日），已发现 URL 跃升至 42 个（全站全量覆盖）*
+*图 13：重新提交 `sitemap-0.xml` 后，上次爬网时间成功刷新至今天（8 月 28 日），已发现 URL 跃升至 42 个（全站全量覆盖）*
 
 ### 3. 终极加速：利用 URL 提交（URL Submission）接口批量推送
 
 Bing 站长工具为每位站长提供了每日 100 次的 **URL Submission 即时提交配额**。通过该接口提交的链接，会直接绕过慢速爬虫排队，直通前台 Serving 检索集群：
 
 ![首次单个 URL 提交](../../assets/bwt-url-submission-initial-single-submit.png)
-*图 11：在 URL 提交面板中首次提交根域名首页*
+*图 14：在 URL 提交面板中首次提交根域名首页*
 
 随后，我们将全站核心频道与全部 29 篇技术博客、8 篇心迹动态打包整理为 42 条完整 URL 清单，进行批量一次性推送：
 
 ![全站 42 个 URL 批量提交大获成功](../../assets/bwt-url-submission-batch-42-success.png)
-*图 13：全站 42 个 URL 批量提交成功弹窗（今天 00:03 全部录入即时前台推送管道）*
+*图 15：全站 42 个 URL 批量提交成功弹窗（今天 00:03 全部录入即时前台推送管道）*
 
 ---
 
@@ -198,6 +194,8 @@ flowchart LR
 
 | 维度 | 现象 / 疑难点 | 底层根因 | 最终处置与破局方案 |
 | :--- | :--- | :--- | :--- |
+| **标题过短告警** | 曾提示标题过短 | 首页标题缺乏品牌名与定位 | 升级为中英双语富文本标题，**已彻底消除告警** |
+| **多个 h1 报错** | 仍提示多个 h1 标记 | 指向旧 `www` 域名在 308 重定向前的历史快照残影 | 新根域名已 0 错误通过，旧域名无需修改，等待系统自动归档 |
 | **Meta 描述警告** | 提示 Meta 描述过短 | Bing 机械按英文 150 字符计数，与 78 字中文高信息密度产生判定偏差 | 保持当前 78 字黄金平衡（Google 满分验证），最新质检已 0 报错通过 |
 | **前台 0 结果** | 搜 `site:eryuemu.com` 无结果 | 8 月 18 日域名切换触发 308 沙盒期，Indexer 与 Serving 分发延时 | 避免被动等待，主动触发 URL 检查与即时提交 |
 | **单字词排名落后** | 搜 `eryuemu` GitHub 占第一 | GitHub (DA 96) 权重压制，新根域名外链积累尚在交接期 | 在 GitHub Profile / 仓库 README 置顶博客链接，传递权重 |
@@ -205,4 +203,4 @@ flowchart LR
 | **前台即时加速** | 爬虫巡检慢 | 默认抓取队列优先级低 | 使用 URL Submission 批量提交全站 42 条链接直达前台 |
 
 > **站长心得**：
-> 当面对搜索引擎站长工具的报错与前台搜不到的表象时，切忌盲目改动代码或产生降权焦虑。搞清 **“离线索引 vs 前台投放”**、**“西方字符计数 vs 中文语义密度”** 以及 **“Sitemap 索引结构”** 的底层运行逻辑，才能在纷繁复杂的 SEO 信号中精准破局，让个人独立博客在各大搜索引擎中稳健生根。
+> 当面对搜索引擎站长工具的报错与前台搜不到的表象时，切忌盲目改动代码或产生降权焦虑。搞清 **“离线索引 vs 前台投放”**、**“西方字符计数 vs 中文语义密度”**、**“308 重定向历史残影”** 以及 **“Sitemap 索引结构”** 的底层运行逻辑，才能在纷繁复杂的 SEO 信号中精准破局，让个人独立博客在各大搜索引擎中稳健生根。
