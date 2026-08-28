@@ -349,6 +349,29 @@ hr {
 .prose video {
 	max-width: 100%;
 	height: auto;
+	border-radius: var(--radius, 8px);
+	display: block;
+	margin: 1.5rem auto 0.8rem auto;
+}
+
+/* Image Captions (from Markdown `*图 x：说明*`) */
+.prose p:has(> em:only-child),
+.prose p > em:only-child {
+	font-style: normal;
+	font-size: 0.88rem;
+	color: var(--text-muted);
+	text-align: center;
+	display: block;
+	margin-top: -0.4rem;
+	margin-bottom: 2rem;
+	line-height: 1.5;
+	letter-spacing: 0.02em;
+}
+
+/* Chinese typography: avoid ugly browser oblique font-shearing */
+.prose em {
+	font-style: normal;
+	color: var(--text-muted);
 }
 
 /* Keyboards & Highlighting */
