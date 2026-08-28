@@ -30,7 +30,7 @@ type: 'ai-organized'
 2. 🟡 **中等严重性**：`Meta descriptions on many of your pages are too short.`（受影响页面数：1）
 
 ![错误详情：多个 h1 报错指向旧 www 域名](../../assets/bwt-seo-multiple-h1-www-historical-cache.png)
-*图 2：点击展开「多个 <h1> 标记」报错详情，受影响 URL 赫然指向已做 308 重定向的旧域名 `https://www.eryuemu.com/`*
+*图 2：点击展开「多个 h1 标记」报错详情，受影响 URL 赫然指向已做 308 重定向的旧域名 https://www.eryuemu.com/*
 
 ![错误详情：Meta 描述过短报错总览](../../assets/bwt-seo-rule118-meta-too-short.png)
 *图 3：Bing 站长平台提示「Meta descriptions on many of your pages are too short.」（规则编号 118）*
