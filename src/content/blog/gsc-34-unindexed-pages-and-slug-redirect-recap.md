@@ -125,7 +125,7 @@ rename src/content/blog/{yukoku-translation-tech-retrospective.md => youketsu-lo
 #### ③ 解决方案：配置 Vercel 301 永久重定向
 改名本身是提升 URL 规范度的良好习惯，但**切忌让旧 URL 凭空变成死链**。正确的做法是配置 **HTTP 301 Moved Permanently（永久重定向）**，告诉搜索引擎与外部引流链接：“内容已永久搬迁到新地址，请把原有的权重和索引同步转移到新地址”。
 
-在项目根目录新建 [`vercel.json`](file:///w:/home/eryuemu/workspace/eryuemu-blog/vercel.json)：
+在项目根目录新建 `vercel.json`：
 
 ```json
 {
@@ -188,141 +188,141 @@ Google 爬虫在 8 月 21 日抓取评估后，判定详情页属于**薄弱内�
 3. **新增同标签关联心迹推荐（Related Thoughts）**：
    自动检索包含相同 Tag（如 `#AI`、`#随感`）的往期历史动态，大幅提升单页的信息丰富度与延伸阅读价值。
 
-191: 改造后，心迹详情页的 HTML 结构和有效信息量已显著超越列表页的一张单一卡片，彻底打破了内容 100% 镜像重合的死局，为搜索引擎提供了一条清晰、有深度、且具备强独立价值的索引路径！
-192: 
-193: #### ④ 后续演进与闭环（8/27）：Google 识别「论坛结构化数据」与推荐字段补全
-194: 在实施心迹详情页“增肌与结构化”改造后，Google 爬虫在 8 月 27 日的抓取中成功识别了这一独立微动态体系，并在 Search Console 发送了进一步的优化提醒邮件：
-195: 
-196: ![GSC 论坛结构化数据优化提醒邮件](../../assets/gsc-aug27-forum-structured-data-alert.png)
-197: *图 9：8 月 27 日 GSC 发送的「论坛结构化数据」优化建议（非严重问题）*
-198: 
-199: 1. **现象解析**：
-200:    - 邮件提示：*“在针对 https://eryuemu.com/ 提交的网址中检测到新的论坛结构化数据问题 —— 首要非严重问题：未填写字段‘url’”*。
-201:    - 这属于 Google 的**非严重改进建议（Warning）**，非致命报错，不会阻碍页面的正常收录与展示。
-202: 2. **根因剖析**：
-203:    - Google 将 `SocialMediaPosting` 与 `DiscussionForumPosting` 归纳在“论坛/社交微动态（Discussion Forum）”富媒体体系中；
-204:    - 根据 Google 论坛数据规范，它建议在 `SocialMediaPosting` 根对象中显式提供 `"url"` 属性（指向单条心迹的绝对直链）；
-205:    - 此前代码中仅提供了 `mainEntityOfPage` 与作者 `author.url`，未显式顶层写明 `"url"`。
-206: 3. **闭环修复**：
-207:    - 在 `src/pages/thoughts/[...id].astro` 的 JSON-LD 中补齐 `"url": new URL(Astro.url.pathname, Astro.site).href`、`"inLanguage": "zh-CN"` 以及图片数组 `image`；
-208:    - 结构化数据达到 100% 满分契合度，构建了从“内容增肌”到“实体富媒体标准”的完整闭环。
-209: 
-210: ---
-211: 
-212: ### 2.3 治理项三：备用网页（规范标记）攻坚 —— 尾斜杠强制 301 重定向与全站规范化
-213: 
-214: #### ① 报错现象与 URL 差异
-215: 查看「备用网页」详情与示例：
-216: 
-217: ![GSC 备用网页详情页](../../assets/gsc-aug23-alternate-page-drilldown.png)
-218: *图 10：GSC 备用网页详情页，受影响网页数为 4*
-219: 
-220: ![GSC 备用网页示例 URL 列表](../../assets/gsc-aug23-alternate-page-example-urls.png)
-221: *图 11：受影响的 4 个 URL 均为不带末尾斜杠的变体*
-222: 
-223: 受影响的 4 个 URL 分别为：
-224: - `https://eryuemu.com/blog/social-media-data-scraping-isolation`
-225: - `https://eryuemu.com/blog/claude-code-installation-guide`
-226: - `https://eryuemu.com/thoughts/2026-08-02-first-post`
-227: - `https://eryuemu.com/thoughts`
-228: 
-229: #### ② 渊源对比：8 月 20 日知识库 vs 8 月 24 日个人博客
-230: 很多站长会觉得眼熟——8 月 20 日在知识库（`guide.hbuwiki.top`）不是刚处理过「备用网页」吗？为什么博客又出现了？
-231: 
-232: 把两次事件并列对比，真相极其清晰：
-233: 
-234: | 站点与框架 | 冲突形式 | 产生根因 | 历史/本次解决方案 |
-235: | :--- | :--- | :--- | :--- |
-236: | **知识库**（VitePress） | `.html` 后缀打架 | 链接写 `/transfer`，但代码声明 `/transfer.html` 为正主 | 在 `.vitepress/config.mts` 中开启 **`cleanUrls: true`**（统一去掉 `.html`） |
-237: | **个人博客**（Astro） | **尾斜杠 `/` 打架** | 爬虫探测 `/guide`，但代码声明 `/guide/` 为正主 | 在 `astro.config.mjs` 中开启 **`trailingSlash: 'always'`**（统一定死带 `/` 并 301 强跳） |
-238: 
-239: #### ③ 终极治理：为什么选择 301 强跳而非放置不管？
-240: * **放着不管（情况 A）**：虽然 Canonical 会生效收敛，但无斜杠变体依然返回 200 网页，爬虫会浪费抓取配额，且 GSC 列表中会永久挂着备用页记录。
-241: * **强制 301 重定向（情况 B，业界最佳实践）**：
-242:   在 `astro.config.mjs` 中显式指定：
-243:   ```javascript
-244:   export default defineConfig({
-245:       site: 'https://eryuemu.com',
-246:       trailingSlash: 'always', // 全站统一强制尾斜杠
-247:       ...
-248:   ```
-249:   同时在 `vercel.json` 中增加 `"trailingSlash": true`。
-250: 
-251: 这样改造后，任何人或爬虫访问不带斜杠的地址，服务器将在 **10 毫秒内直接返回 301 跳转到带斜杠的标准地址**。爬虫在下一次回访时发现无斜杠地址全为重定向，**“备用网页”列表即可在 1~2 周内彻底清零消失**！
-252: 
-253: ---
-254: 
-255: ## 三、透视机制：3 项符合预期的正常状态与排队账单
-256: 
-257: 除了上述 3 项已完成主动技术治理外，其余 3 类未编入索引原因均属于**搜索引擎的内部运行规律与预期排队周期**。
-258: 
-259: ---
-260: 
-261: ### 3.1 网页会自动重定向 —— 5 个页面（验证推进中）
-262: 
-263: 查看「网页会自动重定向」详情：
-264: 
-265: ![GSC 网页会自动重定向详情页](../../assets/gsc-aug23-page-redirect-drilldown.png)
-266: *图 12：GSC 网页会自动重定向详情页，显示「验证已开始：2026/8/18」*
-267: 
-268: ![GSC 自动重定向受影响的 5 个 URL 示例](../../assets/gsc-aug23-page-redirect-example-urls.png)
-269: *图 13：受影响 URL 明细列表*
-270: 
-271: 受影响页面包括 `/about/`、`/blog/`、`/thoughts/...` 等基础页面。
-272: 
-273: **深度原理**：
-274: 这正是此前博客文章《GSC 提示「网页会自动重定向」未编入索引？根域名与 www 规范化全复盘》中详细排查过的 **www ➔ 根域名（308 Permanent Redirect）反转历史**。
-275: 
-276: 截图中赫然标注着：**「验证已开始，开始日期：2026/8/18」**。
-277: Googlebot 验证重定向并非瞬间完成，它需要对整站网络拓扑做多轮重试与缓存刷新，周期通常为 **1 ~ 3 周**。这封信件只是 GSC 系统流水线生成的周期性状态摘要。
-278: 
-279: > [!NOTE]
-280: > **结论**：验证已经在后台队列平稳推进，**无需任何重复操作，静候完成即可**。
-281: 
-282: ---
-283: 
-284: ### 3.2 已抓取 - 尚未编入索引 —— 3 个页面
-285: 
-286: 查看「已抓取 - 尚未编入索引」详情：
-287: 
-288: ![GSC 已抓取尚未编入索引详情页](../../assets/gsc-aug23-crawled-not-indexed-drilldown.png)
-289: *图 14：已抓取尚未编入索引详情页*
-290: 
-291: ![GSC 已抓取尚未编入索引 URL 列表](../../assets/gsc-aug23-crawled-not-indexed-example-urls.png)
-292: *图 15：抓取日期为 8 月 22 日的新近文章列表*
-293: 
-294: 受影响的 3 篇均为 8 月 22 日刚抓取的近期文章（《建站心法》、《水龙吟漫评》、《Bing 站长 SEO 复盘》）。爬虫已经完成了网络请求并存入临时库，目前处于内容质量、语义结构与索引价值评估阶段。新站文章抓取后经过 1~4 周排队后转入已收录状态是完全正常的节奏。
-295: 
-296: ---
-297: 
-298: ### 3.3 已发现 - 尚未编入索引 —— 20 个页面
-299: 
-300: 查看「已发现 - 尚未编入索引」详情：
-301: 
-302: ![GSC 已发现尚未编入索引详情页](../../assets/gsc-aug23-discovered-not-indexed-drilldown.png)
-303: *图 16：已发现尚未编入索引详情页，显示「验证已开始：2026/8/20」*
-304: 
-305: ![GSC 已发现尚未编入索引 URL 列表](../../assets/gsc-aug23-discovered-not-indexed-example-urls.png)
-306: *图 17：等待抓取分配的 20 个文章 URL*
-307: 
-308: 这批 URL 在 8 月 20 日全站批量校准发布时间戳后，`sitemap-index.xml` 的全量 `lastmod` 发生变动，触发 Googlebot 将全站文章重新加入调度池。由于新域名的爬取配额（Crawl Budget）有限，系统正在分批逐步派发抓取任务。
-309: 
-310: ---
-311: 
-312: ## 四、经验提炼：独立博客改名与多站 SEO 防坑守则
-313: 
-314: 经历这一轮 6 大维度的全面复盘与实战排查，可以总结出以下 3 条高价值建站法则：
-315: 
-316: ### 1. URL 即永久资产，改名必配 301
-317: * 在静态博客初期规划内容时，尽量确立稳定、语义清晰的英文 slug；
-318: * 如果后续必须重命名已有文章的 Markdown 文件名，**切记在第一时间于 `vercel.json` 或网关层补全 301 永久重定向规则**，避免搜索引擎在下一次回访时撞上 404。
-319: 
-320: ### 2. 动态/微随笔的 SEO 破局之道：增肌内链与结构化数据
-321: * 对于类似 Twitter / 朋友圈的短动态，如果既想提供沉浸式的单页互动体验，又想被搜索引擎独立收录：
-322:   * 务必注入 `SocialMediaPosting` 或 `BlogPosting` 结构化微数据（并注意补全 `url`、`inLanguage` 等标准推荐字段，避免 GSC 触发论坛/社交数据警告）；
-323:   * 通过前后篇导航与相关推荐丰富正文信息量，打破与列表页 100% 镜像重合的死局。
-324: 
-325: ### 3. 尾斜杠与 Clean URLs 的全站收敛
-326: * 不同框架对 URL 后缀的处理策略不同：
-327:   * **VitePress 体系**：用 `cleanUrls: true` 统一抹平 `.html`；
-328:   * **Astro 体系**：用 `trailingSlash: 'always'` 统一定死带 `/` 并在服务端开启 301 强跳，杜绝任何中间态备用页。
+改造后，心迹详情页的 HTML 结构和有效信息量已显著超越列表页的一张单一卡片，彻底打破了内容 100% 镜像重合的死局，为搜索引擎提供了一条清晰、有深度、且具备强独立价值的索引路径！
+
+#### ④ 后续演进与闭环（8/27）：Google 识别「论坛结构化数据」与推荐字段补全
+在实施心迹详情页“增肌与结构化”改造后，Google 爬虫在 8 月 27 日的抓取中成功识别了这一独立微动态体系，并在 Search Console 发送了进一步的优化提醒邮件：
+
+![GSC 论坛结构化数据优化提醒邮件](../../assets/gsc-aug27-forum-structured-data-alert.png)
+*图 9：8 月 27 日 GSC 发送的「论坛结构化数据」优化建议（非严重问题）*
+
+1. **现象解析**：
+   - 邮件提示：*“在针对 https://eryuemu.com/ 提交的网址中检测到新的论坛结构化数据问题 —— 首要非严重问题：未填写字段‘url’”*。
+   - 这属于 Google 的**非严重改进建议（Warning）**，非致命报错，不会阻碍页面的正常收录与展示。
+2. **根因剖析**：
+   - Google 将 `SocialMediaPosting` 与 `DiscussionForumPosting` 归纳在“论坛/社交微动态（Discussion Forum）”富媒体体系中；
+   - 根据 Google 论坛数据规范，它建议在 `SocialMediaPosting` 根对象中显式提供 `"url"` 属性（指向单条心迹的绝对直链）；
+   - 此前代码中仅提供了 `mainEntityOfPage` 与作者 `author.url`，未显式顶层写明 `"url"`。
+3. **闭环修复**：
+   - 在 `src/pages/thoughts/[...id].astro` 的 JSON-LD 中补齐 `"url": new URL(Astro.url.pathname, Astro.site).href`、`"inLanguage": "zh-CN"` 以及图片数组 `image`；
+   - 结构化数据达到 100% 满分契合度，构建了从“内容增肌”到“实体富媒体标准”的完整闭环。
+
+---
+
+### 2.3 治理项三：备用网页（规范标记）攻坚 —— 尾斜杠强制 301 重定向与全站规范化
+
+#### ① 报错现象与 URL 差异
+查看「备用网页」详情与示例：
+
+![GSC 备用网页详情页](../../assets/gsc-aug23-alternate-page-drilldown.png)
+*图 10：GSC 备用网页详情页，受影响网页数为 4*
+
+![GSC 备用网页示例 URL 列表](../../assets/gsc-aug23-alternate-page-example-urls.png)
+*图 11：受影响的 4 个 URL 均为不带末尾斜杠的变体*
+
+受影响的 4 个 URL 分别为：
+- `https://eryuemu.com/blog/social-media-data-scraping-isolation`
+- `https://eryuemu.com/blog/claude-code-installation-guide`
+- `https://eryuemu.com/thoughts/2026-08-02-first-post`
+- `https://eryuemu.com/thoughts`
+
+#### ② 渊源对比：8 月 20 日知识库 vs 8 月 24 日个人博客
+很多站长会觉得眼熟——8 月 20 日在知识库（`guide.hbuwiki.top`）不是刚处理过「备用网页」吗？为什么博客又出现了？
+
+把两次事件并列对比，真相极其清晰：
+
+| 站点与框架 | 冲突形式 | 产生根因 | 历史/本次解决方案 |
+| :--- | :--- | :--- | :--- |
+| **知识库**（VitePress） | `.html` 后缀打架 | 链接写 `/transfer`，但代码声明 `/transfer.html` 为正主 | 在 `.vitepress/config.mts` 中开启 **`cleanUrls: true`**（统一去掉 `.html`） |
+| **个人博客**（Astro） | **尾斜杠 `/` 打架** | 爬虫探测 `/guide`，但代码声明 `/guide/` 为正主 | 在 `astro.config.mjs` 中开启 **`trailingSlash: 'always'`**（统一定死带 `/` 并 301 强跳） |
+
+#### ③ 终极治理：为什么选择 301 强跳而非放置不管？
+* **放着不管（情况 A）**：虽然 Canonical 会生效收敛，但无斜杠变体依然返回 200 网页，爬虫会浪费抓取配额，且 GSC 列表中会永久挂着备用页记录。
+* **强制 301 重定向（情况 B，业界最佳实践）**：
+  在 `astro.config.mjs` 中显式指定：
+  ```javascript
+  export default defineConfig({
+      site: 'https://eryuemu.com',
+      trailingSlash: 'always', // 全站统一强制尾斜杠
+      ...
+  ```
+  同时在 `vercel.json` 中增加 `"trailingSlash": true`。
+
+这样改造后，任何人或爬虫访问不带斜杠的地址，服务器将在 **10 毫秒内直接返回 301 跳转到带斜杠的标准地址**。爬虫在下一次回访时发现无斜杠地址全为重定向，**“备用网页”列表即可在 1~2 周内彻底清零消失**！
+
+---
+
+## 三、透视机制：3 项符合预期的正常状态与排队账单
+
+除了上述 3 项已完成主动技术治理外，其余 3 类未编入索引原因均属于**搜索引擎的内部运行规律与预期排队周期**。
+
+---
+
+### 3.1 网页会自动重定向 —— 5 个页面（验证推进中）
+
+查看「网页会自动重定向」详情：
+
+![GSC 网页会自动重定向详情页](../../assets/gsc-aug23-page-redirect-drilldown.png)
+*图 12：GSC 网页会自动重定向详情页，显示「验证已开始：2026/8/18」*
+
+![GSC 自动重定向受影响的 5 个 URL 示例](../../assets/gsc-aug23-page-redirect-example-urls.png)
+*图 13：受影响 URL 明细列表*
+
+受影响页面包括 `/about/`、`/blog/`、`/thoughts/...` 等基础页面。
+
+**深度原理**：
+这正是此前博客文章《GSC 提示「网页会自动重定向」未编入索引？根域名与 www 规范化全复盘》中详细排查过的 **www ➔ 根域名（308 Permanent Redirect）反转历史**。
+
+截图中赫然标注着：**「验证已开始，开始日期：2026/8/18」**。
+Googlebot 验证重定向并非瞬间完成，它需要对整站网络拓扑做多轮重试与缓存刷新，周期通常为 **1 ~ 3 周**。这封信件只是 GSC 系统流水线生成的周期性状态摘要。
+
+> [!NOTE]
+> **结论**：验证已经在后台队列平稳推进，**无需任何重复操作，静候完成即可**。
+
+---
+
+### 3.2 已抓取 - 尚未编入索引 —— 3 个页面
+
+查看「已抓取 - 尚未编入索引」详情：
+
+![GSC 已抓取尚未编入索引详情页](../../assets/gsc-aug23-crawled-not-indexed-drilldown.png)
+*图 14：已抓取尚未编入索引详情页*
+
+![GSC 已抓取尚未编入索引 URL 列表](../../assets/gsc-aug23-crawled-not-indexed-example-urls.png)
+*图 15：抓取日期为 8 月 22 日的新近文章列表*
+
+受影响的 3 篇均为 8 月 22 日刚抓取的近期文章（《建站心法》、《水龙吟漫评》、《Bing 站长 SEO 复盘》）。爬虫已经完成了网络请求并存入临时库，目前处于内容质量、语义结构与索引价值评估阶段。新站文章抓取后经过 1~4 周排队后转入已收录状态是完全正常的节奏。
+
+---
+
+### 3.3 已发现 - 尚未编入索引 —— 20 个页面
+
+查看「已发现 - 尚未编入索引」详情：
+
+![GSC 已发现尚未编入索引详情页](../../assets/gsc-aug23-discovered-not-indexed-drilldown.png)
+*图 16：已发现尚未编入索引详情页，显示「验证已开始：2026/8/20」*
+
+![GSC 已发现尚未编入索引 URL 列表](../../assets/gsc-aug23-discovered-not-indexed-example-urls.png)
+*图 17：等待抓取分配的 20 个文章 URL*
+
+这批 URL 在 8 月 20 日全站批量校准发布时间戳后，`sitemap-index.xml` 的全量 `lastmod` 发生变动，触发 Googlebot 将全站文章重新加入调度池。由于新域名的爬取配额（Crawl Budget）有限，系统正在分批逐步派发抓取任务。
+
+---
+
+## 四、经验提炼：独立博客改名与多站 SEO 防坑守则
+
+经历这一轮 6 大维度的全面复盘与实战排查，可以总结出以下 3 条高价值建站法则：
+
+### 1. URL 即永久资产，改名必配 301
+* 在静态博客初期规划内容时，尽量确立稳定、语义清晰的英文 slug；
+* 如果后续必须重命名已有文章的 Markdown 文件名，**切记在第一时间于 `vercel.json` 或网关层补全 301 永久重定向规则**，避免搜索引擎在下一次回访时撞上 404。
+
+### 2. 动态/微随笔的 SEO 破局之道：增肌内链与结构化数据
+* 对于类似 Twitter / 朋友圈的短动态，如果既想提供沉浸式的单页互动体验，又想被搜索引擎独立收录：
+  * 务必注入 `SocialMediaPosting` 或 `BlogPosting` 结构化微数据（并注意补全 `url`、`inLanguage` 等标准推荐字段，避免 GSC 触发论坛/社交数据警告）；
+  * 通过前后篇导航与相关推荐丰富正文信息量，打破与列表页 100% 镜像重合的死局。
+
+### 3. 尾斜杠与 Clean URLs 的全站收敛
+* 不同框架对 URL 后缀的处理策略不同：
+  * **VitePress 体系**：用 `cleanUrls: true` 统一抹平 `.html`；
+  * **Astro 体系**：用 `trailingSlash: 'always'` 统一定死带 `/` 并在服务端开启 301 强跳，杜绝任何中间态备用页。
