@@ -1,0 +1,503 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { SITE_TITLE } from '../consts';
+import { projects } from '../data/projects';
+
+const featuredProjects = projects.filter((p) => p.category === 'featured');
+const toolProjects = projects.filter((p) => p.category === 'tools');
+
+// 搜索引擎结构化数据 (Schema.org JSON-LD)，向 Google / Bing / 百度 等爬虫宣告知识图谱实体与项目从属关系
+const jsonLd = {
+	'@context': 'https://schema.org',
+	'@graph': [
+		{
+			'@type': 'Person',
+			'@id': 'https://eryuemu.com/#person',
+			name: 'eryuemu',
+			alternateName: '二月木',
+			url: 'https://eryuemu.com',
+			sameAs: [
+				'https://github.com/eryuemu',
+				'https://space.bilibili.com/3461564136949896',
+			],
+		},
+		{
+			'@type': 'ItemList',
+			name: 'eryuemu Projects Showcase',
+			description: '二月木（eryuemu）开发与核心贡献的开源项目与实用工具集',
+			itemListElement: projects.map((p, idx) => ({
+				'@type': p.iconType === 'wiki' || p.iconType === 'web' ? 'WebSite' : 'SoftwareSourceCode',
+				position: idx + 1,
+				name: p.title,
+				description: p.desc,
+				programmingLanguage: p.tags,
+				author: {
+					'@id': 'https://eryuemu.com/#person',
+				},
+				url: p.links.find((l) => l.type === 'site')?.url || p.links[0]?.url,
+				codeRepository: p.links.find((l) => l.type === 'github' || l.type === 'upstream')?.url,
+			})),
+		},
+	],
+};
+---
+
+<!doctype html>
+<html lang="zh-CN">
+	<head>
+		<BaseHead
+			title={`项目 — ${SITE_TITLE}`}
+			description="eryuemu（二月木）的个人开源作品、独立开发项目与核心贡献工具集。"
+		/>
+		<!-- 爬虫友好：JSON-LD 知识图谱结构化标记 -->
+		<script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+
+		<style>
+			main {
+				max-width: 860px;
+				margin: 0 auto;
+				padding-top: 6rem;
+				padding-bottom: 4rem;
+			}
+
+			.projects-header {
+				margin-bottom: 3rem;
+				padding-bottom: 1.5rem;
+				border-bottom: 1px solid var(--border);
+			}
+
+			.projects-header h1 {
+				font-size: 2.2rem;
+				font-weight: 700;
+				margin: 0 0 0.8rem 0;
+				color: var(--text-primary);
+				letter-spacing: -0.02em;
+			}
+
+			.projects-subtitle {
+				font-size: 1.05rem;
+				color: var(--text-secondary);
+				line-height: 1.6;
+				margin: 0;
+			}
+
+			.section-title {
+				font-size: 1.25rem;
+				font-weight: 600;
+				margin: 0 0 1.5rem 0;
+				color: var(--text-primary);
+				display: flex;
+				align-items: center;
+				gap: 0.6rem;
+			}
+
+			.section-title .section-icon {
+				display: inline-flex;
+				align-items: center;
+				color: var(--text-secondary);
+			}
+
+			/* Grid layout */
+			.projects-grid {
+				display: grid;
+				grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+				gap: 1.5rem;
+				margin-bottom: 3.5rem;
+			}
+
+			@media (max-width: 640px) {
+				.projects-grid {
+					grid-template-columns: 1fr;
+				}
+			}
+
+			/* Project Card */
+			.project-card {
+				background: var(--bg);
+				border: 1px solid var(--border);
+				border-radius: var(--radius, 12px);
+				padding: 1.5rem;
+				display: flex;
+				flex-direction: column;
+				justify-content: space-between;
+				transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+				position: relative;
+			}
+
+			.project-card:hover {
+				transform: translateY(-3px);
+				border-color: var(--border-hover, var(--text-muted));
+				box-shadow: 0 8px 24px rgba(0, 0, 0, 0.05);
+			}
+
+			:global(html.dark) .project-card:hover {
+				box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+			}
+
+			.card-header {
+				display: flex;
+				align-items: flex-start;
+				justify-content: space-between;
+				gap: 1rem;
+				margin-bottom: 0.75rem;
+			}
+
+			.card-title-group {
+				display: flex;
+				align-items: center;
+				gap: 0.75rem;
+				flex: 1;
+				min-width: 0;
+			}
+
+			.project-icon {
+				width: 38px;
+				height: 38px;
+				border-radius: 8px;
+				background: var(--bg-secondary);
+				border: 1px solid var(--border);
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				color: var(--text-primary);
+				flex-shrink: 0;
+			}
+
+			.title-role-wrap {
+				display: flex;
+				flex-direction: column;
+				gap: 0.25rem;
+				min-width: 0;
+			}
+
+			.project-title {
+				font-size: 1.15rem;
+				font-weight: 600;
+				color: var(--text-primary);
+				margin: 0;
+				line-height: 1.3;
+				word-break: break-word;
+			}
+
+			.role-badge {
+				font-size: 0.72rem;
+				font-weight: 500;
+				color: var(--text-muted);
+				display: inline-flex;
+				align-items: center;
+				gap: 0.25rem;
+			}
+
+			.role-badge.highlight {
+				color: #3b82f6;
+			}
+
+			.status-badge {
+				display: inline-flex;
+				align-items: center;
+				gap: 0.35rem;
+				font-size: 0.75rem;
+				font-weight: 500;
+				padding: 0.2rem 0.55rem;
+				border-radius: 9999px;
+				background: rgba(16, 185, 129, 0.1);
+				color: #10b981;
+				border: 1px solid rgba(16, 185, 129, 0.2);
+				flex-shrink: 0;
+			}
+
+			.status-dot {
+				width: 6px;
+				height: 6px;
+				border-radius: 50%;
+				background-color: currentColor;
+			}
+
+			.project-desc {
+				font-size: 0.92rem;
+				color: var(--text-secondary);
+				line-height: 1.6;
+				margin: 0 0 1.25rem 0;
+				flex-grow: 1;
+			}
+
+			.card-footer {
+				margin-top: auto;
+				display: flex;
+				flex-direction: column;
+				gap: 1rem;
+				padding-top: 1rem;
+				border-top: 1px dashed var(--border);
+			}
+
+			.tags-list {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 0.4rem;
+			}
+
+			.tag-item {
+				font-size: 0.78rem;
+				padding: 0.2rem 0.6rem;
+				border-radius: 4px;
+				background: var(--bg-secondary);
+				color: var(--text-secondary);
+				border: 1px solid var(--border);
+				font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+			}
+
+			.links-row {
+				display: flex;
+				flex-wrap: wrap;
+				align-items: center;
+				gap: 0.6rem;
+			}
+
+			.action-link {
+				display: inline-flex;
+				align-items: center;
+				gap: 0.4rem;
+				font-size: 0.83rem;
+				font-weight: 500;
+				color: var(--text-primary);
+				padding: 0.35rem 0.75rem;
+				border-radius: var(--radius, 6px);
+				background: var(--bg-secondary);
+				border: 1px solid var(--border);
+				text-decoration: none;
+				transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+			}
+
+			.action-link:hover {
+				background: var(--text-primary);
+				color: var(--bg);
+				border-color: var(--text-primary);
+			}
+
+			.action-link.primary {
+				border-color: var(--border-hover, var(--text-muted));
+			}
+
+			.action-link svg {
+				flex-shrink: 0;
+			}
+		</style>
+	</head>
+	<body>
+		<Header />
+		<main>
+			<header class="projects-header">
+				<h1>项目</h1>
+				<p class="projects-subtitle">
+					这里记录了我开发的一些开源作品、独立网站与核心贡献的实用工具。
+				</p>
+			</header>
+
+			<!-- 🌟 精选项目 -->
+			<section>
+				<h2 class="section-title">
+					<span class="section-icon">
+						<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+						</svg>
+					</span>
+					精选项目
+				</h2>
+				<div class="projects-grid">
+					{
+						featuredProjects.map((project) => (
+							<article class="project-card" itemscope itemtype="https://schema.org/SoftwareSourceCode">
+								<div class="card-header">
+									<div class="card-title-group">
+										<div class="project-icon">
+											{project.iconType === 'web' && (
+												<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+													<circle cx="12" cy="12" r="10"></circle>
+													<line x1="2" y1="12" x2="22" y2="12"></line>
+													<path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+												</svg>
+											)}
+											{project.iconType === 'wiki' && (
+												<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+													<path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+													<path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+												</svg>
+											)}
+										</div>
+										<div class="title-role-wrap">
+											<h3 class="project-title" itemprop="name">{project.title}</h3>
+											{project.role && <span class="role-badge">{project.role}</span>}
+										</div>
+									</div>
+									{project.status && (
+										<span class="status-badge">
+											<span class="status-dot"></span>
+											{project.status === 'active' ? 'Active' : project.status}
+										</span>
+									)}
+								</div>
+
+								<p class="project-desc" itemprop="description">{project.desc}</p>
+
+								<div class="card-footer">
+									<div class="tags-list">
+										{project.tags.map((tag) => (
+											<span class="tag-item" itemprop="programmingLanguage">{tag}</span>
+										))}
+									</div>
+
+									<div class="links-row">
+										{project.links.map((link) => (
+											<a
+												href={link.url}
+												target="_blank"
+												rel="noopener me"
+												class={`action-link ${link.type === 'site' ? 'primary' : ''}`}
+												aria-label={link.name}
+												itemprop="url"
+											>
+												{link.type === 'site' && (
+													<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+														<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+														<polyline points="15 3 21 3 21 9"></polyline>
+														<line x1="10" y1="14" x2="21" y2="3"></line>
+													</svg>
+												)}
+												{link.type === 'github' && (
+													<svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor">
+														<path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"></path>
+													</svg>
+												)}
+												<span>{link.name}</span>
+											</a>
+										))}
+									</div>
+								</div>
+							</article>
+						))
+					}
+				</div>
+			</section>
+
+			<!-- 🛠️ 实用工具与实验 -->
+			<section>
+				<h2 class="section-title">
+					<span class="section-icon">
+						<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+						</svg>
+					</span>
+					工具与实验
+				</h2>
+				<div class="projects-grid">
+					{
+						toolProjects.map((project) => (
+							<article class="project-card" itemscope itemtype="https://schema.org/SoftwareSourceCode">
+								<div class="card-header">
+									<div class="card-title-group">
+										<div class="project-icon">
+											{project.iconType === 'keyboard' && (
+												<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+													<rect x="2" y="4" width="20" height="16" rx="2" ry="2"></rect>
+													<line x1="6" y1="8" x2="6" y2="8"></line>
+													<line x1="10" y1="8" x2="10" y2="8"></line>
+													<line x1="14" y1="8" x2="14" y2="8"></line>
+													<line x1="18" y1="8" x2="18" y2="8"></line>
+													<line x1="6" y1="12" x2="6" y2="12"></line>
+													<line x1="10" y1="12" x2="10" y2="12"></line>
+													<line x1="14" y1="12" x2="14" y2="12"></line>
+													<line x1="18" y1="12" x2="18" y2="12"></line>
+													<line x1="8" y1="16" x2="16" y2="16"></line>
+												</svg>
+											)}
+											{project.iconType === 'ai' && (
+												<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+													<path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48l2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48l2.83-2.83"></path>
+													<circle cx="12" cy="12" r="4"></circle>
+												</svg>
+											)}
+											{project.iconType === 'script' && (
+												<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+													<polyline points="4 17 10 11 4 5"></polyline>
+													<line x1="12" y1="19" x2="20" y2="19"></line>
+												</svg>
+											)}
+										</div>
+										<div class="title-role-wrap">
+											<h3 class="project-title" itemprop="name">{project.title}</h3>
+											{project.role && (
+												<span class={`role-badge ${project.role.includes('PR') ? 'highlight' : ''}`}>
+													{project.role}
+												</span>
+											)}
+										</div>
+									</div>
+									{project.status && (
+										<span class="status-badge">
+											<span class="status-dot"></span>
+											{project.status === 'active' ? 'Active' : project.status}
+										</span>
+									)}
+								</div>
+
+								<p class="project-desc" itemprop="description">{project.desc}</p>
+
+								<div class="card-footer">
+									<div class="tags-list">
+										{project.tags.map((tag) => (
+											<span class="tag-item" itemprop="programmingLanguage">{tag}</span>
+										))}
+									</div>
+
+									<div class="links-row">
+										{project.links.length > 0 ? (
+											project.links.map((link) => (
+												<a
+													href={link.url}
+													target="_blank"
+													rel="noopener me"
+													class={`action-link ${link.type === 'upstream' ? 'primary' : ''}`}
+													aria-label={link.name}
+													itemprop="url"
+												>
+													{link.type === 'upstream' && (
+														<svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor">
+															<path d="M5 3.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm0 2.122a2.25 2.25 0 1 0-1.5 0v5.256a2.25 2.25 0 1 0 1.5 0V5.372Zm5.5-2.122a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM12 5.372a2.25 2.25 0 1 0-1.5 0V7.5a.75.75 0 0 1-.75.75H6.5a.75.75 0 0 1 0-1.5h2.25V5.372ZM4.25 12a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Zm7.75 0a.75.75 0 1 0 0 1.5.75.75 0 0 0 0-1.5Z"></path>
+														</svg>
+													)}
+													{link.type === 'github' && (
+														<svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor">
+															<path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8z"></path>
+														</svg>
+													)}
+													{link.type === 'site' && (
+														<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+															<path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+															<polyline points="15 3 21 3 21 9"></polyline>
+															<line x1="10" y1="14" x2="21" y2="3"></line>
+														</svg>
+													)}
+													<span>{link.name}</span>
+												</a>
+											))
+										) : (
+											<span class="action-link" style="opacity: 0.6; cursor: default;">
+												<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+													<polyline points="20 6 9 17 4 12"></polyline>
+												</svg>
+												<span>本地运行 / 脚本</span>
+											</span>
+										)}
+									</div>
+								</div>
+							</article>
+						))
+					}
+				</div>
+			</section>
+		</main>
+		<Footer />
+	</body>
+</html>
