@@ -88,15 +88,18 @@ const { title, description, image = FallbackImage } = Astro.props;
   title/cover, avoiding dropped frames, animation clipping, or skipped morphs.
 -->
 <script>
-	const pageSlug = () => {
+	const getArticleSlug = (doc = document) => {
+		const h1 = doc ? doc.querySelector('h1[data-vt-slug]') : null;
+		if (h1) return h1.getAttribute('data-vt-slug');
 		const m = window.location.pathname.match(/\/blog\/([^\/]+)\//);
 		return m ? decodeURIComponent(m[1]) : null;
 	};
+
 	function applyPostVT(root, activeSlug) {
 		if (!root) return;
 		root.querySelectorAll('[data-vt-slug]').forEach((el) => {
 			const slug = el.getAttribute('data-vt-slug');
-			if (activeSlug !== null && slug === activeSlug) {
+			if (activeSlug !== null && activeSlug !== undefined && slug === activeSlug) {
 				// Activate the target article's view-transition-name
 				el.style.viewTransitionName = '';
 			} else {
@@ -105,29 +108,38 @@ const { title, description, image = FallbackImage } = Astro.props;
 			}
 		});
 	}
+
 	let targetSlug = null;
-	// Capture click to lock in target slug before navigation begins
+
+	// Capture click to lock in target slug when clicking an article link
 	document.addEventListener(
 		'click',
 		(e) => {
 			const a = e.target instanceof Element ? e.target.closest('a') : null;
 			if (!a) return;
 			const m = (a.href || '').match(/\/blog\/([^\/]+)\//);
-			targetSlug = m ? decodeURIComponent(m[1]) : pageSlug();
+			targetSlug = m ? decodeURIComponent(m[1]) : getArticleSlug(document);
 			applyPostVT(document, targetSlug);
 		},
 		true
 	);
-	// Before DOM swap, isolate target slug on incoming newDocument
+
+	// Before DOM swap, if targetSlug wasn't set by click (e.g. browser Back button),
+	// read the slug from the article page we are currently leaving in document!
 	document.addEventListener('astro:before-swap', (e) => {
-		if (!targetSlug) targetSlug = pageSlug();
+		if (!targetSlug) {
+			targetSlug = getArticleSlug(document);
+		}
+		applyPostVT(document, targetSlug);
 		applyPostVT(e.newDocument, targetSlug);
 	});
+
 	// Sync current page on initial load and after navigation
 	function syncPostVT() {
-		targetSlug = pageSlug();
+		targetSlug = getArticleSlug(document);
 		applyPostVT(document, targetSlug);
 	}
+
 	syncPostVT();
 	document.addEventListener('astro:page-load', syncPostVT);
 </script>
