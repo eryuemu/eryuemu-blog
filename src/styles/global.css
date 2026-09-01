@@ -476,52 +476,54 @@ html[data-show-ai="false"] .grid-card-item[data-type="ai-organized"] {
 /* ─── View Transitions · Shared Element Morphing ─── */
 
 /* 1. Default shared-element morph timing (also covers the dynamic
-   `post-title-*` / `post-cover-*` names generated per post). Declared first so
-   the specific group rules below can override it. */
+   `post-title-*` / `post-cover-*` names generated per post). */
 ::view-transition-group(*) {
-	animation-duration: 0.7s;
-	animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+	animation-duration: 0.48s;
+	animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Clean shared-element crossfade. Overrides Astro's default 180ms
-   `plus-lighter` fade, which double-exposes (ghosts/blurs) text while it
-   morphs between two font sizes. Kept in sync with the morph duration above. */
+/* Crisp shared-element crossfade. Disables plus-lighter color blending
+   which creates fuzzy text halos, and fades out the outgoing scaled bitmap
+   rapidly while the incoming crisp text glides into position. */
 ::view-transition-old(*) {
-	animation: vt-shared-out 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+	mix-blend-mode: normal;
+	animation: vt-shared-out 0.18s cubic-bezier(0.4, 0, 1, 1) both;
 }
 
 ::view-transition-new(*) {
-	animation: vt-shared-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+	mix-blend-mode: normal;
+	animation: vt-shared-in 0.48s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 @keyframes vt-shared-out {
-	to { opacity: 0; }
+	0% { opacity: 1; }
+	100% { opacity: 0; }
 }
 
 @keyframes vt-shared-in {
-	from { opacity: 0; }
+	0% { opacity: 0; }
+	35% { opacity: 1; }
+	100% { opacity: 1; }
 }
 
 /* 2. Root cross-fade ─────────────────────────────────────────────
-   ⚠️ Never set `animation: none` (or a 0s duration) on
-   `::view-transition-group(root)`: Chromium then treats the whole transition
-   as instantly finished and destroys every shared-element animation (title /
-   cover / avatar) at frame 0. Keep the group duration positive. */
+   Keep the group duration positive so Chromium never skips the transition. */
 ::view-transition-group(root) {
-	animation-duration: 0.7s;
+	animation-duration: 0.48s;
 	animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* The outgoing page fades out quickly so full-page text never lingers at a
-   half-opacity "double screenshot" (the blurry/ghosted-text bug). */
+   half-opacity double screenshot. */
 ::view-transition-old(root) {
-	animation: vt-root-exit 0.22s cubic-bezier(0.4, 0, 1, 1) both;
+	mix-blend-mode: normal;
+	animation: vt-root-exit 0.18s cubic-bezier(0.4, 0, 1, 1) both;
 }
 
-/* The incoming page slides up 12px + fades in — a gentle entrance instead of
-   a hard pop — while staying vector-crisp. */
+/* The incoming page slides up 8px + fades in cleanly. */
 ::view-transition-new(root) {
-	animation: vt-root-enter 0.66s cubic-bezier(0.16, 1, 0.3, 1) both;
+	mix-blend-mode: normal;
+	animation: vt-root-enter 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 @keyframes vt-root-exit {
@@ -531,7 +533,7 @@ html[data-show-ai="false"] .grid-card-item[data-type="ai-organized"] {
 @keyframes vt-root-enter {
 	from {
 		opacity: 0;
-		transform: translateY(12px);
+		transform: translateY(8px);
 	}
 	to {
 		opacity: 1;
