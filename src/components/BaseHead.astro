@@ -134,7 +134,7 @@ const { title, description, image = FallbackImage } = Astro.props;
 	document.addEventListener('astro:page-load', syncPostVT);
 </script>
 
-<!-- Theme Setup Script -->
+<!-- Theme & Filter Preferences Setup Script -->
 <script is:inline>
 	const getTheme = () => {
 		if (typeof localStorage !== 'undefined' && localStorage.getItem('theme')) {
@@ -151,6 +151,23 @@ const { title, description, image = FallbackImage } = Astro.props;
 	} else {
 		document.documentElement.classList.remove('dark');
 	}
+
+	// Synchronize AI filter visibility preference before view transitions render
+	const syncAiFilterAttr = (doc) => {
+		const showAi = typeof localStorage !== 'undefined' && localStorage.getItem('eryuemu_blog_show_ai') === 'true';
+		doc.documentElement.setAttribute('data-show-ai', showAi ? 'true' : 'false');
+	};
+
+	syncAiFilterAttr(document);
+
+	document.addEventListener('astro:before-swap', (e) => {
+		syncAiFilterAttr(e.newDocument);
+		if (localStorage.getItem('theme') === 'dark') {
+			e.newDocument.documentElement.classList.add('dark');
+		} else {
+			e.newDocument.documentElement.classList.remove('dark');
+		}
+	});
 
 	document.addEventListener('astro:after-swap', () => {
 		if (localStorage.getItem('theme') === 'dark') {

@@ -445,7 +445,7 @@ const posts = (await getCollection('blog')).sort(
 				<ul class="posts-list" id="blog-posts-list">
 					{
 						posts.map((post) => (
-							<li class="post-item fade-in" data-category={post.data.category || '开发'} data-type={post.data.type || 'ai-organized'}>
+							<li class="post-item" data-category={post.data.category || '开发'} data-type={post.data.type || 'ai-organized'}>
 								<a href={`${import.meta.env.BASE_URL.replace(/\/$/, '')}/blog/${post.id}/`} class="post-link">
 									<span class="post-date">
 										<FormattedDate date={post.data.pubDate} includeTime={!post.data.hideTime} />
@@ -469,7 +469,7 @@ const posts = (await getCollection('blog')).sort(
 				<div class="posts-grid-view" id="blog-posts-grid" style="display: none;">
 					{
 						posts.map((post, index) => (
-							<article class="grid-card-item fade-in" data-category={post.data.category || '开发'} data-type={post.data.type || 'ai-organized'}>
+							<article class="grid-card-item" data-category={post.data.category || '开发'} data-type={post.data.type || 'ai-organized'}>
 								<a href={`${import.meta.env.BASE_URL.replace(/\/$/, '')}/blog/${post.id}/`} class="card-link">
 									<div class="card-cover">
 										{post.data.heroImage ? (
@@ -530,7 +530,7 @@ const posts = (await getCollection('blog')).sort(
 					});
 				}
 
-				function applyFilter() {
+				function applyFilter(isInteractive = false) {
 					let listVisible = 0;
 					listItems.forEach(post => {
 						const postCategory = post.getAttribute('data-category') || '开发';
@@ -541,10 +541,12 @@ const posts = (await getCollection('blog')).sort(
 
 						if (categoryMatch && typeMatch) {
 							post.style.display = 'block';
-							post.style.setProperty('--stagger-idx', listVisible.toString());
-							post.classList.remove('fade-in');
-							void post.offsetWidth;
-							post.classList.add('fade-in');
+							if (isInteractive) {
+								post.style.setProperty('--stagger-idx', listVisible.toString());
+								post.classList.remove('fade-in');
+								void post.offsetWidth;
+								post.classList.add('fade-in');
+							}
 							listVisible++;
 						} else {
 							post.style.display = 'none';
@@ -561,10 +563,12 @@ const posts = (await getCollection('blog')).sort(
 
 						if (categoryMatch && typeMatch) {
 							post.style.display = 'flex';
-							post.style.setProperty('--stagger-idx', gridVisible.toString());
-							post.classList.remove('fade-in');
-							void post.offsetWidth;
-							post.classList.add('fade-in');
+							if (isInteractive) {
+								post.style.setProperty('--stagger-idx', gridVisible.toString());
+								post.classList.remove('fade-in');
+								void post.offsetWidth;
+								post.classList.add('fade-in');
+							}
 							gridVisible++;
 						} else {
 							post.style.display = 'none';
@@ -592,6 +596,7 @@ const posts = (await getCollection('blog')).sort(
 						btn.classList.toggle('active', isShowBtn === showAi);
 					});
 
+					document.documentElement.setAttribute('data-show-ai', showAi ? 'true' : 'false');
 					updateAllSliders();
 				}
 
@@ -607,11 +612,11 @@ const posts = (await getCollection('blog')).sort(
 							if (wrapper) {
 								wrapper.classList.add('is-filtering');
 								setTimeout(() => {
-									applyFilter();
+									applyFilter(true);
 									wrapper.classList.remove('is-filtering');
 								}, 160);
 							} else {
-								applyFilter();
+								applyFilter(true);
 							}
 						});
 					});
@@ -629,11 +634,11 @@ const posts = (await getCollection('blog')).sort(
 						if (wrapper) {
 							wrapper.classList.add('is-filtering');
 							setTimeout(() => {
-								applyFilter();
+								applyFilter(true);
 								wrapper.classList.remove('is-filtering');
 							}, 160);
 						} else {
-							applyFilter();
+							applyFilter(true);
 						}
 					});
 				});
@@ -647,11 +652,11 @@ const posts = (await getCollection('blog')).sort(
 						if (wrapper) {
 							wrapper.classList.add('is-filtering');
 							setTimeout(() => {
-								applyFilter();
+								applyFilter(true);
 								wrapper.classList.remove('is-filtering');
 							}, 160);
 						} else {
-							applyFilter();
+							applyFilter(true);
 						}
 					});
 				}

@@ -467,6 +467,12 @@ hr {
 	white-space: nowrap;
 }
 
+/* ─── Zero-Shift AI Post Filter (Applies before View Transition snapshots) ─── */
+html[data-show-ai="false"] .post-item[data-type="ai-organized"],
+html[data-show-ai="false"] .grid-card-item[data-type="ai-organized"] {
+	display: none !important;
+}
+
 /* ─── View Transitions · Shared Element Morphing ─── */
 
 /* 1. Default shared-element morph timing (also covers the dynamic
