@@ -6,6 +6,7 @@ import Footer from '../../components/Footer.astro';
 import FormattedDate from '../../components/FormattedDate.astro';
 import Header from '../../components/Header.astro';
 import ViewToggle from '../../components/ViewToggle.astro';
+import AiFilterToggle from '../../components/AiFilterToggle.astro';
 import DefaultCover from '../../components/DefaultCover.astro';
 import { SITE_DESCRIPTION, SITE_TITLE } from '../../consts';
 
@@ -22,21 +23,176 @@ const posts = (await getCollection('blog')).sort(
 			.page-header {
 				display: flex;
 				justify-content: space-between;
-				align-items: flex-end;
-				padding: 1rem 0 2rem 0;
+				align-items: center;
+				padding: 1rem 0 1.5rem 0;
+				border-bottom: 1px solid var(--border);
+				margin-bottom: 1.5rem;
+				gap: 0.8rem;
+				flex-wrap: wrap;
 			}
 
 			.page-title {
 				font-size: 1.6rem;
 				font-weight: 700;
 				color: var(--text-primary);
-				margin-bottom: 0.4rem;
+				margin-bottom: 0.2rem;
 			}
 
 			.page-desc {
-				font-size: 0.95rem;
+				font-size: 0.9rem;
 				color: var(--text-muted);
 				margin: 0;
+			}
+
+			.header-controls {
+				display: flex;
+				align-items: center;
+				gap: 0.5rem;
+				flex-wrap: wrap;
+			}
+
+			/* Category Tabs */
+			.category-tabs {
+				position: relative;
+				display: inline-flex;
+				background: var(--bg-secondary);
+				padding: 2px;
+				border-radius: 20px;
+				border: 1px solid var(--border);
+				align-self: center;
+				user-select: none;
+			}
+
+			.category-tabs .slider-indicator {
+				position: absolute;
+				top: 2px;
+				left: 2px;
+				height: calc(100% - 4px);
+				background: var(--bg);
+				border-radius: 16px;
+				border: 1px solid var(--border);
+				box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+				transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), width 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+				z-index: 1;
+				pointer-events: none;
+				will-change: transform, width;
+			}
+
+			html.dark .category-tabs .slider-indicator {
+				box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+			}
+
+			.tab-btn {
+				position: relative;
+				z-index: 2;
+				background: transparent;
+				border: 1px solid transparent;
+				padding: 0.35rem 0.9rem;
+				font-size: 0.82rem;
+				font-weight: 500;
+				color: var(--text-muted);
+				border-radius: 16px;
+				cursor: pointer;
+				transition: color 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+			}
+
+			.tab-btn:hover {
+				color: var(--text-primary);
+			}
+
+			.tab-btn.active {
+				color: var(--text-primary);
+				font-weight: 600;
+			}
+
+			/* Empty State */
+			.posts-empty-state {
+				text-align: center;
+				padding: 4rem 1rem;
+				background: var(--bg-secondary);
+				border: 1px dashed var(--border);
+				border-radius: 12px;
+				margin: 1.5rem 0;
+				animation: emptyStateReveal 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+			}
+
+			.empty-icon {
+				font-size: 2.2rem;
+				margin-bottom: 0.5rem;
+				opacity: 0.85;
+			}
+
+			.empty-title {
+				font-size: 1.05rem;
+				font-weight: 600;
+				color: var(--text-primary);
+				margin-bottom: 0.35rem;
+			}
+
+			.empty-desc {
+				font-size: 0.88rem;
+				color: var(--text-muted);
+				margin-bottom: 1.2rem;
+			}
+
+			.empty-switch-btn {
+				display: inline-flex;
+				align-items: center;
+				gap: 0.4rem;
+				padding: 0.45rem 1.1rem;
+				font-size: 0.82rem;
+				font-weight: 500;
+				color: var(--text-primary);
+				background: var(--bg);
+				border: 1px solid var(--border);
+				border-radius: 20px;
+				cursor: pointer;
+				transition: all 0.2s ease;
+			}
+
+			.empty-switch-btn:hover {
+				border-color: var(--border-hover);
+				transform: translateY(-1px);
+				box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+			}
+
+			/* Container & Item Transition Animation */
+			#blog-posts-wrapper {
+				transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), filter 0.2s ease;
+				will-change: opacity, transform;
+			}
+
+			#blog-posts-wrapper.is-filtering {
+				opacity: 0;
+				transform: translateY(6px) scale(0.995);
+				filter: blur(1px);
+			}
+
+			@keyframes postItemReveal {
+				0% {
+					opacity: 0;
+					transform: translateY(8px);
+				}
+				100% {
+					opacity: 1;
+					transform: translateY(0);
+				}
+			}
+
+			.post-item.fade-in, .grid-card-item.fade-in {
+				animation: postItemReveal 0.32s cubic-bezier(0.16, 1, 0.3, 1) both;
+				animation-delay: calc(var(--stagger-idx, 0) * 22ms);
+			}
+
+			@keyframes emptyStateReveal {
+				0% {
+					opacity: 0;
+					transform: translateY(12px) scale(0.97);
+				}
+				100% {
+					opacity: 1;
+					transform: translateY(0) scale(1);
+				}
 			}
 
 			/* ─── 1. Original Minimal List View (100% Identical to Original) ─── */
@@ -227,12 +383,19 @@ const posts = (await getCollection('blog')).sort(
 
 			@media (max-width: 768px) {
 				.page-header {
-					align-items: flex-start;
+					align-items: stretch;
 					flex-direction: column;
-					gap: 1rem;
+					gap: 0.8rem;
 				}
 				.page-title {
 					font-size: 1.4rem;
+				}
+				.header-controls {
+					width: 100%;
+					justify-content: space-between;
+				}
+				.category-tabs {
+					width: auto;
 				}
 				.posts-list .post-link {
 					flex-direction: column;
@@ -255,14 +418,34 @@ const posts = (await getCollection('blog')).sort(
 					<h1 class="page-title">文章</h1>
 					<p class="page-desc">技术笔记与经验分享</p>
 				</div>
-				<ViewToggle containerId="blog-posts-wrapper" />
+				<div class="header-controls">
+					<!-- Category Tabs with Slider Indicator -->
+					<div class="category-tabs" id="blog-category-filter">
+						<span class="slider-indicator" aria-hidden="true"></span>
+						<button class="tab-btn active" data-category="all">全部</button>
+						<button class="tab-btn" data-category="开发">开发</button>
+						<button class="tab-btn" data-category="随笔">随笔</button>
+					</div>
+					<AiFilterToggle id="blog-ai-toggle" />
+					<ViewToggle containerId="blog-posts-wrapper" />
+				</div>
 			</section>
 			<section id="blog-posts-wrapper">
+				<!-- Empty State -->
+				<div class="posts-empty-state" id="blog-empty-state" style="display: none;">
+					<div class="empty-icon">📝</div>
+					<p class="empty-title">当前分类下暂无原创文章</p>
+					<p class="empty-desc">默认仅展示原创内容，可开启「包含 AI」查看 AI 整理的技术复盘与实战笔记</p>
+					<button type="button" class="empty-switch-btn" id="blog-empty-enable-ai">
+						✨ 显示全部（包含 AI 整理）
+					</button>
+				</div>
+
 				<!-- 1. Original List View -->
 				<ul class="posts-list" id="blog-posts-list">
 					{
 						posts.map((post) => (
-							<li class="post-item">
+							<li class="post-item fade-in" data-category={post.data.category || '开发'} data-type={post.data.type || 'ai-organized'}>
 								<a href={`${import.meta.env.BASE_URL.replace(/\/$/, '')}/blog/${post.id}/`} class="post-link">
 									<span class="post-date">
 										<FormattedDate date={post.data.pubDate} includeTime={!post.data.hideTime} />
@@ -286,7 +469,7 @@ const posts = (await getCollection('blog')).sort(
 				<div class="posts-grid-view" id="blog-posts-grid" style="display: none;">
 					{
 						posts.map((post, index) => (
-							<article class="grid-card-item">
+							<article class="grid-card-item fade-in" data-category={post.data.category || '开发'} data-type={post.data.type || 'ai-organized'}>
 								<a href={`${import.meta.env.BASE_URL.replace(/\/$/, '')}/blog/${post.id}/`} class="card-link">
 									<div class="card-cover">
 										{post.data.heroImage ? (
@@ -317,15 +500,168 @@ const posts = (await getCollection('blog')).sort(
 		<Footer />
 
 		<script>
-			function setupBlogViewToggle() {
-				const STORAGE_KEY = 'eryuemu_blog_view_mode';
+			function setupBlogPage() {
+				const STORAGE_VIEW_KEY = 'eryuemu_blog_view_mode';
+				const STORAGE_AI_KEY = 'eryuemu_blog_show_ai';
+
+				const filterContainer = document.getElementById('blog-category-filter');
+				const wrapper = document.getElementById('blog-posts-wrapper');
 				const listView = document.getElementById('blog-posts-list');
 				const gridView = document.getElementById('blog-posts-grid');
+				const emptyState = document.getElementById('blog-empty-state');
+				const emptyEnableBtn = document.getElementById('blog-empty-enable-ai');
+
+				const listItems = listView ? Array.from(listView.querySelectorAll<HTMLElement>('.post-item')) : [];
+				const gridItems = gridView ? Array.from(gridView.querySelectorAll<HTMLElement>('.grid-card-item')) : [];
+
+				let currentCategory = 'all';
+				// Default to false (do not show AI articles by default)
+				let showAi = localStorage.getItem(STORAGE_AI_KEY) === 'true';
+
+				// Helper to update all sliding indicator positions
+				function updateAllSliders() {
+					document.querySelectorAll<HTMLElement>('.category-tabs, .view-toggle-wrapper, .ai-filter-wrapper').forEach(wrap => {
+						const activeBtn = wrap.querySelector<HTMLElement>('.active');
+						const slider = wrap.querySelector<HTMLElement>('.slider-indicator');
+						if (activeBtn && slider) {
+							slider.style.width = `${activeBtn.offsetWidth}px`;
+							slider.style.transform = `translateX(${activeBtn.offsetLeft - 2}px)`;
+						}
+					});
+				}
+
+				function applyFilter() {
+					let listVisible = 0;
+					listItems.forEach(post => {
+						const postCategory = post.getAttribute('data-category') || '开发';
+						const postType = post.getAttribute('data-type') || 'ai-organized';
+
+						const categoryMatch = currentCategory === 'all' || postCategory === currentCategory;
+						const typeMatch = showAi || postType === 'original';
+
+						if (categoryMatch && typeMatch) {
+							post.style.display = 'block';
+							post.style.setProperty('--stagger-idx', listVisible.toString());
+							post.classList.remove('fade-in');
+							void post.offsetWidth;
+							post.classList.add('fade-in');
+							listVisible++;
+						} else {
+							post.style.display = 'none';
+						}
+					});
+
+					let gridVisible = 0;
+					gridItems.forEach(post => {
+						const postCategory = post.getAttribute('data-category') || '开发';
+						const postType = post.getAttribute('data-type') || 'ai-organized';
+
+						const categoryMatch = currentCategory === 'all' || postCategory === currentCategory;
+						const typeMatch = showAi || postType === 'original';
+
+						if (categoryMatch && typeMatch) {
+							post.style.display = 'flex';
+							post.style.setProperty('--stagger-idx', gridVisible.toString());
+							post.classList.remove('fade-in');
+							void post.offsetWidth;
+							post.classList.add('fade-in');
+							gridVisible++;
+						} else {
+							post.style.display = 'none';
+						}
+					});
+
+					if (emptyState) {
+						emptyState.style.display = (listVisible === 0 && gridVisible === 0) ? 'block' : 'none';
+					}
+				}
+
+				function updateUIState() {
+					// Sync category tab active class
+					if (filterContainer) {
+						const buttons = filterContainer.querySelectorAll('.tab-btn');
+						buttons.forEach(btn => {
+							btn.classList.toggle('active', btn.getAttribute('data-category') === currentCategory);
+						});
+					}
+
+					// Sync AI filter toggle button active class
+					const aiBtns = document.querySelectorAll('.ai-filter-btn');
+					aiBtns.forEach(btn => {
+						const isShowBtn = btn.getAttribute('data-show-ai') === 'true';
+						btn.classList.toggle('active', isShowBtn === showAi);
+					});
+
+					updateAllSliders();
+				}
+
+				// Category tab listeners
+				if (filterContainer) {
+					const buttons = filterContainer.querySelectorAll('.tab-btn');
+					buttons.forEach(btn => {
+						btn.addEventListener('click', () => {
+							const cat = btn.getAttribute('data-category') || 'all';
+							if (cat === currentCategory) return;
+							currentCategory = cat;
+							updateUIState();
+							if (wrapper) {
+								wrapper.classList.add('is-filtering');
+								setTimeout(() => {
+									applyFilter();
+									wrapper.classList.remove('is-filtering');
+								}, 160);
+							} else {
+								applyFilter();
+							}
+						});
+					});
+				}
+
+				// AI toggle listeners
+				const aiBtns = document.querySelectorAll('.ai-filter-btn');
+				aiBtns.forEach(btn => {
+					btn.addEventListener('click', () => {
+						const newShowAi = btn.getAttribute('data-show-ai') === 'true';
+						if (newShowAi === showAi) return;
+						showAi = newShowAi;
+						localStorage.setItem(STORAGE_AI_KEY, showAi ? 'true' : 'false');
+						updateUIState();
+						if (wrapper) {
+							wrapper.classList.add('is-filtering');
+							setTimeout(() => {
+								applyFilter();
+								wrapper.classList.remove('is-filtering');
+							}, 160);
+						} else {
+							applyFilter();
+						}
+					});
+				});
+
+				// Empty state enable AI button
+				if (emptyEnableBtn) {
+					emptyEnableBtn.addEventListener('click', () => {
+						showAi = true;
+						localStorage.setItem(STORAGE_AI_KEY, 'true');
+						updateUIState();
+						if (wrapper) {
+							wrapper.classList.add('is-filtering');
+							setTimeout(() => {
+								applyFilter();
+								wrapper.classList.remove('is-filtering');
+							}, 160);
+						} else {
+							applyFilter();
+						}
+					});
+				}
+
+				// View switcher toggle
 				const toggleWrappers = document.querySelectorAll('.view-toggle-wrapper');
-				const savedView = localStorage.getItem(STORAGE_KEY) || 'list';
+				const savedView = localStorage.getItem(STORAGE_VIEW_KEY) || 'list';
 
 				function setViewMode(mode: 'list' | 'grid') {
-					localStorage.setItem(STORAGE_KEY, mode);
+					localStorage.setItem(STORAGE_VIEW_KEY, mode);
 
 					if (mode === 'grid') {
 						if (listView) listView.style.display = 'none';
@@ -338,13 +674,11 @@ const posts = (await getCollection('blog')).sort(
 					toggleWrappers.forEach(tw => {
 						const btns = tw.querySelectorAll('.view-btn');
 						btns.forEach(btn => {
-							if (btn.getAttribute('data-view') === mode) {
-								btn.classList.add('active');
-							} else {
-								btn.classList.remove('active');
-							}
+							btn.classList.toggle('active', btn.getAttribute('data-view') === mode);
 						});
 					});
+
+					updateAllSliders();
 				}
 
 				toggleWrappers.forEach(tw => {
@@ -359,10 +693,15 @@ const posts = (await getCollection('blog')).sort(
 					});
 				});
 
+				window.addEventListener('resize', updateAllSliders, { passive: true });
+
+				updateUIState();
+				applyFilter();
 				setViewMode(savedView as 'list' | 'grid');
+				requestAnimationFrame(() => updateAllSliders());
 			}
 
-			document.addEventListener('astro:page-load', setupBlogViewToggle);
+			document.addEventListener('astro:page-load', setupBlogPage);
 		</script>
 	</body>
 </html>

@@ -7,6 +7,7 @@ import Footer from '../components/Footer.astro';
 import FormattedDate from '../components/FormattedDate.astro';
 import Splash from '../components/Splash.astro';
 import ViewToggle from '../components/ViewToggle.astro';
+import AiFilterToggle from '../components/AiFilterToggle.astro';
 import DefaultCover from '../components/DefaultCover.astro';
 import avatar from '../assets/avatar.jpg';
 import { SITE_TITLE, SITE_DESCRIPTION } from '../consts';
@@ -104,10 +105,19 @@ const posts = (await getCollection('blog'))
 			.section-header {
 				display: flex;
 				justify-content: space-between;
-				align-items: baseline;
+				align-items: center;
 				margin-bottom: 1.5rem;
 				padding-bottom: 0.8rem;
 				border-bottom: 1px solid var(--border);
+				gap: 0.8rem;
+				flex-wrap: wrap;
+			}
+
+			.section-left-group {
+				display: flex;
+				align-items: center;
+				gap: 1rem;
+				flex-wrap: wrap;
 			}
 
 			.section-title {
@@ -115,12 +125,14 @@ const posts = (await getCollection('blog'))
 				font-size: 1.1rem;
 				font-weight: 600;
 				color: var(--text-primary);
+				white-space: nowrap;
 			}
 
 			.header-controls {
 				display: flex;
 				align-items: center;
-				gap: 0.75rem;
+				gap: 0.5rem;
+				flex-wrap: wrap;
 			}
 
 			.view-all {
@@ -131,6 +143,8 @@ const posts = (await getCollection('blog'))
 				align-items: center;
 				gap: 0.3rem;
 				text-decoration: none;
+				white-space: nowrap;
+				margin-left: 0.2rem;
 			}
 
 			.view-all:hover {
@@ -140,16 +154,38 @@ const posts = (await getCollection('blog'))
 
 			/* Category Tabs */
 			.category-tabs {
-				display: flex;
-				gap: 0.25rem;
+				position: relative;
+				display: inline-flex;
 				background: var(--bg-secondary);
-				padding: 0.2rem;
+				padding: 2px;
 				border-radius: 20px;
 				border: 1px solid var(--border);
 				align-self: center;
+				user-select: none;
+			}
+
+			.category-tabs .slider-indicator {
+				position: absolute;
+				top: 2px;
+				left: 2px;
+				height: calc(100% - 4px);
+				background: var(--bg);
+				border-radius: 16px;
+				border: 1px solid var(--border);
+				box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+				transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), width 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+				z-index: 1;
+				pointer-events: none;
+				will-change: transform, width;
+			}
+
+			html.dark .category-tabs .slider-indicator {
+				box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
 			}
 
 			.tab-btn {
+				position: relative;
+				z-index: 2;
 				background: transparent;
 				border: 1px solid transparent;
 				padding: 0.35rem 0.9rem;
@@ -158,7 +194,7 @@ const posts = (await getCollection('blog'))
 				color: var(--text-muted);
 				border-radius: 16px;
 				cursor: pointer;
-				transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+				transition: color 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 			}
 
 			.tab-btn:hover {
@@ -166,21 +202,98 @@ const posts = (await getCollection('blog'))
 			}
 
 			.tab-btn.active {
-				background: var(--bg);
 				color: var(--text-primary);
-				border-color: var(--border);
-				box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+				font-weight: 600;
 			}
 
-			/* Container Animation */
+			/* Empty State */
+			.posts-empty-state {
+				text-align: center;
+				padding: 3.5rem 1rem;
+				background: var(--bg-secondary);
+				border: 1px dashed var(--border);
+				border-radius: 12px;
+				margin: 1rem 0;
+				animation: emptyStateReveal 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+			}
+
+			.empty-icon {
+				font-size: 2rem;
+				margin-bottom: 0.5rem;
+				opacity: 0.85;
+			}
+
+			.empty-title {
+				font-size: 1rem;
+				font-weight: 600;
+				color: var(--text-primary);
+				margin-bottom: 0.35rem;
+			}
+
+			.empty-desc {
+				font-size: 0.85rem;
+				color: var(--text-muted);
+				margin-bottom: 1.2rem;
+			}
+
+			.empty-switch-btn {
+				display: inline-flex;
+				align-items: center;
+				gap: 0.4rem;
+				padding: 0.45rem 1.1rem;
+				font-size: 0.82rem;
+				font-weight: 500;
+				color: var(--text-primary);
+				background: var(--bg);
+				border: 1px solid var(--border);
+				border-radius: 20px;
+				cursor: pointer;
+				transition: all 0.2s ease;
+			}
+
+			.empty-switch-btn:hover {
+				border-color: var(--border-hover);
+				transform: translateY(-1px);
+				box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+			}
+
+			/* Container & Item Transition Animation */
 			.posts-wrapper {
-				transition: opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1), transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+				transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), filter 0.2s ease;
 				will-change: opacity, transform;
 			}
 
 			.posts-wrapper.is-filtering {
 				opacity: 0;
-				transform: translateY(4px);
+				transform: translateY(6px) scale(0.995);
+				filter: blur(1px);
+			}
+
+			@keyframes postItemReveal {
+				0% {
+					opacity: 0;
+					transform: translateY(8px);
+				}
+				100% {
+					opacity: 1;
+					transform: translateY(0);
+				}
+			}
+
+			.post-item.fade-in, .grid-card-item.fade-in {
+				animation: postItemReveal 0.32s cubic-bezier(0.16, 1, 0.3, 1) both;
+				animation-delay: calc(var(--stagger-idx, 0) * 26ms);
+			}
+
+			@keyframes emptyStateReveal {
+				0% {
+					opacity: 0;
+					transform: translateY(12px) scale(0.97);
+				}
+				100% {
+					opacity: 1;
+					transform: translateY(0) scale(1);
+				}
 			}
 
 			/* ─── 1. Original Minimal List View (100% Identical to Original) ─── */
@@ -358,17 +471,19 @@ const posts = (await getCollection('blog'))
 			@media (max-width: 768px) {
 				.section-header {
 					flex-direction: column;
-					align-items: flex-start;
+					align-items: stretch;
 					gap: 0.8rem;
+				}
+				.section-left-group {
+					width: 100%;
+					justify-content: space-between;
 				}
 				.header-controls {
 					width: 100%;
 					justify-content: space-between;
 				}
 				.category-tabs {
-					width: 100%;
-					box-sizing: border-box;
-					justify-content: space-between;
+					width: auto;
 				}
 				.tab-btn {
 					flex: 1;
@@ -431,25 +546,39 @@ const posts = (await getCollection('blog'))
 
 			<section>
 				<div class="section-header">
-					<h2 class="section-title">近期文章</h2>
-					<!-- Category Filter Tabs -->
-					<div class="category-tabs" id="category-filter">
-						<button class="tab-btn active" data-category="all">全部</button>
-						<button class="tab-btn" data-category="开发">开发</button>
-						<button class="tab-btn" data-category="随笔">随笔</button>
+					<div class="section-left-group">
+						<h2 class="section-title">近期文章</h2>
+						<!-- Category Filter Tabs with Slider Indicator -->
+						<div class="category-tabs" id="category-filter">
+							<span class="slider-indicator" aria-hidden="true"></span>
+							<button class="tab-btn active" data-category="all">全部</button>
+							<button class="tab-btn" data-category="开发">开发</button>
+							<button class="tab-btn" data-category="随笔">随笔</button>
+						</div>
 					</div>
 					<div class="header-controls">
+						<AiFilterToggle id="home-ai-toggle" />
 						<ViewToggle containerId="posts-wrapper" />
+						<a href={`${import.meta.env.BASE_URL.replace(/\/$/, '')}/blog/`} class="view-all">全部 →</a>
 					</div>
-					<a href={`${import.meta.env.BASE_URL.replace(/\/$/, '')}/blog/`} class="view-all">全部 →</a>
 				</div>
 
 				<div class="posts-wrapper" id="posts-wrapper" data-view="list">
+					<!-- Empty State -->
+					<div class="posts-empty-state" id="posts-empty-state" style="display: none;">
+						<div class="empty-icon">📝</div>
+						<p class="empty-title">当前分类下暂无原创文章</p>
+						<p class="empty-desc">默认仅展示原创内容，可开启「包含 AI」查看 AI 整理的技术复盘与实战笔记</p>
+						<button type="button" class="empty-switch-btn" id="home-empty-enable-ai">
+							✨ 显示全部（包含 AI 整理）
+						</button>
+					</div>
+
 					<!-- 1. Original List View -->
 					<div class="posts-list-view" id="posts-list-view">
 						{
 							posts.map((post) => (
-								<article class="post-item" data-category={post.data.category || '开发'} data-type={post.data.type || 'ai-organized'}>
+								<article class="post-item fade-in" data-category={post.data.category || '开发'} data-type={post.data.type || 'ai-organized'}>
 									<a href={`${import.meta.env.BASE_URL.replace(/\/$/, '')}/blog/${post.id}/`}>
 										<span class="post-date">
 											<FormattedDate date={post.data.pubDate} includeTime={!post.data.hideTime} />
@@ -470,7 +599,7 @@ const posts = (await getCollection('blog'))
 					<div class="posts-grid-view" id="posts-grid-view" style="display: none;">
 						{
 							posts.map((post, index) => (
-								<article class="grid-card-item" data-category={post.data.category || '开发'} data-type={post.data.type || 'ai-organized'}>
+								<article class="grid-card-item fade-in" data-category={post.data.category || '开发'} data-type={post.data.type || 'ai-organized'}>
 									<a href={`${import.meta.env.BASE_URL.replace(/\/$/, '')}/blog/${post.id}/`} class="card-link">
 										<div class="card-cover">
 											{post.data.heroImage ? (
@@ -503,84 +632,175 @@ const posts = (await getCollection('blog'))
 
 		<script>
 			function setupCategoryFilterAndViewToggle() {
-				const STORAGE_KEY = 'eryuemu_blog_view_mode';
+				const STORAGE_VIEW_KEY = 'eryuemu_blog_view_mode';
+				const STORAGE_AI_KEY = 'eryuemu_blog_show_ai';
+
 				const filterContainer = document.getElementById('category-filter');
 				const wrapper = document.getElementById('posts-wrapper');
 				const listView = document.getElementById('posts-list-view');
 				const gridView = document.getElementById('posts-grid-view');
+				const emptyState = document.getElementById('posts-empty-state');
+				const emptyEnableBtn = document.getElementById('home-empty-enable-ai');
 
-				const listItems = listView ? listView.querySelectorAll('.post-item') : [];
-				const gridItems = gridView ? gridView.querySelectorAll('.grid-card-item') : [];
+				const listItems = listView ? Array.from(listView.querySelectorAll<HTMLElement>('.post-item')) : [];
+				const gridItems = gridView ? Array.from(gridView.querySelectorAll<HTMLElement>('.grid-card-item')) : [];
 
-				// 1. Category Filter Logic
-				if (filterContainer) {
-					const buttons = filterContainer.querySelectorAll('.tab-btn');
+				let currentCategory = 'all';
+				// Default to false (do not show AI articles by default)
+				let showAi = localStorage.getItem(STORAGE_AI_KEY) === 'true';
 
-					function applyFilter(selectedCategory: string | null) {
-						let listVisible = 0;
-						listItems.forEach(post => {
-							const postCategory = post.getAttribute('data-category');
-							if (selectedCategory === 'all' || postCategory === selectedCategory) {
-								if (listVisible < 12) {
-									(post as HTMLElement).style.display = 'block';
-									listVisible++;
-								} else {
-									(post as HTMLElement).style.display = 'none';
-								}
+				// Helper to update all sliding indicator positions
+				function updateAllSliders() {
+					document.querySelectorAll<HTMLElement>('.category-tabs, .view-toggle-wrapper, .ai-filter-wrapper').forEach(wrap => {
+						const activeBtn = wrap.querySelector<HTMLElement>('.active');
+						const slider = wrap.querySelector<HTMLElement>('.slider-indicator');
+						if (activeBtn && slider) {
+							slider.style.width = `${activeBtn.offsetWidth}px`;
+							slider.style.transform = `translateX(${activeBtn.offsetLeft - 2}px)`;
+						}
+					});
+				}
+
+				function applyFilter() {
+					let listVisible = 0;
+					listItems.forEach(post => {
+						const postCategory = post.getAttribute('data-category') || '开发';
+						const postType = post.getAttribute('data-type') || 'ai-organized';
+
+						const categoryMatch = currentCategory === 'all' || postCategory === currentCategory;
+						const typeMatch = showAi || postType === 'original';
+
+						if (categoryMatch && typeMatch) {
+							if (listVisible < 12) {
+								post.style.display = 'block';
+								post.style.setProperty('--stagger-idx', listVisible.toString());
+								post.classList.remove('fade-in');
+								void post.offsetWidth;
+								post.classList.add('fade-in');
+								listVisible++;
 							} else {
-								(post as HTMLElement).style.display = 'none';
+								post.style.display = 'none';
 							}
-						});
-
-						let gridVisible = 0;
-						gridItems.forEach(post => {
-							const postCategory = post.getAttribute('data-category');
-							if (selectedCategory === 'all' || postCategory === selectedCategory) {
-								if (gridVisible < 12) {
-									(post as HTMLElement).style.display = 'flex';
-									gridVisible++;
-								} else {
-									(post as HTMLElement).style.display = 'none';
-								}
-							} else {
-								(post as HTMLElement).style.display = 'none';
-							}
-						});
-					}
-
-					buttons.forEach(btn => {
-						btn.addEventListener('click', () => {
-							if (btn.classList.contains('active')) return;
-
-							buttons.forEach(b => b.classList.remove('active'));
-							btn.classList.add('active');
-
-							const selectedCategory = btn.getAttribute('data-category');
-
-							if (wrapper) {
-								wrapper.classList.add('is-filtering');
-								setTimeout(() => {
-									applyFilter(selectedCategory);
-									wrapper.classList.remove('is-filtering');
-								}, 160);
-							} else {
-								applyFilter(selectedCategory);
-							}
-						});
+						} else {
+							post.style.display = 'none';
+						}
 					});
 
-					const activeBtn = filterContainer.querySelector('.tab-btn.active');
-					if (activeBtn) {
-						applyFilter(activeBtn.getAttribute('data-category'));
+					let gridVisible = 0;
+					gridItems.forEach(post => {
+						const postCategory = post.getAttribute('data-category') || '开发';
+						const postType = post.getAttribute('data-type') || 'ai-organized';
+
+						const categoryMatch = currentCategory === 'all' || postCategory === currentCategory;
+						const typeMatch = showAi || postType === 'original';
+
+						if (categoryMatch && typeMatch) {
+							if (gridVisible < 12) {
+								post.style.display = 'flex';
+								post.style.setProperty('--stagger-idx', gridVisible.toString());
+								post.classList.remove('fade-in');
+								void post.offsetWidth;
+								post.classList.add('fade-in');
+								gridVisible++;
+							} else {
+								post.style.display = 'none';
+							}
+						} else {
+							post.style.display = 'none';
+						}
+					});
+
+					if (emptyState) {
+						emptyState.style.display = (listVisible === 0 && gridVisible === 0) ? 'block' : 'none';
 					}
 				}
 
-				// 2. View Switcher Toggle Logic
+				function updateUIState() {
+					// Sync category tab active class
+					if (filterContainer) {
+						const buttons = filterContainer.querySelectorAll('.tab-btn');
+						buttons.forEach(btn => {
+							btn.classList.toggle('active', btn.getAttribute('data-category') === currentCategory);
+						});
+					}
+
+					// Sync AI filter toggle button active class
+					const aiBtns = document.querySelectorAll('.ai-filter-btn');
+					aiBtns.forEach(btn => {
+						const isShowBtn = btn.getAttribute('data-show-ai') === 'true';
+						btn.classList.toggle('active', isShowBtn === showAi);
+					});
+
+					updateAllSliders();
+				}
+
+				// Category tab listeners
+				if (filterContainer) {
+					const buttons = filterContainer.querySelectorAll('.tab-btn');
+					buttons.forEach(btn => {
+						btn.addEventListener('click', () => {
+							const cat = btn.getAttribute('data-category') || 'all';
+							if (cat === currentCategory) return;
+							currentCategory = cat;
+							updateUIState();
+							if (wrapper) {
+								wrapper.classList.add('is-filtering');
+								setTimeout(() => {
+									applyFilter();
+									wrapper.classList.remove('is-filtering');
+								}, 160);
+							} else {
+								applyFilter();
+							}
+						});
+					});
+				}
+
+				// AI toggle listeners
+				const aiBtns = document.querySelectorAll('.ai-filter-btn');
+				aiBtns.forEach(btn => {
+					btn.addEventListener('click', () => {
+						const newShowAi = btn.getAttribute('data-show-ai') === 'true';
+						if (newShowAi === showAi) return;
+						showAi = newShowAi;
+						localStorage.setItem(STORAGE_AI_KEY, showAi ? 'true' : 'false');
+						updateUIState();
+						if (wrapper) {
+							wrapper.classList.add('is-filtering');
+							setTimeout(() => {
+								applyFilter();
+								wrapper.classList.remove('is-filtering');
+							}, 160);
+						} else {
+							applyFilter();
+						}
+					});
+				});
+
+				// Empty state enable AI button
+				if (emptyEnableBtn) {
+					emptyEnableBtn.addEventListener('click', () => {
+						showAi = true;
+						localStorage.setItem(STORAGE_AI_KEY, 'true');
+						updateUIState();
+						if (wrapper) {
+							wrapper.classList.add('is-filtering');
+							setTimeout(() => {
+								applyFilter();
+								wrapper.classList.remove('is-filtering');
+							}, 160);
+						} else {
+							applyFilter();
+						}
+					});
+				}
+
+				// View mode toggle
 				const toggleWrappers = document.querySelectorAll('.view-toggle-wrapper');
-				const savedView = localStorage.getItem(STORAGE_KEY) || 'list';
+				const savedView = localStorage.getItem(STORAGE_VIEW_KEY) || 'list';
 
 				function setViewMode(mode: 'list' | 'grid') {
-					localStorage.setItem(STORAGE_KEY, mode);
+					localStorage.setItem(STORAGE_VIEW_KEY, mode);
 					if (wrapper) wrapper.setAttribute('data-view', mode);
 
 					if (mode === 'grid') {
@@ -594,13 +814,11 @@ const posts = (await getCollection('blog'))
 					toggleWrappers.forEach(tw => {
 						const btns = tw.querySelectorAll('.view-btn');
 						btns.forEach(btn => {
-							if (btn.getAttribute('data-view') === mode) {
-								btn.classList.add('active');
-							} else {
-								btn.classList.remove('active');
-							}
+							btn.classList.toggle('active', btn.getAttribute('data-view') === mode);
 						});
 					});
+
+					updateAllSliders();
 				}
 
 				toggleWrappers.forEach(tw => {
@@ -615,7 +833,12 @@ const posts = (await getCollection('blog'))
 					});
 				});
 
+				window.addEventListener('resize', updateAllSliders, { passive: true });
+
+				updateUIState();
+				applyFilter();
 				setViewMode(savedView as 'list' | 'grid');
+				requestAnimationFrame(() => updateAllSliders());
 			}
 
 			document.addEventListener('astro:page-load', setupCategoryFilterAndViewToggle);

@@ -1,5 +1,5 @@
 ---
-// ViewToggle.astro - Crisp SVG segmented view switcher button
+// ViewToggle.astro - Crisp SVG segmented view switcher button with sliding pill indicator
 interface Props {
 	containerId?: string;
 }
@@ -8,9 +8,10 @@ const { containerId = 'posts-list' } = Astro.props;
 ---
 
 <div class="view-toggle-wrapper" data-target-container={containerId}>
+	<span class="slider-indicator" aria-hidden="true"></span>
 	<button
 		type="button"
-		class="view-btn list-btn"
+		class="view-btn list-btn active"
 		data-view="list"
 		title="列表视图"
 		aria-label="切换至列表视图"
@@ -44,6 +45,7 @@ const { containerId = 'posts-list' } = Astro.props;
 
 <style>
 	.view-toggle-wrapper {
+		position: relative;
 		display: inline-flex;
 		align-items: center;
 		background: var(--bg-secondary);
@@ -51,9 +53,31 @@ const { containerId = 'posts-list' } = Astro.props;
 		border-radius: 20px;
 		border: 1px solid var(--border);
 		flex-shrink: 0;
+		user-select: none;
+	}
+
+	.slider-indicator {
+		position: absolute;
+		top: 2px;
+		left: 2px;
+		height: calc(100% - 4px);
+		background: var(--bg);
+		border-radius: 16px;
+		border: 1px solid var(--border);
+		box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+		transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), width 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+		z-index: 1;
+		pointer-events: none;
+		will-change: transform, width;
+	}
+
+	html.dark .slider-indicator {
+		box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
 	}
 
 	.view-btn {
+		position: relative;
+		z-index: 2;
 		display: inline-flex;
 		align-items: center;
 		gap: 0.35rem;
@@ -65,7 +89,7 @@ const { containerId = 'posts-list' } = Astro.props;
 		border: 1px solid transparent;
 		border-radius: 16px;
 		cursor: pointer;
-		transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+		transition: color 0.22s cubic-bezier(0.16, 1, 0.3, 1);
 		line-height: 1;
 	}
 
@@ -74,14 +98,17 @@ const { containerId = 'posts-list' } = Astro.props;
 	}
 
 	.view-btn.active {
-		background: var(--bg);
 		color: var(--text-primary);
-		border-color: var(--border);
-		box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+		font-weight: 600;
 	}
 
 	.view-icon {
 		flex-shrink: 0;
+		transition: transform 0.22s ease;
+	}
+
+	.view-btn:hover .view-icon {
+		transform: scale(1.08);
 	}
 
 	@media (max-width: 480px) {

@@ -1,0 +1,116 @@
+---
+// AiFilterToggle.astro - Segmented button with sliding pill indicator
+interface Props {
+	id?: string;
+}
+
+const { id = 'ai-filter-toggle' } = Astro.props;
+---
+
+<div class="ai-filter-wrapper" id={id}>
+	<span class="slider-indicator" aria-hidden="true"></span>
+	<button
+		type="button"
+		class="ai-filter-btn original-btn active"
+		data-show-ai="false"
+		title="仅显示原创文章（默认）"
+		aria-label="仅显示原创文章"
+	>
+		<svg class="ai-filter-icon" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+			<path d="M12 20h9"></path>
+			<path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+		</svg>
+		<span class="btn-text">仅原创</span>
+	</button>
+	<button
+		type="button"
+		class="ai-filter-btn all-btn"
+		data-show-ai="true"
+		title="显示全部文章（包含 AI 整理）"
+		aria-label="显示全部文章（包含 AI 整理）"
+	>
+		<svg class="ai-filter-icon" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+			<path d="M12 2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2 2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"></path>
+			<rect x="4" y="8" width="16" height="12" rx="2"></rect>
+			<path d="M9 13v2"></path>
+			<path d="M15 13v2"></path>
+		</svg>
+		<span class="btn-text">包含 AI</span>
+	</button>
+</div>
+
+<style>
+	.ai-filter-wrapper {
+		position: relative;
+		display: inline-flex;
+		align-items: center;
+		background: var(--bg-secondary);
+		padding: 2px;
+		border-radius: 20px;
+		border: 1px solid var(--border);
+		flex-shrink: 0;
+		user-select: none;
+	}
+
+	.slider-indicator {
+		position: absolute;
+		top: 2px;
+		left: 2px;
+		height: calc(100% - 4px);
+		background: var(--bg);
+		border-radius: 16px;
+		border: 1px solid var(--border);
+		box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+		transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), width 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+		z-index: 1;
+		pointer-events: none;
+		will-change: transform, width;
+	}
+
+	html.dark .slider-indicator {
+		box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
+	}
+
+	.ai-filter-btn {
+		position: relative;
+		z-index: 2;
+		display: inline-flex;
+		align-items: center;
+		gap: 0.32rem;
+		padding: 0.3rem 0.65rem;
+		font-size: 0.8rem;
+		font-weight: 500;
+		color: var(--text-muted);
+		background: transparent;
+		border: 1px solid transparent;
+		border-radius: 16px;
+		cursor: pointer;
+		transition: color 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+		line-height: 1;
+	}
+
+	.ai-filter-btn:hover {
+		color: var(--text-primary);
+	}
+
+	.ai-filter-btn.active {
+		color: var(--text-primary);
+		font-weight: 600;
+	}
+
+	.ai-filter-icon {
+		flex-shrink: 0;
+		transition: transform 0.22s ease;
+	}
+
+	.ai-filter-btn:hover .ai-filter-icon {
+		transform: scale(1.08);
+	}
+
+	@media (max-width: 480px) {
+		.ai-filter-btn {
+			padding: 0.3rem 0.5rem;
+			font-size: 0.76rem;
+		}
+	}
+</style>
