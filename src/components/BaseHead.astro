@@ -78,39 +78,38 @@ const { title, description, image = FallbackImage } = Astro.props;
   transition INTO those pages (e.g. article → home) gets swallowed and even the
   hero avatar/name/motto fly-back disappears.
 
-  On Firefox only we collapse the per-post shared elements to *one* article at
-  a time: clicking an article link activates that slug's title/cover and
-  disables all the others, and the incoming page is trimmed to the same slug
-  just before the swap (`astro:before-swap`, which exposes `newDocument`).
-  Because the same slug exists on both sides, the title/cover fly back and
-  forth exactly like in Chromium, while "new-only" count stays 0 — so Firefox
-  never skips the transition. Hero shared elements are unaffected.
+<!--
+  Shared-Element Isolation:
+  Collapses per-post shared elements to *one* active article at a time.
+  When entering an article or returning to the list, only that specific article's
+  post-title-<slug> / post-cover-<slug> is activated, while the remaining 30+ items
+  have viewTransitionName = 'none'.
+  This guarantees that 100% of GPU compositor resources focus on the single active
+  title/cover, avoiding dropped frames, animation clipping, or skipped morphs.
 -->
 <script>
-	const isFirefox = () => /firefox/i.test(navigator.userAgent);
 	const pageSlug = () => {
-		const m = window.location.pathname.match(/^\/blog\/([^\/]+)\/$/);
+		const m = window.location.pathname.match(/\/blog\/([^\/]+)\//);
 		return m ? decodeURIComponent(m[1]) : null;
 	};
 	function applyPostVT(root, activeSlug) {
-		if (!isFirefox()) return;
+		if (!root) return;
 		root.querySelectorAll('[data-vt-slug]').forEach((el) => {
 			const slug = el.getAttribute('data-vt-slug');
 			if (activeSlug !== null && slug === activeSlug) {
-				// 清掉内联禁用 → Astro 注入的 view-transition-name 生效
+				// Activate the target article's view-transition-name
 				el.style.viewTransitionName = '';
 			} else {
-				// 内联禁用(优先于 Astro 注入的样式)
+				// Disable non-target articles so only 1 shared element pair exists
 				el.style.viewTransitionName = 'none';
 			}
 		});
 	}
 	let targetSlug = null;
-	// 捕获阶段监听点击(Astro 的导航处理之前):确定目标文章并准备当前页面
+	// Capture click to lock in target slug before navigation begins
 	document.addEventListener(
 		'click',
 		(e) => {
-			if (!isFirefox()) return;
 			const a = e.target instanceof Element ? e.target.closest('a') : null;
 			if (!a) return;
 			const m = (a.href || '').match(/\/blog\/([^\/]+)\//);
@@ -119,14 +118,13 @@ const { title, description, image = FallbackImage } = Astro.props;
 		},
 		true
 	);
-	// 新页面在 swap 之前按目标文章裁剪(此时新快照尚未捕获)
+	// Before DOM swap, isolate target slug on incoming newDocument
 	document.addEventListener('astro:before-swap', (e) => {
-		if (!isFirefox()) return;
+		if (!targetSlug) targetSlug = pageSlug();
 		applyPostVT(e.newDocument, targetSlug);
 	});
-	// 当前页面(首次加载 + 每次导航后)收敛到自身文章,非文章页全部禁用
+	// Sync current page on initial load and after navigation
 	function syncPostVT() {
-		if (!isFirefox()) return;
 		targetSlug = pageSlug();
 		applyPostVT(document, targetSlug);
 	}

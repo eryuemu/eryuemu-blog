@@ -475,55 +475,48 @@ html[data-show-ai="false"] .grid-card-item[data-type="ai-organized"] {
 
 /* ─── View Transitions · Shared Element Morphing ─── */
 
-/* 1. Default shared-element morph timing (also covers the dynamic
-   `post-title-*` / `post-cover-*` names generated per post). */
+/* 1. Default shared-element morph timing (covers post-title-* and post-cover-*) */
 ::view-transition-group(*) {
-	animation-duration: 0.48s;
-	animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+	animation-duration: 0.52s;
+	animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-/* Crisp shared-element crossfade. Disables plus-lighter color blending
-   which creates fuzzy text halos, and fades out the outgoing scaled bitmap
-   rapidly while the incoming crisp text glides into position. */
+/* Seamless shared-element crossfade */
 ::view-transition-old(*) {
 	mix-blend-mode: normal;
-	animation: vt-shared-out 0.18s cubic-bezier(0.4, 0, 1, 1) both;
+	animation: vt-shared-out 0.52s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 ::view-transition-new(*) {
 	mix-blend-mode: normal;
-	animation: vt-shared-in 0.48s cubic-bezier(0.16, 1, 0.3, 1) both;
+	animation: vt-shared-in 0.52s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 @keyframes vt-shared-out {
-	0% { opacity: 1; }
-	100% { opacity: 0; }
+	to { opacity: 0; }
 }
 
 @keyframes vt-shared-in {
-	0% { opacity: 0; }
-	35% { opacity: 1; }
-	100% { opacity: 1; }
+	from { opacity: 0; }
 }
 
 /* 2. Root cross-fade ─────────────────────────────────────────────
    Keep the group duration positive so Chromium never skips the transition. */
 ::view-transition-group(root) {
-	animation-duration: 0.48s;
+	animation-duration: 0.52s;
 	animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* The outgoing page fades out quickly so full-page text never lingers at a
-   half-opacity double screenshot. */
+/* The outgoing page fades out cleanly. */
 ::view-transition-old(root) {
 	mix-blend-mode: normal;
-	animation: vt-root-exit 0.18s cubic-bezier(0.4, 0, 1, 1) both;
+	animation: vt-root-exit 0.22s cubic-bezier(0.4, 0, 1, 1) both;
 }
 
-/* The incoming page slides up 8px + fades in cleanly. */
+/* The incoming page slides up 10px + fades in smoothly. */
 ::view-transition-new(root) {
 	mix-blend-mode: normal;
-	animation: vt-root-enter 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+	animation: vt-root-enter 0.52s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 @keyframes vt-root-exit {
@@ -533,7 +526,7 @@ html[data-show-ai="false"] .grid-card-item[data-type="ai-organized"] {
 @keyframes vt-root-enter {
 	from {
 		opacity: 0;
-		transform: translateY(8px);
+		transform: translateY(10px);
 	}
 	to {
 		opacity: 1;
