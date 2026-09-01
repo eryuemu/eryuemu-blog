@@ -111,6 +111,17 @@ const { title, description, image = FallbackImage } = Astro.props;
 
 	let targetSlug = null;
 
+	// When leaving an article, snap it back to top BEFORE Astro captures the
+	// outgoing snapshot. The shared title sits at the top of the article, so if
+	// the reader has scrolled down (natural while reading), the outgoing title
+	// would be captured offscreen and the shared-element morph would start
+	// invisible — breaking the one-shot title flight on the way back.
+	const snapArticleToTop = () => {
+		if (getArticleSlug(document)) {
+			window.scrollTo(0, 0);
+		}
+	};
+
 	// Capture click to lock in target slug when clicking an article link
 	document.addEventListener(
 		'click',
@@ -120,9 +131,20 @@ const { title, description, image = FallbackImage } = Astro.props;
 			const m = (a.href || '').match(/\/blog\/([^\/]+)\//);
 			targetSlug = m ? decodeURIComponent(m[1]) : getArticleSlug(document);
 			applyPostVT(document, targetSlug);
+			// Same-origin links the router will actually handle (not new tabs,
+			// not external): make sure the snapshot sees the article top.
+			if (!m && !a.target && (a.href || '').startsWith(location.origin)) {
+				snapArticleToTop();
+			}
 		},
 		true
 	);
+
+	// Browser Back from a scrolled article: same offscreen-capture problem.
+	// Runs before Astro's snapshot (the fetch delays startViewTransition).
+	window.addEventListener('popstate', () => {
+		snapArticleToTop();
+	});
 
 	// Before DOM swap, if targetSlug wasn't set by click (e.g. browser Back button),
 	// read the slug from the article page we are currently leaving in document!
@@ -134,9 +156,25 @@ const { title, description, image = FallbackImage } = Astro.props;
 		applyPostVT(e.newDocument, targetSlug);
 	});
 
+	// The browser captures the incoming page right after the swap callback
+	// resolves. `astro:after-swap` fires synchronously inside that callback
+	// (well before the capture in both Chromium and Firefox), so re-asserting
+	// the activation here makes the shared name deterministically present in
+	// the new-state snapshot — no reliance on microtask timing races.
+	document.addEventListener('astro:after-swap', () => {
+		applyPostVT(document, targetSlug);
+	});
+
 	// Sync current page on initial load and after navigation
 	function syncPostVT() {
-		targetSlug = getArticleSlug(document);
+		// Preserve the slug locked in by the click / astro:before-swap handlers.
+		// `astro:page-load` can fire BEFORE the browser captures the incoming page
+		// during a View Transition, so re-deriving the slug from THIS page here
+		// would un-name the incoming title (list pages have no h1[data-vt-slug])
+		// and silently kill the shared-element morph on browser Back / back-btn.
+		if (targetSlug == null) {
+			targetSlug = getArticleSlug(document);
+		}
 		applyPostVT(document, targetSlug);
 	}
 

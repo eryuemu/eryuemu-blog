@@ -66,10 +66,21 @@ const { path = '', containerId = 'waline-comment-box', showDivider = true } = As
 
   initWaline();
 
-  document.addEventListener('astro:after-swap', () => {
+  // Destroy before the swap: at `astro:after-swap` the old comment container
+  // is already detached, and Waline's destroy() calls `removeChild` on it,
+  // throwing an uncaught TypeError on every navigation away from an article.
+  document.addEventListener('astro:before-swap', () => {
     if (walineInstance && typeof walineInstance.destroy === 'function') {
-      walineInstance.destroy();
+      try {
+        walineInstance.destroy();
+      } catch (e) {
+        console.warn('Waline destroy failed:', e);
+      }
+      walineInstance = null;
     }
+  });
+
+  document.addEventListener('astro:after-swap', () => {
     initWaline();
   });
 </script>

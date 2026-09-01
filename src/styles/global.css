@@ -592,11 +592,14 @@ html[data-show-ai="false"] .grid-card-item[data-type="ai-organized"] {
 	mix-blend-mode: normal;
 }
 
-/* 5. Orphaned elements (present only on the outgoing page — e.g. the sidebar
-   avatar when navigating to 心迹 / 友链) exit fast & clean instead of lingering
-   as a slow ghost in the corner. `:only-child` matches the old image when its
-   image-pair has no new counterpart. */
-::view-transition-old(*):only-child {
+/* 5. Orphaned elements (present only on the outgoing page — e.g. the article
+   sidebar avatar/name/motto when navigating back to 文章 / 心迹 / 友链) exit fast
+   & clean instead of lingering as a slow ghost in the corner. `:only-child`
+   matches the old image when its image-pair has no new counterpart.
+   `:root` prefix raises specificity above the
+   `[data-astro-transition='back']::view-transition-old(hero-*)` duration
+   overrides (0.9s) that would otherwise stretch this fast exit to 900ms. */
+:root::view-transition-old(*):only-child {
 	animation: vt-exit 0.1s cubic-bezier(0.4, 0, 1, 1) both;
 }
 
