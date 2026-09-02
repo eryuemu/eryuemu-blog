@@ -501,6 +501,7 @@ const posts = (await getCollection('blog')).sort(
 			function setupBlogPage() {
 				const STORAGE_VIEW_KEY = 'eryuemu_blog_view_mode';
 				const STORAGE_AI_KEY = 'eryuemu_blog_show_ai';
+				const STORAGE_CATEGORY_KEY = 'eryuemu_blog_category';
 
 				const filterContainer = document.getElementById('blog-category-filter');
 				const wrapper = document.getElementById('blog-posts-wrapper');
@@ -512,7 +513,9 @@ const posts = (await getCollection('blog')).sort(
 				const listItems = listView ? Array.from(listView.querySelectorAll<HTMLElement>('.post-item')) : [];
 				const gridItems = gridView ? Array.from(gridView.querySelectorAll<HTMLElement>('.grid-card-item')) : [];
 
-				let currentCategory = 'all';
+				// Restore the category so it survives view-transition navigation
+				// (both for the user and for the pre-swap shared-element restore).
+				let currentCategory = sessionStorage.getItem(STORAGE_CATEGORY_KEY) || 'all';
 				// Default to false (do not show AI articles by default)
 				let showAi = localStorage.getItem(STORAGE_AI_KEY) === 'true';
 
@@ -606,6 +609,7 @@ const posts = (await getCollection('blog')).sort(
 							const cat = btn.getAttribute('data-category') || 'all';
 							if (cat === currentCategory) return;
 							currentCategory = cat;
+							sessionStorage.setItem(STORAGE_CATEGORY_KEY, cat);
 							updateUIState();
 							if (wrapper) {
 								wrapper.classList.add('is-filtering');

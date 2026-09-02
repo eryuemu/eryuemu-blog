@@ -109,6 +109,32 @@ const { title, description, image = FallbackImage } = Astro.props;
 		});
 	}
 
+	// Re-apply the user's list/grid + category + AI filter on the INCOMING
+	// document BEFORE the browser captures the new page. The server HTML ships
+	// defaults (list view, category 全部) — e.g. the grid is rendered with
+	// display:none and AI visibility only applies once html[data-show-ai] is
+	// set. Capturing those defaults breaks every shared-element pair on the
+	// way back (no title/cover box -> no morph in 卡片 or 分类/AI 筛选 views).
+	function restoreViewState(doc) {
+		if (!doc || !doc.documentElement) return;
+		const showAi = localStorage.getItem('eryuemu_blog_show_ai') === 'true';
+		doc.documentElement.setAttribute('data-show-ai', showAi ? 'true' : 'false');
+		const mode = localStorage.getItem('eryuemu_blog_view_mode') || 'list';
+		const list = doc.getElementById('blog-posts-list');
+		const grid = doc.getElementById('blog-posts-grid');
+		if (mode === 'grid' && list && grid) {
+			list.style.display = 'none';
+			grid.style.display = 'grid';
+		}
+		const cat = sessionStorage.getItem('eryuemu_blog_category') || 'all';
+		doc.querySelectorAll('.post-item, .grid-card-item').forEach((el) => {
+			const c = el.getAttribute('data-category') || '开发';
+			const t = el.getAttribute('data-type') || 'ai-organized';
+			const ok = (cat === 'all' || c === cat) && (showAi || t === 'original');
+			el.style.display = ok ? '' : 'none';
+		});
+	}
+
 	let targetSlug = null;
 
 	// When leaving an article, snap it back to top BEFORE Astro captures the
@@ -154,6 +180,7 @@ const { title, description, image = FallbackImage } = Astro.props;
 		}
 		applyPostVT(document, targetSlug);
 		applyPostVT(e.newDocument, targetSlug);
+		restoreViewState(e.newDocument);
 	});
 
 	// The browser captures the incoming page right after the swap callback

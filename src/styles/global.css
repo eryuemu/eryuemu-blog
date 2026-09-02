@@ -485,7 +485,11 @@ html[data-show-ai="false"] .grid-card-item[data-type="ai-organized"] {
 
 /* Clean shared-element crossfade. Overrides Astro's default 180ms
    `plus-lighter` fade, which double-exposes (ghosts/blurs) text while it
-   morphs between two font sizes. Kept in sync with the morph duration above. */
+   morphs between two font sizes. Kept in sync with the morph duration above.
+   The two images never overlap at meaningful opacity: the outgoing one holds
+   at 100% during the flight and hands off to the incoming one only at the
+   landing (~72-100% of the timeline). This kills the scaled "double image"
+   ghost (very visible in Firefox) and the "animation ends early" feel. */
 ::view-transition-old(*) {
 	animation: vt-shared-out 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
@@ -495,11 +499,13 @@ html[data-show-ai="false"] .grid-card-item[data-type="ai-organized"] {
 }
 
 @keyframes vt-shared-out {
-	to { opacity: 0; }
+	0%, 72% { opacity: 1; }
+	100% { opacity: 0; }
 }
 
 @keyframes vt-shared-in {
-	from { opacity: 0; }
+	0%, 78% { opacity: 0; }
+	100% { opacity: 1; }
 }
 
 /* 2. Root cross-fade ─────────────────────────────────────────────
