@@ -287,6 +287,14 @@ const filteredHeadings = headings.filter((h) => h.depth >= 2 && h.depth <= 3);
 				margin: 0 0 1rem 0;
 				color: var(--text-primary);
 				letter-spacing: -0.01em;
+				/* Shrink the title box to its text width. The shared-element morph
+				   scales images by the group's WIDTH ratio, so when the article h1
+				   box spans the full column (677px) while the list title box is its
+				   text width (≈182px), the morph becomes a ~3.7x mismatched zoom
+				   (huge ghost on entry, tiny text on return). With a text-width box
+				   the two boxes share the same aspect as a ~2x font zoom and the
+				   title morphs naturally between list and article font sizes. */
+				width: fit-content;
 			}
 
 			.article-meta {
