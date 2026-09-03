@@ -248,6 +248,10 @@ const posts = (await getCollection('blog')).sort(
 				color: var(--text-primary);
 				line-height: 1.4;
 				margin: 0;
+				width: fit-content;
+				max-width: 100%;
+				word-break: break-word;
+				overflow-wrap: break-word;
 			}
 
 			.type-badge-inline {

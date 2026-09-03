@@ -295,6 +295,9 @@ const filteredHeadings = headings.filter((h) => h.depth >= 2 && h.depth <= 3);
 				   the two boxes share the same aspect as a ~2x font zoom and the
 				   title morphs naturally between list and article font sizes. */
 				width: fit-content;
+				max-width: 100%;
+				word-break: break-word;
+				overflow-wrap: break-word;
 			}
 
 			.article-meta {

@@ -345,6 +345,10 @@ const posts = (await getCollection('blog'))
 				font-weight: 500;
 				color: var(--text-primary);
 				line-height: 1.4;
+				width: fit-content;
+				max-width: 100%;
+				word-break: break-word;
+				overflow-wrap: break-word;
 			}
 
 			.type-badge-inline {
@@ -632,6 +636,7 @@ const posts = (await getCollection('blog'))
 			function setupCategoryFilterAndViewToggle() {
 				const STORAGE_VIEW_KEY = 'eryuemu_blog_view_mode';
 				const STORAGE_AI_KEY = 'eryuemu_blog_show_ai';
+				const STORAGE_CATEGORY_KEY = 'eryuemu_blog_category';
 
 				const filterContainer = document.getElementById('category-filter');
 				const wrapper = document.getElementById('posts-wrapper');
@@ -643,7 +648,7 @@ const posts = (await getCollection('blog'))
 				const listItems = listView ? Array.from(listView.querySelectorAll<HTMLElement>('.post-item')) : [];
 				const gridItems = gridView ? Array.from(gridView.querySelectorAll<HTMLElement>('.grid-card-item')) : [];
 
-				let currentCategory = 'all';
+				let currentCategory = sessionStorage.getItem(STORAGE_CATEGORY_KEY) || 'all';
 				// Default to false (do not show AI articles by default)
 				let showAi = localStorage.getItem(STORAGE_AI_KEY) === 'true';
 
@@ -745,6 +750,7 @@ const posts = (await getCollection('blog'))
 							const cat = btn.getAttribute('data-category') || 'all';
 							if (cat === currentCategory) return;
 							currentCategory = cat;
+							sessionStorage.setItem(STORAGE_CATEGORY_KEY, cat);
 							updateUIState();
 							if (wrapper) {
 								wrapper.classList.add('is-filtering');

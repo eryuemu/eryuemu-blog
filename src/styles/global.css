@@ -475,37 +475,170 @@ html[data-show-ai="false"] .grid-card-item[data-type="ai-organized"] {
 
 /* ─── View Transitions · Shared Element Morphing ─── */
 
-/* 1. Default shared-element morph timing (also covers the dynamic
-   `post-title-*` / `post-cover-*` names generated per post). Declared first so
-   the specific group rules below can override it. */
+/* 1. Default shared-element morph timing (covers titles, covers, and active shared elements) */
 ::view-transition-group(*) {
-	animation-duration: 0.7s;
+	animation-duration: 0.78s;
 	animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+	overflow: clip;
 }
 
-/* Clean shared-element crossfade. Overrides Astro's default 180ms
-   `plus-lighter` fade, which double-exposes (ghosts/blurs) text while it
-   morphs between two font sizes. Kept in sync with the morph duration above.
-   The two images never overlap at meaningful opacity: the outgoing one holds
-   at 100% during the flight and hands off to the incoming one only at the
-   landing (~72-100% of the timeline). This kills the scaled "double image"
-   ghost (very visible in Firefox) and the "animation ends early" feel. */
+[data-astro-transition='back']::view-transition-group(*) {
+	animation-duration: 0.9s;
+}
+
+/* Base replacement rules: maintain natural aspect ratio so text never stretches or squashes */
+::view-transition-old(*),
+::view-transition-new(*) {
+	height: auto;
+	width: 100%;
+	max-width: 100%;
+	transform-origin: top left;
+}
+
 ::view-transition-old(*) {
-	animation: vt-shared-out 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+	animation: vt-title-out 0.78s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 ::view-transition-new(*) {
-	animation: vt-shared-in 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+	animation: vt-title-in 0.78s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-@keyframes vt-shared-out {
-	0%, 72% { opacity: 1; }
-	100% { opacity: 0; }
+[data-astro-transition='back']::view-transition-old(*) {
+	animation-duration: 0.9s;
 }
 
-@keyframes vt-shared-in {
-	0%, 78% { opacity: 0; }
-	100% { opacity: 1; }
+[data-astro-transition='back']::view-transition-new(*) {
+	animation-duration: 0.9s;
+}
+
+/* 1.1 Active Article Title: Specialized rules for morphing between list and article */
+::view-transition-group(active-post-title) {
+	animation-duration: 0.78s;
+	animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+	overflow: clip;
+}
+
+[data-astro-transition='back']::view-transition-group(active-post-title) {
+	animation-duration: 0.9s;
+}
+
+::view-transition-old(active-post-title),
+::view-transition-new(active-post-title) {
+	height: auto;
+	width: 100%;
+	max-width: 100%;
+	transform-origin: top left;
+}
+
+::view-transition-old(active-post-title) {
+	animation: vt-title-out 0.78s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+::view-transition-new(active-post-title) {
+	animation: vt-title-in 0.78s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+[data-astro-transition='back']::view-transition-old(active-post-title) {
+	animation-duration: 0.9s;
+}
+
+[data-astro-transition='back']::view-transition-new(active-post-title) {
+	animation-duration: 0.9s;
+}
+
+/* 1.2 Active Article Cover: Ensure full container fill and object-fit for hero images */
+::view-transition-group(active-post-cover) {
+	animation-duration: 0.78s;
+	animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+	overflow: clip;
+}
+
+[data-astro-transition='back']::view-transition-group(active-post-cover) {
+	animation-duration: 0.9s;
+}
+
+::view-transition-old(active-post-cover),
+::view-transition-new(active-post-cover) {
+	height: 100%;
+	width: 100%;
+	object-fit: cover;
+}
+
+::view-transition-old(active-post-cover) {
+	animation: vt-cover-out 0.78s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+::view-transition-new(active-post-cover) {
+	animation: vt-cover-in 0.78s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+[data-astro-transition='back']::view-transition-old(active-post-cover) {
+	animation-duration: 0.9s;
+}
+
+[data-astro-transition='back']::view-transition-new(active-post-cover) {
+	animation-duration: 0.9s;
+}
+
+/* Smooth mid-flight crossfade keyframes */
+@keyframes vt-title-out {
+	0% {
+		opacity: 1;
+	}
+	40% {
+		opacity: 1;
+	}
+	75% {
+		opacity: 0;
+	}
+	100% {
+		opacity: 0;
+	}
+}
+
+@keyframes vt-title-in {
+	0% {
+		opacity: 0;
+	}
+	25% {
+		opacity: 0;
+	}
+	60% {
+		opacity: 1;
+	}
+	100% {
+		opacity: 1;
+	}
+}
+
+@keyframes vt-cover-out {
+	0% {
+		opacity: 1;
+	}
+	40% {
+		opacity: 1;
+	}
+	75% {
+		opacity: 0;
+	}
+	100% {
+		opacity: 0;
+	}
+}
+
+@keyframes vt-cover-in {
+	0% {
+		opacity: 0;
+	}
+	25% {
+		opacity: 0;
+	}
+	60% {
+		opacity: 1;
+	}
+	100% {
+		opacity: 1;
+	}
 }
 
 /* 2. Root cross-fade ─────────────────────────────────────────────
@@ -514,8 +647,19 @@ html[data-show-ai="false"] .grid-card-item[data-type="ai-organized"] {
    as instantly finished and destroys every shared-element animation (title /
    cover / avatar) at frame 0. Keep the group duration positive. */
 ::view-transition-group(root) {
-	animation-duration: 0.7s;
+	animation-duration: 0.78s;
 	animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-astro-transition='back']::view-transition-group(root) {
+	animation-duration: 0.9s;
+}
+
+/* Explicit full-size override for root viewport snapshot */
+::view-transition-old(root),
+::view-transition-new(root) {
+	height: 100%;
+	width: 100%;
 }
 
 /* The outgoing page fades out quickly so full-page text never lingers at a
@@ -524,10 +668,14 @@ html[data-show-ai="false"] .grid-card-item[data-type="ai-organized"] {
 	animation: vt-root-exit 0.22s cubic-bezier(0.4, 0, 1, 1) both;
 }
 
-/* The incoming page slides up 12px + fades in — a gentle entrance instead of
+/* The incoming page slides up 10px + fades in — a gentle entrance instead of
    a hard pop — while staying vector-crisp. */
 ::view-transition-new(root) {
-	animation: vt-root-enter 0.66s cubic-bezier(0.16, 1, 0.3, 1) both;
+	animation: vt-root-enter 0.72s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+[data-astro-transition='back']::view-transition-new(root) {
+	animation-duration: 0.85s;
 }
 
 @keyframes vt-root-exit {
@@ -537,7 +685,7 @@ html[data-show-ai="false"] .grid-card-item[data-type="ai-organized"] {
 @keyframes vt-root-enter {
 	from {
 		opacity: 0;
-		transform: translateY(12px);
+		transform: translateY(10px);
 	}
 	to {
 		opacity: 1;

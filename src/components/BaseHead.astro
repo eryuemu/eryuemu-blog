@@ -100,8 +100,8 @@ const { title, description, image = FallbackImage } = Astro.props;
 		root.querySelectorAll('[data-vt-slug]').forEach((el) => {
 			const slug = el.getAttribute('data-vt-slug');
 			if (activeSlug !== null && activeSlug !== undefined && slug === activeSlug) {
-				// Activate the target article's view-transition-name
-				el.style.viewTransitionName = '';
+				const isTitle = el.tagName === 'H1' || el.tagName === 'H2' || el.classList.contains('post-title');
+				el.style.viewTransitionName = isTitle ? 'active-post-title' : 'active-post-cover';
 			} else {
 				// Disable non-target articles so only 1 shared element pair exists
 				el.style.viewTransitionName = 'none';
@@ -120,18 +120,44 @@ const { title, description, image = FallbackImage } = Astro.props;
 		const showAi = localStorage.getItem('eryuemu_blog_show_ai') === 'true';
 		doc.documentElement.setAttribute('data-show-ai', showAi ? 'true' : 'false');
 		const mode = localStorage.getItem('eryuemu_blog_view_mode') || 'list';
-		const list = doc.getElementById('blog-posts-list');
-		const grid = doc.getElementById('blog-posts-grid');
+		const list = doc.getElementById('blog-posts-list') || doc.getElementById('posts-list-view');
+		const grid = doc.getElementById('blog-posts-grid') || doc.getElementById('posts-grid-view');
 		if (mode === 'grid' && list && grid) {
 			list.style.display = 'none';
 			grid.style.display = 'grid';
 		}
 		const cat = sessionStorage.getItem('eryuemu_blog_category') || 'all';
+
+		// Sync active class on tab and filter buttons in the incoming document
+		doc.querySelectorAll('.tab-btn').forEach((btn) => {
+			btn.classList.toggle('active', btn.getAttribute('data-category') === cat);
+		});
+		doc.querySelectorAll('.view-btn').forEach((btn) => {
+			btn.classList.toggle('active', btn.getAttribute('data-view') === mode);
+		});
+		doc.querySelectorAll('.ai-filter-btn').forEach((btn) => {
+			btn.classList.toggle('active', (btn.getAttribute('data-show-ai') === 'true') === showAi);
+		});
+
+		const isHome = doc.getElementById('posts-wrapper') !== null;
+		let homeListCount = 0;
+		let homeGridCount = 0;
 		doc.querySelectorAll('.post-item, .grid-card-item').forEach((el) => {
 			const c = el.getAttribute('data-category') || '开发';
 			const t = el.getAttribute('data-type') || 'ai-organized';
 			const ok = (cat === 'all' || c === cat) && (showAi || t === 'original');
-			el.style.display = ok ? '' : 'none';
+			if (isHome) {
+				const isGrid = el.classList.contains('grid-card-item');
+				if (isGrid) {
+					el.style.display = (ok && homeGridCount < 12) ? 'flex' : 'none';
+					if (ok) homeGridCount++;
+				} else {
+					el.style.display = (ok && homeListCount < 12) ? 'block' : 'none';
+					if (ok) homeListCount++;
+				}
+			} else {
+				el.style.display = ok ? '' : 'none';
+			}
 		});
 	}
 
