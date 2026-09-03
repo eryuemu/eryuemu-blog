@@ -100,8 +100,10 @@ const { title, description, image = FallbackImage } = Astro.props;
 		root.querySelectorAll('[data-vt-slug]').forEach((el) => {
 			const slug = el.getAttribute('data-vt-slug');
 			if (activeSlug !== null && activeSlug !== undefined && slug === activeSlug) {
-				const isTitle = el.tagName === 'H1' || el.tagName === 'H2' || el.classList.contains('post-title');
-				el.style.viewTransitionName = isTitle ? 'active-post-title' : 'active-post-cover';
+				// Clear inline style so Astro's compiled stylesheet rule takes effect:
+				// view-transition-name: post-title-<slug> / post-cover-<slug>
+				// This guarantees Gecko (Firefox) parses the name from stylesheets without detached-DOM drops.
+				el.style.viewTransitionName = '';
 			} else {
 				// Disable non-target articles so only 1 shared element pair exists
 				el.style.viewTransitionName = 'none';
@@ -216,6 +218,8 @@ const { title, description, image = FallbackImage } = Astro.props;
 	// the new-state snapshot — no reliance on microtask timing races.
 	document.addEventListener('astro:after-swap', () => {
 		applyPostVT(document, targetSlug);
+		// Force synchronous reflow so Gecko/Firefox immediately flushes style tree and suppresses DOM element
+		void document.documentElement.offsetHeight;
 	});
 
 	// Sync current page on initial load and after navigation

@@ -580,63 +580,40 @@ html[data-show-ai="false"] .grid-card-item[data-type="ai-organized"] {
 	animation-duration: 0.9s;
 }
 
-/* Smooth mid-flight crossfade keyframes */
+/* Single-image flight & crisp landing handoff keyframes:
+   Eliminates the Firefox / Linux double-image ghost and premature landing */
 @keyframes vt-title-out {
-	0% {
+	0%, 62% {
 		opacity: 1;
 	}
-	40% {
-		opacity: 1;
-	}
-	75% {
-		opacity: 0;
-	}
-	100% {
+	82%, 100% {
 		opacity: 0;
 	}
 }
 
 @keyframes vt-title-in {
-	0% {
+	0%, 68% {
 		opacity: 0;
 	}
-	25% {
-		opacity: 0;
-	}
-	60% {
-		opacity: 1;
-	}
-	100% {
+	88%, 100% {
 		opacity: 1;
 	}
 }
 
 @keyframes vt-cover-out {
-	0% {
+	0%, 62% {
 		opacity: 1;
 	}
-	40% {
-		opacity: 1;
-	}
-	75% {
-		opacity: 0;
-	}
-	100% {
+	82%, 100% {
 		opacity: 0;
 	}
 }
 
 @keyframes vt-cover-in {
-	0% {
+	0%, 68% {
 		opacity: 0;
 	}
-	25% {
-		opacity: 0;
-	}
-	60% {
-		opacity: 1;
-	}
-	100% {
+	88%, 100% {
 		opacity: 1;
 	}
 }
