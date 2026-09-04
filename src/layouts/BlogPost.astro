@@ -33,6 +33,9 @@ const {
 
 // Filter headings for TOC (H2 and H3)
 const filteredHeadings = headings.filter((h) => h.depth >= 2 && h.depth <= 3);
+
+// Normalized canonical path for Waline comments & pageview counter
+const cleanPath = Astro.url.pathname.replace(/\/+$/, '') || '/';
 ---
 
 <html lang="zh-CN">
@@ -683,6 +686,14 @@ const filteredHeadings = headings.filter((h) => h.depth >= 2 && h.depth <= 3);
 								<span class="sidebar-meta-val">{wordCount.toLocaleString()} 字</span>
 							</div>
 						)}
+						{id && (
+							<div class="sidebar-meta-item">
+								<span>阅读次数</span>
+								<span class="sidebar-meta-val">
+									<span class="waline-pageview-count" data-path={cleanPath}>-</span> 次
+								</span>
+							</div>
+						)}
 					</div>
 
 					<div class="author-card-divider"></div>
@@ -778,6 +789,16 @@ const filteredHeadings = headings.filter((h) => h.depth >= 2 && h.depth <= 3);
 									{wordCount.toLocaleString()} 字
 								</span>
 							)}
+							{id && (
+								<span class="meta-item">
+									<span class="separator">·</span>
+									<svg class="meta-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+										<path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
+										<circle cx="12" cy="12" r="3"></circle>
+									</svg>
+									<span class="waline-pageview-count" data-path={cleanPath}>-</span> 次阅读
+								</span>
+							)}
 
 							{updatedDate && (
 								<span class="meta-item updated">
@@ -871,6 +892,63 @@ const filteredHeadings = headings.filter((h) => h.depth >= 2 && h.depth <= 3);
 		<Footer />
 
 		<script>
+			import { WALINE_SERVER_URL } from '../consts';
+
+			async function updatePageviews() {
+				const els = document.querySelectorAll<HTMLElement>('.waline-pageview-count');
+				if (els.length === 0 || !WALINE_SERVER_URL) return;
+
+				const rawPath = window.location.pathname;
+				const currentPath = rawPath.replace(/\/+$/, '') || '/';
+				const sessionKey = `waline_pv_${currentPath}`;
+				const alreadyViewed = sessionStorage.getItem(sessionKey);
+
+				try {
+					let count: number | null = null;
+
+					if (!alreadyViewed) {
+						// First visit in current session: increment view count
+						const res = await fetch(`${WALINE_SERVER_URL.replace(/\/+$/, '')}/api/article`, {
+							method: 'POST',
+							headers: { 'Content-Type': 'application/json' },
+							body: JSON.stringify({ path: currentPath, type: 'time', action: 'inc' }),
+						});
+						if (res.ok) {
+							const data = await res.json();
+							if (data?.data?.[0]?.time !== undefined) {
+								count = data.data[0].time;
+								sessionStorage.setItem(sessionKey, '1');
+							}
+						}
+					}
+
+					// Fallback or repeat navigation in same session: read-only counter fetch
+					if (count === null) {
+						const res = await fetch(
+							`${WALINE_SERVER_URL.replace(/\/+$/, '')}/api/article?path=${encodeURIComponent(currentPath)}&type=time`
+						);
+						if (res.ok) {
+							const data = await res.json();
+							if (data?.data?.[0]?.time !== undefined) {
+								count = data.data[0].time;
+							}
+						}
+					}
+
+					if (count !== null) {
+						const formatted = count.toLocaleString();
+						els.forEach((el) => {
+							const elPath = el.getAttribute('data-path');
+							if (!elPath || elPath === currentPath) {
+								el.textContent = formatted;
+							}
+						});
+					}
+				} catch (err) {
+					console.warn('Failed to load pageviews from Waline:', err);
+				}
+			}
+
 			function setupBlogPostPage() {
 				// 1. Reading progress bar handler
 				const progressBar = document.getElementById('reading-progress');
@@ -1090,6 +1168,9 @@ const filteredHeadings = headings.filter((h) => h.depth >= 2 && h.depth <= 3);
 						wrapper.appendChild(table);
 					}
 				});
+
+				// 9. Update Pageview Counter via Waline
+				updatePageviews();
 			}
 
 			// Runs on initial page load and after every page swap in Astro View Transitions

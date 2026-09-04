@@ -173,12 +173,8 @@ const formattedWords = totalWords >= 1000 ? (totalWords / 1000).toFixed(1) + 'k'
 		}
 
 		// 2. 真实访问量统计 (沿用您在 HBU-Wiki 中使用的 Vercount 接口)
-		const VERC_COOKIE_PREFIX = 'vercount_uv_';
+		const VERC_KEY = 'vercount_uv_eryuemu_com';
 		const API_URL = 'https://events.vercount.one/api/v2/log';
-
-		function getCookieName() {
-			return `${VERC_COOKIE_PREFIX}eryuemu_com`;
-		}
 
 		function getCookie(name: string) {
 			const cookie = document.cookie.split('; ').find(row => row.startsWith(`${name}=`));
@@ -187,6 +183,38 @@ const formattedWords = totalWords >= 1000 ? (totalWords / 1000).toFixed(1) + 'k'
 
 		function setCookie(name: string, value: string) {
 			document.cookie = `${name}=${value}; path=/; max-age=31536000; samesite=lax`;
+		}
+
+		function checkHasVisited(): boolean {
+			// 1. 优先读取 localStorage（持久保存在设备磁盘，无惧 IP 切换与浏览器防追踪）
+			try {
+				if (typeof localStorage !== 'undefined' && localStorage.getItem(VERC_KEY) === '1') {
+					return true;
+				}
+			} catch (e) {}
+
+			// 2. 备用读取 Cookie（平滑迁移既有老访客凭据）
+			try {
+				if (getCookie(VERC_KEY) === '1') {
+					try {
+						localStorage.setItem(VERC_KEY, '1');
+					} catch (e) {}
+					return true;
+				}
+			} catch (e) {}
+
+			return false;
+		}
+
+		function markAsVisited() {
+			try {
+				if (typeof localStorage !== 'undefined') {
+					localStorage.setItem(VERC_KEY, '1');
+				}
+			} catch (e) {}
+			try {
+				setCookie(VERC_KEY, '1');
+			} catch (e) {}
 		}
 
 		async function fetchStats() {
@@ -200,12 +228,11 @@ const formattedWords = totalWords >= 1000 ? (totalWords / 1000).toFixed(1) + 'k'
 				return;
 			}
 
-			const cookieName = getCookieName();
-			const hasVisited = getCookie(cookieName) === '1';
+			const hasVisited = checkHasVisited();
 			const isNewUv = !hasVisited;
 
 			if (isNewUv) {
-				setCookie(cookieName, '1');
+				markAsVisited();
 			}
 
 			// 将计数请求映射到历史统计标识（www.eryuemu.com），无缝继承 7 月以来积累的 490+ 人数与 2500+ 访问量
