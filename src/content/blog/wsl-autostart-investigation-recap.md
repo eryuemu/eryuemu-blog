@@ -17,6 +17,8 @@ type: 'ai-organized'
 
 关联笔记：[WSL2 实战手册](/blog/wsl2-practical-guide) · [C 盘大扫除](/blog/windows-dev-env-cleanup)
 
+> **2026-09-04 更新**：同案在"正常"的轻薄本上复发——Win+R 历史丢失的元凶 Antigravity 误伤从孤例变实锤，排查与修复见文末附章。
+
 ---
 
 ## 0. 结论速览（先看这个）
@@ -354,6 +356,7 @@ timeout /t 2 >nul
 - **Windows PowerShell 5.1 按 GBK 读脚本**，Linux 侧写的中文 .ps1 会乱码崩溃——脚本用纯英文
 - **Appx 打包服务**（PC Manager / Intel Arc）的 SCM 注册名带空格、用 manifest 里的真名才能查
 - **"最近文件追踪"是两个开关**：`Start_TrackDocs`（文件历史）+ `Start_TrackProgs`（程序历史），关的时候容易误伤 Win+R
+- **Antigravity 的"最近追踪/隐私"类操作是 Win+R 历史高危操作**：2026-08-24 游戏本与 2026-09-04 轻薄本两起同案均由它误关 `Start_TrackProgs` + 清空 `RunMRU`（见文末附章）
 - **`pageReporting` 键已废弃**（GitHub #9899），写了报"未知键"警告，默认 true 不写也生效
 - **AI 说"已全部回退/修复"要核查**：交叉验证两家 AI 的结论，发现一方声称"100% 回退"实则漏了 Start_TrackProgs
 - **排查顺序建议**：先"常规启动项"再"服务排除"再"审计定位"，每家 AI 查一半就换人，信息断裂（这次靠摘要文件接力才拼完整）
@@ -406,3 +409,40 @@ reg query "HKLM\SOFTWARE\Classes\CLSID\{B2B4A4D1-2754-4140-A2EB-9A76D9D7CDC6}" /
 ## 10. 一句话总结
 
 > **WSL 开机自启 = Windows Shell 开机时通过 9P 访问 `\\wsl.localhost` 把 WSL 唤醒了。这是 WSL 的内建行为，没有官方开关；只要你的 Windows 侧存在"最近打开过 WSL 文件"之类的访问源，它就一定会被唤醒。能做的只有：接受它（反正天天用），或者用脚本手动关。**
+
+---
+
+## 附：更新（2026-09-04）——"正常"的轻薄本也中招了，Antigravity 误伤实锤第二例
+
+> 本文当初对照用的"正常机"（轻薄本，Win11 24H2，同样装了 Antigravity）在 2026-09-04 出现与 6.4 完全相同的症状：**Win+R 历史全空、新命令不再记录**。排查过程与结论记录如下，下次直接照此秒查。
+
+### 排查（这次几乎把弯路走全了）
+
+| 怀疑方向 | 验证 | 结果 |
+|----------|------|------|
+| 联想智能引擎等"管家"定时清理 | RunMRU 键写哨兵值、每 10 秒监视 6.5 分钟 | 无任何删除 → 排除 |
+| 组策略/系统设置禁用 | HKCU/HKLM `Policies\Explorer` 全查，无 NoRun 类策略 | 排除 |
+| 键损坏或权限不足 | 哨兵值可正常写入，ACL 正常（用户 FullControl） | 排除 |
+| 第三方顶包 Win+R | 启动项、进程、ShellExecuteHooks 全干净 | 排除 |
+| Explorer 壳抽风 | 重启资源管理器后重试 | 无效 |
+| **`Start_TrackProgs` 被误关** | `HKCU\...\Explorer\Advanced\Start_TrackProgs = 0` | **命中** |
+
+细节与 6.4 略不同：游戏本那次"最近文件追踪"双开关都被动过（`Start_TrackDocs` 后来已回退）；本机复查 **`Start_TrackDocs` 从未被动**（值不存在 = 默认开启），只有 `Start_TrackProgs` 被置 0、`RunMRU` 同样被清空（旧历史不可恢复）。
+
+### 修复（与 6.4 同一条命令）
+
+```powershell
+reg add "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v Start_TrackProgs /t REG_DWORD /d 1 /f
+```
+
+改完重启资源管理器即恢复记录（实测 `RunMRU` 写入 `a = cmd\1`）。
+
+### 结论升级：两案坐实，别再让"清理软件"背锅
+
+6.4 把现象归因于 Antigravity 处理"最近文件追踪"时的误伤，当时尚属孤例；如今第二台电脑出现**完全相同的改动痕迹**（`Start_TrackProgs` 归零 + `RunMRU` 清空）、同样装有 Antigravity——**"用 AI/工具执行'关闭最近追踪'类操作 = Win+R 历史高危操作"正式从孤例升级为两案实锤**。真嫌"最近使用"碍事，只关**显示**开关即可，别碰**跟踪**开关。
+
+> 本次的哨兵监视顺带证明了一件反直觉的事：记录不是"被谁定时删掉"的，而是 **`Start_TrackProgs = 0` 时 Explorer 压根不写入**。以后再遇到"Win+R 没记录"，跳过所有"找清理者"的弯路，先查这个开关：
+
+```powershell
+reg query "HKCU\Software\Microsoft\Windows\CurrentVersion\Explorer\Advanced" /v Start_TrackProgs
+```
