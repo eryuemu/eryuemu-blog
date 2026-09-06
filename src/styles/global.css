@@ -356,13 +356,27 @@ hr {
 
 /* Mobile & portrait screenshots: limit width, add neat border and shadow */
 .prose img[src*="vercel-storage-warning-email"],
+.prose img[src*="group-chat"],
+.prose img[src*="xx14-black-33"],
+.prose img[src*="xx14-black-22"],
 .prose img[src*="phone"],
 .prose img[src*="mobile"],
 .prose .phone-screenshot img {
-	max-width: 300px;
+	max-width: 320px;
+	width: 100%;
 	border: 1px solid var(--border);
 	border-radius: 14px;
 	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+html.dark .prose img[src*="vercel-storage-warning-email"],
+html.dark .prose img[src*="group-chat"],
+html.dark .prose img[src*="xx14-black-33"],
+html.dark .prose img[src*="xx14-black-22"],
+html.dark .prose img[src*="phone"],
+html.dark .prose img[src*="mobile"],
+html.dark .prose .phone-screenshot img {
+	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
 }
 
 /* Image Captions (from Markdown `*图 x：说明*`) */

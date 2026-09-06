@@ -1,6 +1,6 @@
 ---
 title: '联想小新 14 装 Fedora 44 KDE 双系统全记录（下）：一次注销引发的血案'
-description: 'Fedora 44 KDE 新装系统安装中文输入法后第一次点注销即卡死，强制断电后开机黑屏白光标、TTY 切不出、键盘假死但 CapsLk 灯能亮灭。全程还原从玄学到科学的排查：FnLock 陷阱、CapsLk 判断法、发现真正的登录管理器是 plasmalogin（plasmalogin-helper exited with 64）、plymouth 打错 playmouth、GRUB 加 3 进纯文本、startplasma-wayland 秒退、换装 SDDM 连环坑（sddm-wayland-plasma、01-breeze-fedora 主题缺失）、群友 pam_environment 建议全是背锅侠，直到停止试错改为只读取证：journalctl -b -1 抓上一轮启动日志，coredumpctl list 发现 kwin_wayland/plasmashell/kded6/plasma-login-greeter 全家 SIGABRT，直接运行 kwin_wayland --version 让动态链接器报出 undefined symbol: _ZN12ScreenLocker7KSldApp14inhibitSuspendEv——根因是装输入法的 305 包大事务把 kwin 连带升级到 6.7.4，而无版本号裸依赖的 kscreenlocker 停在 6.6.4，ABI 脱节。修复只需一条 dnf upgrade 对齐版本，再加 1730 包全量更新收尾。次日复盘推翻 Gemini 两个结论：sddm 并非出厂默认（已还原 plasmalogin）、本机根本没有后台自动更新；顺带处理 Firefox 默认主页、确认 KDE 应用不占后台资源。39 张实拍图完整记录。'
+description: 'Fedora 44 KDE 新装系统安装中文输入法后第一次点注销即卡死，强制断电后开机黑屏白光标、TTY 切不出、键盘假死但 CapsLk 灯能亮灭。全程还原从玄学到科学的排查：FnLock 陷阱、CapsLk 判断法、发现真正的登录管理器是 plasmalogin（plasmalogin-helper exited with 64）、plymouth 打错 playmouth、GRUB 加 3 进纯文本、startplasma-wayland 秒退、换装 SDDM 连环坑（sddm-wayland-plasma、01-breeze-fedora 主题缺失）、群友 pam_environment 建议全是背锅侠，直到停止试错改为只读取证：journalctl -b -1 抓上一轮启动日志，coredumpctl list 发现 kwin_wayland / plasmashell / kded6 / plasma-login-greeter 全家 SIGABRT，直接运行 kwin_wayland --version 让动态链接器报出 undefined symbol: _ZN12ScreenLocker7KSldApp14inhibitSuspendEv —— 根因是装输入法的 305 包大事务把 kwin 连带升级到 6.7.4，而无版本号裸依赖的 kscreenlocker 停在 6.6.4，ABI 脱节。修复只需一条 dnf upgrade 对齐版本，再加 1730 包全量更新收尾。次日复盘推翻 Gemini 两个结论：sddm 并非出厂默认（已还原 plasmalogin）、本机根本没有后台自动更新；顺带处理 Firefox 默认主页、确认 KDE 应用不占后台资源。39 张实拍图完整记录。'
 pubDate: '2026-09-06T16:10:00+08:00'
 updatedDate: '2026-09-06T16:30:00+08:00'
 category: '开发'
@@ -177,12 +177,12 @@ TTY 里没网的话先连 Wi-Fi 再装：`ping -c 3 baidu.com` 测连通性，�
 
 期间把问题截图发到了群里（群聊时间 00:06~00:18，一边排查一边还惦记着"修完明天还早八"）：
 
-![群里天之川沙夜回复：rm -f ~/.pam_environment 看看呢——此前没遇到过这个问题](../../assets/xx14-black-33-group-chat-short.jpg)
+![群里 pod 回复：rm -f ~/.pam_environment 看看呢——此前没遇到过这个问题](../../assets/xx14-black-33-group-chat-short.jpg)
 *图 11：把症状发到群里求援（00:06）*
 
-群友"天之川沙夜"给出 Linux 圈的高频经验建议——`rm -f ~/.pam_environment`。逻辑很合理：90% 的"登录界面闪退（Exit 64 报错）"都是新手配置 Fcitx5 时把 `GTK_IM_MODULE=fcitx` 这类环境变量写错位置导致的。
+群友"pod"给出 Linux 圈的高频经验建议——`rm -f ~/.pam_environment`。逻辑很合理：90% 的"登录界面闪退（Exit 64 报错）"都是新手配置 Fcitx5 时把 `GTK_IM_MODULE=fcitx` 这类环境变量写错位置导致的。
 
-![群聊完整上下文：天之川沙夜两次回复 rm ~/.pam_environment 与"没遇到过"](../../assets/xx14-black-22-group-chat-pam-env.jpg)
+![群聊完整上下文：pod 两次回复 rm ~/.pam_environment 与"没遇到过"](../../assets/xx14-black-22-group-chat-pam-env.jpg)
 *图 12：群友建议的完整上下文（00:18）*
 
 顺手完成的一组排除（均非根因，但属于标准清理项）：
