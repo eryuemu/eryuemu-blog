@@ -354,6 +354,17 @@ hr {
 	margin: 1.5rem auto 0.8rem auto;
 }
 
+/* Mobile & portrait screenshots: limit width, add neat border and shadow */
+.prose img[src*="vercel-storage-warning-email"],
+.prose img[src*="phone"],
+.prose img[src*="mobile"],
+.prose .phone-screenshot img {
+	max-width: 300px;
+	border: 1px solid var(--border);
+	border-radius: 14px;
+	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
 /* Image Captions (from Markdown `*图 x：说明*`) */
 .prose p:has(> em:only-child),
 .prose p > em:only-child {
