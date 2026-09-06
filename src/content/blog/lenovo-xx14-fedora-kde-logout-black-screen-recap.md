@@ -322,16 +322,18 @@ sudo dnf upgrade --refresh -y
 
 **为什么排查前期全部落空？** 三个干扰项（主题缺失、pam_environment、满屏 ACPI 红字）与一个方法论问题：图形服务崩溃现场随每次启动重建，反复重启服务只能反复得到同样黑屏；转为纯文本 + 只读取证（journalctl -b -1 / coredumpctl / 直接运行二进制）后，两步锁定根因。
 
-## 9. 次日复盘：Gemini 两个结论被推翻
+## 9. 次日复盘：从"还原 sddm"的疑问开始
 
-09-06 对系统状态逐项核对时，发现 Gemini 收尾时给出的两个结论不成立，均予以修正。这次的复盘阵型是两台电脑两套 AI 接力：游戏本跑 Antigravity 交叉验证结论，小新 14 本机跑 Trae 执行核对与还原。
+黑屏修复后的第二天，回看整个排查过程会产生一个自然的疑虑：为了修这个 bug，系统跟着 AI 动了太多地方——装了 sddm 全家桶、改了开机默认目标、删过缓存和配置文件，其中真正对修复有用的只有对齐 kscreenlocker 的那一条升级命令，其余大多是试错的副产品。疑虑里还有一个具体问题：sddm 是排查时装上去的，现在系统好了，它还需要换回去吗？
+
+于是定下一条还原原则：**除修 bug 必需的改动外，其余全部还原**。带着这个疑问逐项核对（这次的复盘阵型是两台电脑两套 AI 接力：游戏本跑 Antigravity 交叉验证结论，小新 14 本机跑 Trae 执行核对与还原），结果发现 Gemini 收尾时给出的两个结论本身就不成立，还原范围因此比预想的更大。以下是逐项修正。
 
 ![次日复盘现场：游戏本跑 Antigravity 交叉验证，小新 14 跑 Trae 整理文章](../../assets/xx14-black-32-next-day-review.jpg)
 *图 22：两台 AI 接力复盘的现场（15:41）*
 
 ### 9.1 "SDDM 本来就是出厂默认" —— 错
 
-Gemini 收尾称 sddm 为 Fedora KDE 出厂默认显示管理器、无需还原（"系统从最开始记录的就是 sddm.service"）。实际 **Fedora 44 KDE 出厂默认为新一代 plasmalogin**（plasma-login-manager，`plasmalogin.service`）——即第一轮日志中 `plasmalogin-helper exited with 64` 的主角；sddm 全家是排查期才安装的。systemctl status 里那个 `Drop-In: /usr/lib/systemd/system/service.d/10-timeout-abort.conf` 与 `man:plasmalogin(8)` 的出处也早已说明一切。
+关于"sddm 要不要换回去"的疑问，核对后的答案是：不存在"换回去"——sddm 本身就是排查期引入的外来组件，正确做法是彻底移除。Gemini 收尾称 sddm 为 Fedora KDE 出厂默认显示管理器、无需还原（"系统从最开始记录的就是 sddm.service"），实际 **Fedora 44 KDE 出厂默认为新一代 plasmalogin**（plasma-login-manager，`plasmalogin.service`）——即第一轮日志中 `plasmalogin-helper exited with 64` 的主角。systemctl status 里那个 `Drop-In: /usr/lib/systemd/system/service.d/10-timeout-abort.conf` 与 `man:plasmalogin(8)` 的出处也早已说明一切。
 
 还原操作：
 
