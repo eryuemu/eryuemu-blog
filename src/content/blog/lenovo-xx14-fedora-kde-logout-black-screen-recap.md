@@ -5,7 +5,7 @@ pubDate: '2026-09-06T16:10:00+08:00'
 updatedDate: '2026-09-06T16:30:00+08:00'
 category: '开发'
 type: 'ai-organized'
-heroImage: '../../assets/xx14-black-15-stuck-fedora-logo.jpg'
+heroImage: '../../assets/xx14-black-30-desktop-recovered.jpg'
 ---
 
 # 联想小新 14 装 Fedora 44 KDE 双系统全记录（下）：一次注销引发的血案
