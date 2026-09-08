@@ -4,6 +4,7 @@ description: '昨夜挂机运行 Docker 视频抓取任务，中午发现电脑 
 pubDate: '2026-09-08T19:30:00+08:00'
 category: '开发'
 type: 'ai-organized'
+heroImage: '../../assets/broadband-troubleshooting-terminal.png'
 ---
 
 # 一次宽带欠费造成的乌龙
@@ -34,6 +35,8 @@ type: 'ai-organized'
 昨夜在 Ubuntu 工作站上通过 Docker 运行新浪视频归档抓取项目（`archiveteam/sinavideo-grab`），同时后台常驻运行 Clash Verge 的 TUN 模式以接管全局流量。
 
 中午 12:48 回到工位，打开网页发现全部处于无限等待状态。在终端中执行基础网络探测，出现了一组互相矛盾的现象：
+
+![终端初步排查：ping 223.5.5.5 全丢、curl 百度超时、删除 Meta 虚拟网卡失败，但 IPv6 与 DNS 解析正常](../../assets/broadband-troubleshooting-terminal.png)
 
 ```bash
 # 1. ping 常用公共 DNS，完全不通
@@ -140,7 +143,11 @@ Trae 建议断电重启路由器，并给出简化结论以便同步给局域网
 
 查询该域名可知，这是**河南联通宽带欠费停机专用的重定向拦截门户**。
 
-与此同时，舍友查询了宽带扣费记录，确认宽带账户因欠费已被运营商实施停机拦截。在联通客户端完成充值缴费后，两分钟内无需重启任何设备或修改任何配置，本机的 IPv4 ping、网页访问全部恢复正常。
+与此同时，舍友查询了宽带扣费记录，确认宽带账户因欠费已被运营商实施停机拦截。舍友随后完成了缴费充值（包年 660 元），我们在群里分摊了费用并重新通电插座：
+
+![微信群聊确认宽带续费成功（年费 660 元，室友分摊 110 元）并提示重启插座](../../assets/broadband-arrears-payment-confirmation.jpg)
+
+完成缴费后，两分钟内无需重启任何设备或修改任何配置，本机的 IPv4 ping、网页访问全部恢复正常。
 
 **实测结果彻底推翻了前期的推断**：
 * 路由器连接跟踪表并未打满；
