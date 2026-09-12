@@ -222,7 +222,7 @@ type: 'ai-organized'
 
 ## 相关文章
 
-- [戦巫センナギ-存档修改与脚本逆向全复盘](/blog/sennaagi-save-script-recap) —— 同引擎（Escu:de）的存档修改与脚本逆向实践
-- [当 Galgame 变成「旮旯给木」：我们还能守住那份感动吗？](/blog/when-galgame-becomes-tala-game) —— 对 Galgame 翻译质量与文化传递的思考
-- [Python-Windows下Errno22排查实录](/blog/python-windows-errno22-troubleshooting) —— 编码问题排查经验（与 SJIS/GBK 字符集问题相通）
-- [WSL2 实战手册：空间账单、symlink 陷阱与 cc-switch 四连坑](/blog/wsl2-practical-guide) —— 工具链管理的教训
+- [戦巫センナギ-存档修改与脚本逆向全复盘](/blog/sennaagi-save-script-recap/) —— 同引擎（Escu:de）的存档修改与脚本逆向实践
+- [当 Galgame 变成「旮旯给木」：我们还能守住那份感动吗？](/blog/when-galgame-becomes-tala-game/) —— 对 Galgame 翻译质量与文化传递的思考
+- [Python-Windows下Errno22排查实录](/blog/python-windows-errno22-troubleshooting/) —— 编码问题排查经验（与 SJIS/GBK 字符集问题相通）
+- [WSL2 实战手册：空间账单、symlink 陷阱与 cc-switch 四连坑](/blog/wsl2-practical-guide/) —— 工具链管理的教训

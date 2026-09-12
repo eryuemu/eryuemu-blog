@@ -247,4 +247,4 @@ copy new_script.bin "D:\games\戦巫<...>\script.bin"
 ## 10. 相关链接
 
 - **随笔/当 Galgame 变成「旮旯给木」：我们还能守住那份感动吗？** ← Galgame 文化思考
-- [Python-Windows下Errno22排查实录](/blog/python-windows-errno22-troubleshooting) ← 另一篇技术排错复盘
+- [Python-Windows下Errno22排查实录](/blog/python-windows-errno22-troubleshooting/) ← 另一篇技术排错复盘

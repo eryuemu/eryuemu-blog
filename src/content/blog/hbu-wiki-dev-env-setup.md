@@ -6,7 +6,7 @@ category: '开发'
 type: 'ai-organized'
 ---
 
-> ⚠️ **架构已升级（2026-07-05）**：本文记录的是在 Windows 宿主机上做项目级隔离的方案。目前开发环境已整体迁移至 WSL2，Node.js、Python、项目代码全部锁在 Linux 虚拟磁盘内，从根部解决了隔离问题。本文的"地基 vs 沙子"方法论仍然有效，只是实现方式从"塞进项目文件夹"升级为"塞进 WSL2"。详见 [C 盘大扫除（前篇）](/blog/windows-dev-env-cleanup) 和 [WSL2 实战手册（后篇）](/blog/wsl2-practical-guide)。
+> ⚠️ **架构已升级（2026-07-05）**：本文记录的是在 Windows 宿主机上做项目级隔离的方案。目前开发环境已整体迁移至 WSL2，Node.js、Python、项目代码全部锁在 Linux 虚拟磁盘内，从根部解决了隔离问题。本文的"地基 vs 沙子"方法论仍然有效，只是实现方式从"塞进项目文件夹"升级为"塞进 WSL2"。详见 [C 盘大扫除（前篇）](/blog/windows-dev-env-cleanup/) 和 [WSL2 实战手册（后篇）](/blog/wsl2-practical-guide/)。
 
 ---
 
@@ -155,6 +155,6 @@ C:\workspace\HBU Wiki\
 ## 相关笔记
 
 - **工具** ← 工具 & 效率 MOC
-- [Claude Code 安装与配置完全指南](/blog/claude-code-installation-guide) ← 同样的"零污染"装机哲学
-- [社交媒体数据采集-隔离环境搭建](/blog/social-media-data-scraping-isolation) ← 地基 vs 沙子的分层方法论
-- [本地知识库与博客搭建思路](/blog/knowledge-base-and-blog-setup) ← 知识库 vs 博客的思考，HBU-Wiki 的 VitePress 定位
+- [Claude Code 安装与配置完全指南](/blog/claude-code-installation-guide/) ← 同样的"零污染"装机哲学
+- [社交媒体数据采集-隔离环境搭建](/blog/social-media-data-scraping-isolation/) ← 地基 vs 沙子的分层方法论
+- [本地知识库与博客搭建思路](/blog/knowledge-base-and-blog-setup/) ← 知识库 vs 博客的思考，HBU-Wiki 的 VitePress 定位

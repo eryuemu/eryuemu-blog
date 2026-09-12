@@ -589,7 +589,7 @@ Obsidian Vault                       Astro 项目
 
 ## 十三、未完成事项（待办）
 
-- [x] **购买独立域名**（`eryuemu.com`）并绑定 Vercel——已通过 Spaceship 购入并配置 DNS（详见 [eryuemu.com 域名绑定与 DNS 踩坑实录](/blog/eryuemu-domain-binding-and-dns-troubleshooting)）
+- [x] **购买独立域名**（`eryuemu.com`）并绑定 Vercel——已通过 Spaceship 购入并配置 DNS（详见 [eryuemu.com 域名绑定与 DNS 踩坑实录](/blog/eryuemu-domain-binding-and-dns-troubleshooting/)）
 - [ ] **打通 Obsidian → Astro 发布管线**——按方案 A（Symlink）实施，详见**上一章**
 - [ ] **定制 Waline 评论框样式**——暗黑模式适配、字体微调
 - [ ] **Astro Content Collection Schema 适配**——让 `tags`、`created`、`status` 等 Obsidian 属性被 Astro 正确识别
@@ -675,9 +675,9 @@ Waline 后端的代码托管在 GitHub 的 `waline-comments` 仓库。如果以�
 
 ## 相关笔记
 
-- [本地知识库与博客搭建思路](/blog/knowledge-base-and-blog-setup) ← Astro 选型与博客整体规划
-- [个人博客域名选购指南](/blog/personal-blog-domain-buying-guide) ← 域名选购决策
-- [eryuemu.com 域名绑定与 DNS 踩坑实录](/blog/eryuemu-domain-binding-and-dns-troubleshooting) ← 域名 DNS 配置 + Vercel 绑定
-- [HBU-Wiki 开发环境搭建：从fnm到项目级Node.js隔离](/blog/hbu-wiki-dev-env-setup) ← HBU-Wiki（VitePress + GitHub Pages + Giscus）的经验
-- [WSL2 实战手册：空间账单、symlink 陷阱与 cc-switch 四连坑](/blog/wsl2-practical-guide) ← 本地开发环境
-- [Windows 开发环境大扫除：从C盘灾难到WSL2物理隔离](/blog/windows-dev-env-cleanup) ← WSL2 架构决策
+- [本地知识库与博客搭建思路](/blog/knowledge-base-and-blog-setup/) ← Astro 选型与博客整体规划
+- [个人博客域名选购指南](/blog/personal-blog-domain-buying-guide/) ← 域名选购决策
+- [eryuemu.com 域名绑定与 DNS 踩坑实录](/blog/eryuemu-domain-binding-and-dns-troubleshooting/) ← 域名 DNS 配置 + Vercel 绑定
+- [HBU-Wiki 开发环境搭建：从fnm到项目级Node.js隔离](/blog/hbu-wiki-dev-env-setup/) ← HBU-Wiki（VitePress + GitHub Pages + Giscus）的经验
+- [WSL2 实战手册：空间账单、symlink 陷阱与 cc-switch 四连坑](/blog/wsl2-practical-guide/) ← 本地开发环境
+- [Windows 开发环境大扫除：从C盘灾难到WSL2物理隔离](/blog/windows-dev-env-cleanup/) ← WSL2 架构决策

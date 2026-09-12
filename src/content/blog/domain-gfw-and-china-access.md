@@ -416,7 +416,7 @@ GitHub 那边怎么认的？因为项目里有 `public/CNAME` 文件写着这个
 
 ## 相关笔记
 
-- [eryuemu.com 域名绑定与 DNS 踩坑实录](/blog/eryuemu-domain-binding-and-dns-troubleshooting) ← 前一篇：DNS 配置、Vercel 绑定、IP 实测（本文的续篇）
-- [个人博客域名选购指南](/blog/personal-blog-domain-buying-guide) ← 域名后缀对比与注册商选择
-- [HBU-Wiki 开发环境搭建：从fnm到项目级Node.js隔离](/blog/hbu-wiki-dev-env-setup) ← HBU-Wiki 项目本身
-- [eryuemu-blog 部署与评论系统搭建全复盘](/blog/eryuemu-blog-deployment-comment-sys) ← 博客部署 + Waline 评论系统
+- [eryuemu.com 域名绑定与 DNS 踩坑实录](/blog/eryuemu-domain-binding-and-dns-troubleshooting/) ← 前一篇：DNS 配置、Vercel 绑定、IP 实测（本文的续篇）
+- [个人博客域名选购指南](/blog/personal-blog-domain-buying-guide/) ← 域名后缀对比与注册商选择
+- [HBU-Wiki 开发环境搭建：从fnm到项目级Node.js隔离](/blog/hbu-wiki-dev-env-setup/) ← HBU-Wiki 项目本身
+- [eryuemu-blog 部署与评论系统搭建全复盘](/blog/eryuemu-blog-deployment-comment-sys/) ← 博客部署 + Waline 评论系统

@@ -64,4 +64,4 @@ heroImage: '../../assets/yukoku-cover.jpg'
 
 ## 相关笔记
 
-- [《悠刻のファムファタル》简体中文翻译 · 技术复盘与反思](/blog/youketsu-localization-recap) ← 后篇：完整技术复盘与反思
+- [《悠刻のファムファタル》简体中文翻译 · 技术复盘与反思](/blog/youketsu-localization-recap/) ← 后篇：完整技术复盘与反思

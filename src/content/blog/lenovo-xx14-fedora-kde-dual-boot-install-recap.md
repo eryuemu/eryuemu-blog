@@ -16,7 +16,7 @@ heroImage: '../../assets/xx14-install-13-oobe-finished.jpg'
 > **协作方式**：AI（Gemini）预演了完整四步流程，实际执行改为"一次回复只做一步、做完确认再做下一步"。
 > **结果**：一次成功，GRUB 双引导正常，装机本体不到 1 小时，时间大头花在无损调整分区上。
 
-关联阅读：[下篇：一次注销引发的血案](/blog/lenovo-xx14-fedora-kde-logout-black-screen-recap)（装完当晚因安装输入法引发 kwin/kscreenlocker ABI 脱节黑屏，排查全程见下篇）
+关联阅读：[下篇：一次注销引发的血案](/blog/lenovo-xx14-fedora-kde-logout-black-screen-recap/)（装完当晚因安装输入法引发 kwin/kscreenlocker ABI 脱节黑屏，排查全程见下篇）
 
 ---
 

@@ -8,13 +8,13 @@ type: 'ai-organized'
 
 ## 一、前置条件
 
-本文承接 [个人博客域名选购指南](/blog/personal-blog-domain-buying-guide)，假设以下事项已完成：
+本文承接 [个人博客域名选购指南](/blog/personal-blog-domain-buying-guide/)，假设以下事项已完成：
 
 - 已在 Spaceship 以首年优惠价购入 `eryuemu.com`
 - `eryuemu-blog` 博客已在 Vercel 部署并稳定运行（默认 `.vercel.app` 域名可访问）
 - 本地开发环境基于 WSL2，项目路径 `~/workspace/eryuemu-blog`
 
-> 如果域名还没买，先去 [个人博客域名选购指南](/blog/personal-blog-domain-buying-guide) 看后缀对比和注册商选择。
+> 如果域名还没买，先去 [个人博客域名选购指南](/blog/personal-blog-domain-buying-guide/) 看后缀对比和注册商选择。
 
 ---
 
@@ -312,7 +312,7 @@ Spaceship（Namecheap 旗下）的 DNS 后台现代化程度很高，解析生�
 | Vercel 自动部署 | ✅ | 每次 `git push` 后 1 分钟内更新 |
 | DNS 配置 | ✅ 正常 | `76.76.21.21` + `cname.vercel-dns.com`（实测可直连） |
 | GitHub Pages | ❌ 已下线 | 404，无实际影响 |
-| 评论系统 | ✅ Waline + Supabase | 详见 [eryuemu-blog 部署与评论系统搭建全复盘](/blog/eryuemu-blog-deployment-comment-sys) |
+| 评论系统 | ✅ Waline + Supabase | 详见 [eryuemu-blog 部署与评论系统搭建全复盘](/blog/eryuemu-blog-deployment-comment-sys/) |
 | 访客统计 | ✅ Vercount | 每次真实刷新 +1 |
 | 项目 README | ✅ 已更新 | 含架构图和技术栈 |
 | migrate.cjs | ✅ 已修复 | WikiLink 转换为正确路径 |
@@ -339,7 +339,7 @@ Spaceship（Namecheap 旗下）的 DNS 后台现代化程度很高，解析生�
 
 ## 相关笔记
 
-- [个人博客域名选购指南](/blog/personal-blog-domain-buying-guide) ← 域名后缀对比、注册商选择、薅羊毛策略
-- [eryuemu-blog 部署与评论系统搭建全复盘](/blog/eryuemu-blog-deployment-comment-sys) ← 博客部署 + Waline + Supabase 完整过程
-- [本地知识库与博客搭建思路](/blog/knowledge-base-and-blog-setup) ← Astro 选型与博客整体规划
-- [WSL2 实战手册：空间账单、symlink 陷阱与 cc-switch 四连坑](/blog/wsl2-practical-guide) ← 本地开发环境
+- [个人博客域名选购指南](/blog/personal-blog-domain-buying-guide/) ← 域名后缀对比、注册商选择、薅羊毛策略
+- [eryuemu-blog 部署与评论系统搭建全复盘](/blog/eryuemu-blog-deployment-comment-sys/) ← 博客部署 + Waline + Supabase 完整过程
+- [本地知识库与博客搭建思路](/blog/knowledge-base-and-blog-setup/) ← Astro 选型与博客整体规划
+- [WSL2 实战手册：空间账单、symlink 陷阱与 cc-switch 四连坑](/blog/wsl2-practical-guide/) ← 本地开发环境

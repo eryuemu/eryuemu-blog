@@ -132,6 +132,6 @@ type: 'ai-organized'
 
 ## 相关笔记
 
-- [eryuemu-blog 部署与评论系统搭建全复盘](/blog/eryuemu-blog-deployment-comment-sys) ← 博客部署 + Waline 评论系统
-- [eryuemu.com 域名绑定与 DNS 踩坑实录](/blog/eryuemu-domain-binding-and-dns-troubleshooting) ← 域名 DNS 配置 + Vercel 绑定（本文续篇）
-- [本地知识库与博客搭建思路](/blog/knowledge-base-and-blog-setup) ← Astro 选型与博客规划
+- [eryuemu-blog 部署与评论系统搭建全复盘](/blog/eryuemu-blog-deployment-comment-sys/) ← 博客部署 + Waline 评论系统
+- [eryuemu.com 域名绑定与 DNS 踩坑实录](/blog/eryuemu-domain-binding-and-dns-troubleshooting/) ← 域名 DNS 配置 + Vercel 绑定（本文续篇）
+- [本地知识库与博客搭建思路](/blog/knowledge-base-and-blog-setup/) ← Astro 选型与博客规划

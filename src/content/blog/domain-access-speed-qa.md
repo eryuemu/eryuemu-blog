@@ -65,4 +65,4 @@ type: 'ai-organized'
 
 ## 相关笔记
 
-- [域名、GFW 与国内访问：一场测速引发的排查实录](/blog/domain-gfw-and-china-access) ← 同一套结论的精加工详解版（含实测数据、对比表格与分级治理拆解）
+- [域名、GFW 与国内访问：一场测速引发的排查实录](/blog/domain-gfw-and-china-access/) ← 同一套结论的精加工详解版（含实测数据、对比表格与分级治理拆解）

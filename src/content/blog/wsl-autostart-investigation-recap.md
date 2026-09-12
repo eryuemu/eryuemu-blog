@@ -15,7 +15,7 @@ type: 'ai-organized'
 > **最终方案**：接受自启（闲置约 700MB）+ 桌面「关闭WSL.bat」双击手动 `wsl --shutdown`。
 > **本文定位**：按真实时间顺序记录全过程，保留每一步排查、实验、翻车与教训，以后再遇到"WSL 开机自动启动/莫名被唤醒"直接照此查。
 
-关联笔记：[WSL2 实战手册](/blog/wsl2-practical-guide) · [C 盘大扫除](/blog/windows-dev-env-cleanup)
+关联笔记：[WSL2 实战手册](/blog/wsl2-practical-guide/) · [C 盘大扫除](/blog/windows-dev-env-cleanup/)
 
 > **2026-09-04 更新**：同案在"正常"的轻薄本上复发——Win+R 历史丢失从孤例变两起，源头同为 AI 助手（Antigravity），排查与修复见文末附章。
 

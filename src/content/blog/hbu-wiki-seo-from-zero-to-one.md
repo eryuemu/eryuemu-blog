@@ -304,7 +304,7 @@ IndexNow 模式： 网站发布新内容 ──> 主动向 IndexNow API 发送�
 
 该问题的完整成因分析、根域名规范化抉择、Vercel 重定向配置与 GSC 资源管理实战，已单独整理成深度复盘专文：
 
-👉 **[GSC 提示「网页会自动重定向」未编入索引？根域名与 www 规范化全复盘](/blog/gsc-page-redirect-and-domain-canonical-guide)**
+👉 **[GSC 提示「网页会自动重定向」未编入索引？根域名与 www 规范化全复盘](/blog/gsc-page-redirect-and-domain-canonical-guide/)**
 
 ---
 

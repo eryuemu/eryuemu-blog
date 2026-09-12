@@ -17,7 +17,7 @@ heroImage: '../../assets/xx14-black-30-desktop-recovered.jpg'
 > **修复**：`dnf upgrade` 对齐两者至 6.7.4 + 全系统 1730 包全量更新。
 > **最终状态**：系统还原为出厂默认（plasmalogin 登录管理器，排查期安装的 sddm 六包全部卸载），输入法 fcitx5 正常自启。
 
-关联阅读：[上篇：安装篇](/blog/lenovo-xx14-fedora-kde-dual-boot-install-recap)
+关联阅读：[上篇：安装篇](/blog/lenovo-xx14-fedora-kde-dual-boot-install-recap/)
 
 ---
 
@@ -393,4 +393,4 @@ Gemini 把 kwin 版本被顶上去的原因归给"PackageKit 与 Discover 的后
 9. **经验主义要核对前提**：群友的 pam_environment 建议在 90% 的案例里是对的，但本机根本没配置过那个文件。症状相似 ≠ 病因相同，先取证再用药。
 10. **AI 给出的结论也要核对**：本次"sddm 是出厂默认"与"后台自动更新"两个论断均与事实不符；对系统改动保留事务记录（`dnf history`）与还原路径，是第二天能 20 分钟完成修正的前提。
 
-全文完。上篇《[联想小新 14 装 Fedora 44 KDE 双系统全记录（上）：安装篇](/blog/lenovo-xx14-fedora-kde-dual-boot-install-recap)》记录安装与基础配置全流程。
+全文完。上篇《[联想小新 14 装 Fedora 44 KDE 双系统全记录（上）：安装篇](/blog/lenovo-xx14-fedora-kde-dual-boot-install-recap/)》记录安装与基础配置全流程。
