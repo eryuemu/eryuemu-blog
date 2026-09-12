@@ -1,12 +1,12 @@
 ---
-title: 'GNOME 动态壁纸扩展行为改造全记录：真全屏不暂停的根因 与 GNOME 50 删除 make_below()'
+title: '【折腾向】Ubuntu 26.04 动态壁纸扩展改造全记录：真全屏不暂停的根因 与 GNOME 50 删除 make_below()'
 description: 'Ubuntu 26.04 + GNOME Shell 50.1 上给 gnome-wallpaper-engine（v1.2.1）做行为改造，目标是三个：① 开机不自启（不覆盖静态壁纸）；② 窗口最大化时壁纸继续播（配半透明终端）；③ 真全屏自动暂停、退出全屏自动恢复。过程中撞上两个障碍。障碍一：真全屏时壁纸根本不暂停（实测 mpv PID 全程不变），而排查过程中连续踩了两个大坑——先是把"壁纸不播"误判为扩展缺陷（真凶其实是 NVIDIA 驱动升级未重启导致 mpv 崩溃），更根本的是没意识到 GNOME Shell 会缓存扩展 JS，disable/enable 根本不重新加载改过的代码，导致前期所有"改完就观察"的实验结论全部作废；直到插桩诊断 + 注销重登才拿到真相：DING 桌面图标扩展那个永远铺满屏幕、系统判定为"最大化"的窗口 "Desktop Icons 1" 让 isFullscreenLike() 恒为真，AutoPause 状态被卡死。障碍二：退出全屏后壁纸重启会盖住所有应用窗口（且 mpv 图标冒进 Dock）——根因是原版写成 make_above() + make_below() 配对调用，而 GNOME 50 已删除 make_below()，异常被空 catch 吞掉后变成"只抬不压"。两处修复各只改一个方法，含完整"原版 ↔ 修复后"代码对照、md5 校验值与重打步骤。'
 pubDate: '2026-09-13T00:48:00+08:00'
 category: '开发'
 type: 'ai-organized'
 ---
 
-# GNOME 动态壁纸扩展行为改造全记录：真全屏不暂停的根因 与 GNOME 50 删除 make_below()
+# 【折腾向】Ubuntu 26.04 动态壁纸扩展改造全记录：真全屏不暂停的根因 与 GNOME 50 删除 make_below()
 
 > **需求**：桌面动态壁纸（视频）在 GNOME 上要实现三个行为——
 > ① **开机不自启**（不覆盖静态壁纸）；② **窗口最大化时壁纸继续播**（配半透明终端，最大化也看得见）；③ **真全屏时自动暂停、退出全屏自动恢复播放**。
@@ -23,7 +23,7 @@ type: 'ai-organized'
 > **修复**：两处，各只改一个方法（第二处只改两个 `try` 块）。
 > **本文定位**：需求 → 障碍 → 诊断证据 → 最小改动 → 验证，全流程 + 可重打的最小补丁 + 自包含恢复步骤。**扩展在线升级会覆盖这两处补丁**，所以这篇文档本身就是恢复手册。
 
-关联笔记：[Ubuntu 上让 KDE 与 GNOME 完全隔离的实战全记录](/blog/ubuntu-kde-gnome-dual-desktop-isolation-recap/) · [Ubuntu 26.04 单用户装 KDE 两次翻车全复盘](/blog/ubuntu-kde-two-failed-installs-recap/)
+关联笔记：[【折腾向】Ubuntu 26.04 让 KDE 与 GNOME 完全隔离的实战全记录](/blog/ubuntu-kde-gnome-dual-desktop-isolation-recap/) · [【折腾向】Ubuntu 26.04 装 KDE 两次翻车全复盘](/blog/ubuntu-kde-two-failed-installs-recap/)
 
 ---
 
@@ -603,7 +603,7 @@ GNOME 50 一次就删掉了 `make_below()` / `is_below()` / `set_accept_focus()`
 
 ### 相关阅读
 
-- [Ubuntu 26.04 单用户装 KDE 两次翻车全复盘](/blog/ubuntu-kde-two-failed-installs-recap/)
-- [Ubuntu 上让 KDE 与 GNOME 完全隔离的实战全记录](/blog/ubuntu-kde-gnome-dual-desktop-isolation-recap/)
+- [【折腾向】Ubuntu 26.04 装 KDE 两次翻车全复盘](/blog/ubuntu-kde-two-failed-installs-recap/)
+- [【折腾向】Ubuntu 26.04 让 KDE 与 GNOME 完全隔离的实战全记录](/blog/ubuntu-kde-gnome-dual-desktop-isolation-recap/)
 - [七彩虹游戏本无 U 盘安装 Linux 双系统全复盘](/blog/colorful-laptop-no-usb-dual-boot-recap/)
 - [联想小新 14 装 Fedora 44 KDE 双系统全记录（下）：一次注销引发的血案](/blog/lenovo-xx14-fedora-kde-logout-black-screen-recap/)

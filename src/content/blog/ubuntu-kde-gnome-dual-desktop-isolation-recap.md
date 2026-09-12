@@ -1,12 +1,12 @@
 ---
-title: 'Ubuntu 让 KDE 与 GNOME 完全隔离的实战全记录：专用系统用户 + 343 包精选方案 + 双向菜单隐藏'
+title: '【折腾向】Ubuntu 26.04 让 KDE 与 GNOME 完全隔离的实战全记录：专用系统用户 + 343 包精选方案 + 双向菜单隐藏'
 description: '前两次把 KDE 装在主账户下都以污染 GNOME 告终。第三次换方案：给 KDE 单独开一个系统用户 eryuemu-kde，两套桌面各有各的 $HOME，软件包系统级共享。本文完整记录"只读勘察 → 拆包核对 → 推翻前一版判断 → 发现 sddm 抢登录器风险 → 343 包精选方案 → 安装 → 双向隔离 → 指纹验证"全过程，给出可直接复用的隔离机制清单（账户层 / 用户层 / dpkg 层 / 包层四级）与 7 条污染通道分析。关键手段：用 --no-install-recommends 精确剔除 kde-config-gtk-style / sddm / xdg-desktop-portal-kde 三个污染源；用"用户目录覆盖法"（~/.local/share/applications/ 放同名 .desktop）替代改系统文件，避免被 apt 静默冲掉；用 dpkg diversion 永久加固 Dolphin 抢注 org.freedesktop.FileManager1。含最反直觉的一条洞察——真正的危害不是"对方建了文件"，而是"**谁的值会赢**"：两个方向其实都会被读到，区别在于 KDE 的值在两边都占上风（往 GNOME 写时优先级高于 dconf，往自己家目录写时又用自己的 Breeze 值覆盖）。附完整改动总账（375 新装包 / 0 卸载 / 0 系统文件修改 / 0 项 GNOME 配置改动）与 44637 个文件的指纹验证证据。'
 pubDate: '2026-09-13T00:48:02+08:00'
 category: '开发'
 type: 'ai-organized'
 ---
 
-# Ubuntu 让 KDE 与 GNOME 完全隔离的实战全记录：专用系统用户 + 343 包精选方案 + 双向菜单隐藏
+# 【折腾向】Ubuntu 26.04 让 KDE 与 GNOME 完全隔离的实战全记录：专用系统用户 + 343 包精选方案 + 双向菜单隐藏
 
 > **目标**：**不重装系统、不用虚拟机**，让 KDE Plasma 和 GNOME 共存，且 **GNOME 的配置一个字节都不被改动**。
 > **环境**：Ubuntu 26.04 LTS (Resolute Raccoon) · GNOME Shell 50.1 · Wayland · gdm3 · NVIDIA 595.91.07 · 2560×1600 · 磁盘 98G
@@ -15,7 +15,7 @@ type: 'ai-organized'
 > **结果**：✅ 两个桌面完全隔离。菜单互不相见（GNOME 41 个可见 / KDE 37 个可见，对方各 0 个），GNOME 有 **44637 个文件的指纹**证明未被改动。
 > **本文定位**：可复用的操作手册 + 方法论。重点不是"装成功了"，而是**为什么这样做、怎么验证做到了、哪一层最可靠**。
 
-关联笔记：[Ubuntu 26.04 单用户装 KDE 两次翻车全复盘](/blog/ubuntu-kde-two-failed-installs-recap/) · [GNOME 动态壁纸扩展行为改造全记录](/blog/gnome-live-wallpaper-engine-two-bugs-fix-recap/)
+关联笔记：[【折腾向】Ubuntu 26.04 装 KDE 两次翻车全复盘](/blog/ubuntu-kde-two-failed-installs-recap/) · [【折腾向】Ubuntu 26.04 动态壁纸扩展改造全记录](/blog/gnome-live-wallpaper-engine-two-bugs-fix-recap/)
 
 ---
 
@@ -1888,7 +1888,7 @@ V6  → 全系统 dpkg -V 只有 1 处"缺失"，就是那个**故意的** dpkg 
 
 ### 相关阅读
 
-- [Ubuntu 26.04 单用户装 KDE 两次翻车全复盘](/blog/ubuntu-kde-two-failed-installs-recap/)
-- [GNOME 动态壁纸扩展行为改造全记录](/blog/gnome-live-wallpaper-engine-two-bugs-fix-recap/)
+- [【折腾向】Ubuntu 26.04 装 KDE 两次翻车全复盘](/blog/ubuntu-kde-two-failed-installs-recap/)
+- [【折腾向】Ubuntu 26.04 动态壁纸扩展改造全记录](/blog/gnome-live-wallpaper-engine-two-bugs-fix-recap/)
 - [七彩虹游戏本无 U 盘安装 Linux 双系统全复盘](/blog/colorful-laptop-no-usb-dual-boot-recap/)
 - [联想小新 14 装 Fedora 44 KDE 双系统全记录（下）：一次注销引发的血案](/blog/lenovo-xx14-fedora-kde-logout-black-screen-recap/)

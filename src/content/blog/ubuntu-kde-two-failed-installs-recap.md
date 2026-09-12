@@ -1,12 +1,12 @@
 ---
-title: 'Ubuntu 26.04 单用户装 KDE 两次翻车全复盘：同一个 $HOME 下双桌面为什么必然互相污染'
+title: '【折腾向】Ubuntu 26.04 装 KDE 两次翻车全复盘：同一个 $HOME 下双桌面为什么必然互相污染'
 description: 'Ubuntu 26.04 LTS（GNOME 50.1 / Wayland / gdm3）上两次尝试安装 KDE Plasma 与 GNOME 共存，两次都把 GNOME 搞乱——图标、字体、字号全变，且卸载 KDE 之后依然乱。本文按真实时间顺序记录全过程，含每一步的原始命令。整件事由三个 AI 接力：第一轮 agy 装（--no-install-recommends，316 包，显式加了 kde-config-gtk-style），用户首次登录 KDE 的 7 分钟空窗里污染就已落盘；报 bug 后 agy 跑了 56 条命令全在查图标，一条都没查 GTK 主题，回退时又把主题恢复成默认值而非原值、还执行 killall -9 gjs 把 GNOME Shell 杀掉——用户被踢出桌面后转投 Trae，由 Trae 完成恢复。第二轮 Trae 装（带推荐包，536 包 + 预置 gdm3 + 封印 kde-gtk-config），用户只进 Plasma 11 秒就复现；agy 再次 purge 534 包仍未解决，最终由 DSH 完成系统层 + 家目录 27 项清除。文中记录了第二次回退时"保护列表"过滤 Original 536/Filtered 536 一个都没命中、"安全检查"因 apt 输出走 stderr 而静默失效、~/.gtkrc-2.0 成为漏网之鱼等细节，并用 dpkg 每日快照 + Timeshift 快照双重取证把根因追到 5 条共享通道。'
 pubDate: '2026-09-13T00:48:01+08:00'
 category: '开发'
 type: 'ai-organized'
 ---
 
-# Ubuntu 26.04 单用户装 KDE 两次翻车全复盘：同一个 $HOME 下双桌面为什么必然互相污染
+# 【折腾向】Ubuntu 26.04 装 KDE 两次翻车全复盘：同一个 $HOME 下双桌面为什么必然互相污染
 
 > **症状**：在同一用户下安装 KDE Plasma 后返回 GNOME——应用网格里混入 Dolphin / KDE 系统设置 / Konsole；Nautilus 的文件夹图标全变成 KDE 的蓝色扁平风；桌面快捷方式变成"原始文件名 + 未信任角标"；字体从 12.5 缩到 10。**把 KDE 包全部卸掉（316 个）后，界面依然乱。**
 > **环境**：Ubuntu 26.04 LTS (Resolute Raccoon) · GNOME Shell 50.1 · Wayland · gdm3 · NVIDIA RTX 5060 · 2560×1600
@@ -28,7 +28,7 @@ type: 'ai-organized'
 > **结论**：**在同一个 `$HOME` 下，"单用户双桌面"没有工程上可靠的隔离手段。** `apt purge` 删不掉污染，因为作恶的文件**不属于任何软件包**。唯一出路是给 KDE 独立系统用户（见[下一篇](/blog/ubuntu-kde-gnome-dual-desktop-isolation-recap/)）。
 > **本文定位**：按真实时间顺序记录全过程（含原始命令、哪里跑偏、哪里静默失效），并给出可复用的取证方法。以后再遇到"卸了桌面环境还是乱的"直接照此查。
 
-关联笔记：[Ubuntu 上让 KDE 与 GNOME 完全隔离的实战全记录](/blog/ubuntu-kde-gnome-dual-desktop-isolation-recap/) · [七彩虹游戏本无 U 盘安装 Linux 双系统全复盘](/blog/colorful-laptop-no-usb-dual-boot-recap/)
+关联笔记：[【折腾向】Ubuntu 26.04 让 KDE 与 GNOME 完全隔离的实战全记录](/blog/ubuntu-kde-gnome-dual-desktop-isolation-recap/) · [七彩虹游戏本无 U 盘安装 Linux 双系统全复盘](/blog/colorful-laptop-no-usb-dual-boot-recap/)
 
 ---
 
@@ -1219,7 +1219,7 @@ apt-cache rdepends --installed libgtk2.0-0t64
 
 ### 相关阅读
 
-- [Ubuntu 上让 KDE 与 GNOME 完全隔离的实战全记录](/blog/ubuntu-kde-gnome-dual-desktop-isolation-recap/)
-- [GNOME 动态壁纸扩展行为改造全记录](/blog/gnome-live-wallpaper-engine-two-bugs-fix-recap/)
+- [【折腾向】Ubuntu 26.04 让 KDE 与 GNOME 完全隔离的实战全记录](/blog/ubuntu-kde-gnome-dual-desktop-isolation-recap/)
+- [【折腾向】Ubuntu 26.04 动态壁纸扩展改造全记录](/blog/gnome-live-wallpaper-engine-two-bugs-fix-recap/)
 - [七彩虹游戏本无 U 盘安装 Linux 双系统全复盘](/blog/colorful-laptop-no-usb-dual-boot-recap/)
 - [联想小新 14 装 Fedora 44 KDE 双系统全记录（下）：一次注销引发的血案](/blog/lenovo-xx14-fedora-kde-logout-black-screen-recap/)
