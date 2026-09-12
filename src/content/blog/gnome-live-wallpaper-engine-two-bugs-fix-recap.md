@@ -1,7 +1,7 @@
 ---
 title: 'GNOME 动态壁纸扩展行为改造全记录：真全屏不暂停的根因 与 GNOME 50 删除 make_below()'
 description: 'Ubuntu 26.04 + GNOME Shell 50.1 上给 gnome-wallpaper-engine（v1.2.1）做行为改造，目标是三个：① 开机不自启（不覆盖静态壁纸）；② 窗口最大化时壁纸继续播（配半透明终端）；③ 真全屏自动暂停、退出全屏自动恢复。过程中撞上两个障碍。障碍一：真全屏时壁纸根本不暂停（实测 mpv PID 全程不变），而排查过程中连续踩了两个大坑——先是把"壁纸不播"误判为扩展缺陷（真凶其实是 NVIDIA 驱动升级未重启导致 mpv 崩溃），更根本的是没意识到 GNOME Shell 会缓存扩展 JS，disable/enable 根本不重新加载改过的代码，导致前期所有"改完就观察"的实验结论全部作废；直到插桩诊断 + 注销重登才拿到真相：DING 桌面图标扩展那个永远铺满屏幕、系统判定为"最大化"的窗口 "Desktop Icons 1" 让 isFullscreenLike() 恒为真，AutoPause 状态被卡死。障碍二：退出全屏后壁纸重启会盖住所有应用窗口（且 mpv 图标冒进 Dock）——根因是原版写成 make_above() + make_below() 配对调用，而 GNOME 50 已删除 make_below()，异常被空 catch 吞掉后变成"只抬不压"。两处修复各只改一个方法，含完整"原版 ↔ 修复后"代码对照、md5 校验值与重打步骤。'
-pubDate: '2026-09-12T23:30:00+08:00'
+pubDate: '2026-09-13T00:48:00+08:00'
 category: '开发'
 type: 'ai-organized'
 ---
