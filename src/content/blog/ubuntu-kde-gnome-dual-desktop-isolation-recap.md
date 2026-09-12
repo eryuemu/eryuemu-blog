@@ -540,6 +540,13 @@ sudo apt install kde-config-gtk-style
 sudo apt install -y --no-install-recommends gwenview kcalc ark
 ```
 
+#### 📌 第 3 条佐证：任务栏 tooltip 显示 `org.kde.discover.desktop`
+
+![KDE 任务栏的固定项上悬停，tooltip 直接暴露出内部 ID「org.kde.discover.desktop」——因为对应程序根本没装，KDE 只能拿内部标识当显示名](../../assets/p16-kde-10-discover-tooltip.jpg)
+
+**这张图就是"白纸图标 + 乱码 tooltip"的现场**：任务栏上那个空白方块，
+悬停后 tooltip 直接写出了它的内部 ID —— **说明 KDE 找不到这个程序，只能拿标识符代替名字。**
+
 > 📌 **关于 Discover**：它**没有被安装**，而是**交给用户右键把那个固定项移除**。
 > 理由和第 6.3 节的"给替代品"逻辑相反 —— 这里不是"缺一个程序"，而是"KDE 默认钉了一个不需要的软件中心"，
 > 所以**删条目比装程序更合适**（Discover 会拖进 snap 相关依赖，与"不用 Snap"的偏好冲突）。
@@ -569,6 +576,14 @@ sudo apt install -y --no-install-recommends gwenview kcalc ark
 **根因**：KDE 侧火狐的启动器 `~/.local/share/applications/userapp-Firefox-BXFCV3.desktop`
 **缺 `Icon=` 字段** —— 没有这一行，桌面/任务栏就找不到图标可画，只能显示空白。
 
+![KDE 任务栏现场：鼠标悬停在火狐图标上，tooltip 写着「Firefox 的自定义」，而它左边的图标是一个白纸方块——正是缺 Icon= 的那个坏启动器。旁边才是正常的火狐图标](../../assets/p16-kde-09-firefox-taskbar-blank-icon.jpg)
+
+**图上能看出两件事**：
+
+1. **tooltip 写着「Firefox 的**自定义**」** —— 这个名字不是 Firefox 官方的（官方的叫 "Firefox Web Browser"），
+   说明它来自一个**用户自定义生成的启动器**，也就是那个坏文件
+2. **它左边那个白纸方块** = 缺 `Icon=` 的结果 —— **图标画不出来，系统只能给个通用文档图标**
+
 ```bash
 # 补上图标字段
 # ~/.local/share/applications/userapp-Firefox-BXFCV3.desktop
@@ -593,6 +608,10 @@ Icon=firefox
    → 所以 KWin 不给它们加最小化/最大化/关闭按钮
    → 看起来就是"没有放大缩小按钮"
 ```
+
+![KDE 里火狐窗口的右上角：只有一个 ✕ 关闭按钮，**没有最小化、没有最大化**](../../assets/p16-kde-08-firefox-no-window-buttons.jpg)
+
+**上图是现场**：窗口右上角**只有 `✕`**，最小化/最大化按钮**根本不存在**。
 
 **处理过程走了一个来回**：
 
