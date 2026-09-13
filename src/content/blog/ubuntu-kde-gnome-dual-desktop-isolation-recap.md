@@ -1,7 +1,8 @@
 ---
 title: '【折腾向】Ubuntu 26.04 让 KDE 与 GNOME 完全隔离的实战全记录：专用系统用户 + 343 包精选方案 + 双向菜单隐藏'
-description: '前两次把 KDE 装在主账户下都以污染 GNOME 告终。第三次换方案：给 KDE 单独开一个系统用户 eryuemu-kde，两套桌面各有各的 $HOME，软件包系统级共享。本文完整记录"只读勘察 → 拆包核对 → 推翻前一版判断 → 发现 sddm 抢登录器风险 → 343 包精选方案 → 安装 → 双向隔离 → 指纹验证"全过程，给出可直接复用的隔离机制清单（账户层 / 用户层 / dpkg 层 / 包层四级）与 7 条污染通道分析。关键手段：用 --no-install-recommends 精确剔除 kde-config-gtk-style / sddm / xdg-desktop-portal-kde 三个污染源；用"用户目录覆盖法"（~/.local/share/applications/ 放同名 .desktop）替代改系统文件，避免被 apt 静默冲掉；用 dpkg diversion 永久加固 Dolphin 抢注 org.freedesktop.FileManager1。含最反直觉的一条洞察——真正的危害不是"对方建了文件"，而是"**谁的值会赢**"：两个方向其实都会被读到，区别在于 KDE 的值在两边都占上风（往 GNOME 写时优先级高于 dconf，往自己家目录写时又用自己的 Breeze 值覆盖）。附完整改动总账（375 新装包 / 0 卸载 / 0 系统文件修改 / 0 项 GNOME 配置改动）与 44637 个文件的指纹验证证据。'
+description: '前两次把 KDE 装在主账户下都以污染 GNOME 告终。第三次换方案：给 KDE 单独开一个系统用户 eryuemu-kde，两套桌面各有各的 $HOME，软件包系统级共享。本文完整记录"只读勘察 → 拆包核对 → 推翻前一版判断 → 发现 sddm 抢登录器风险 → 343 包精选方案 → 安装 → 双向隔离 → 指纹验证"全过程，给出可直接复用的隔离机制清单（账户层 / 用户层 / dpkg 层 / 包层四级）与 7 条污染通道分析。关键手段：用 --no-install-recommends 精确剔除 kde-config-gtk-style / sddm / xdg-desktop-portal-kde 三个污染源；用"用户目录覆盖法"（~/.local/share/applications/ 放同名 .desktop）替代改系统文件，避免被 apt 静默冲掉；用 dpkg diversion 永久加固 Dolphin 抢注 org.freedesktop.FileManager1。含最反直觉的一条洞察——真正的危害不是"对方建了文件"，而是"**谁的值会赢**"：两个方向其实都会被读到，区别在于 KDE 的值在两边都占上风（往 GNOME 写时优先级高于 dconf，往自己家目录写时又用自己的 Breeze 值覆盖）。附完整改动总账（375 新装包 / 0 卸载 / 0 系统文件修改 / 0 项 GNOME 配置改动）与 44637 个文件的指纹验证证据。附录 A.9 另补齐了可直接照抄的复刻材料：双向隐藏名单（22 + 18 项）、fcitx5 四处配置全文、最小可运行的隐藏脚本，以及发布后的复核勘误。'
 pubDate: '2026-09-13T00:48:02+08:00'
+updatedDate: '2026-09-13T12:40:00+08:00'
 category: '开发'
 type: 'ai-organized'
 ---
@@ -12,7 +13,7 @@ type: 'ai-organized'
 > **环境**：Ubuntu 26.04 LTS (Resolute Raccoon) · GNOME Shell 50.1 · Wayland · gdm3 · NVIDIA 595.91.07 · 2560×1600 · 磁盘 98G
 > **前情**：前两次把 KDE 装在主账户下，两次都污染了 GNOME（详见[上一篇](/blog/ubuntu-kde-two-failed-installs-recap/)）
 > **方案**：新建系统用户 `eryuemu-kde`（uid 1001），软件包系统级共享、`$HOME` 物理隔离
-> **结果**：✅ 两个桌面完全隔离。菜单互不相见（GNOME 41 个可见 / KDE 37 个可见，对方各 0 个），GNOME 有 **44637 个文件的指纹**证明未被改动。
+> **结果**：✅ 两个桌面完全隔离。菜单互不相见（GNOME 39 个可见 / KDE 35 个可见，对方各 0 个），GNOME 有 **44637 个文件的指纹**证明未被改动。
 > **本文定位**：可复用的操作手册 + 方法论。重点不是"装成功了"，而是**为什么这样做、怎么验证做到了、哪一层最可靠**。
 
 关联笔记：[【折腾向】Ubuntu 26.04 装 KDE 两次翻车全复盘](/blog/ubuntu-kde-two-failed-installs-recap/) · [【折腾向】Ubuntu 26.04 动态壁纸扩展改造全记录](/blog/gnome-live-wallpaper-engine-two-bugs-fix-recap/)
@@ -25,7 +26,7 @@ type: 'ai-organized'
 |------|------|
 | 两个账户 | `eryuemu`（uid 1000）→ 只能进 GNOME ／ `eryuemu-kde`（uid 1001）→ 进 Plasma |
 | 新建用户命令 | `sudo useradd -m -s /bin/bash -c "KDE Plasma 专用账户" eryuemu-kde` + 家目录权限 `750` |
-| 安装命令 | `apt install --no-install-recommends kde-plasma-desktop` + 16 个手工挑选的组件 |
+| 安装命令 | `apt install --no-install-recommends kde-plasma-desktop` + 17 个手工挑选的组件 |
 | 包数量 | 首装 **343**，最终 **375**（占 690 MB），**卸载 0 个**；包总数 **1975 → 2350** |
 | 登录器 | **仍是 gdm3**，`sddm` **未装** ✅ |
 | 三个污染源 | `sddm` / `kde-config-gtk-style` / `xdg-desktop-portal-kde` —— **全是推荐包，一个都没装** |
@@ -691,7 +692,7 @@ sudo bash ~/workspace/系统维护文档/hide-gnome-apps.sh --undo
 
 | 在 GNOME 里 | 在 KDE 里 |
 |---|---|
-| 看不到 Dolphin、Konsole、Kate 等 KDE 程序（**41 个可见，KDE 的 0 个**） | 看不到 文件、终端、看图、PDF 等 GNOME 程序（**37 个可见，GNOME 的 0 个**） |
+| 看不到 Dolphin、Konsole、Kate 等 KDE 程序（**39 个可见，KDE 的 0 个**） | 看不到 文件、终端、看图、PDF 等 GNOME 程序（**35 个可见，GNOME 的 0 个**） |
 | **两边都能用的**（跨桌面通用工具）：输入法、mpv、htop、GDebi、Timeshift、网络设置、NVIDIA 设置 | |
 
 **两侧各隐藏了多少**：
@@ -1514,7 +1515,7 @@ gsettings get org.gnome.desktop.wm.preferences titlebar-font
 
 ```
 ✅ 双向 0 个对方的进程/服务在跑
-✅ 双方家目录内 0 项对方程序的残留
+✅ 双方家目录内 0 项**影响功能的**对方残留（唯一遗留：1 个 KDE 写的书签库，见 A.9.5）
 ```
 
 ---
@@ -1527,12 +1528,12 @@ gsettings get org.gnome.desktop.wm.preferences titlebar-font
 |---|---|
 | **功能隔离** | ✅ **完全** —— 各桌面只用各自的程序，互不干扰 |
 | **配置隔离** | ✅ **完全** —— 各写自己的 `$HOME`，互不可见（权限 750） |
-| **文件隔离** | ✅ **完全** —— 双方家目录内 0 项对方程序的残留 |
+| **文件隔离** | ✅ **完全** —— 无影响功能的对方残留（唯一遗留：1 个 KDE 写的书签库 `user-places.xbel`，无害，见 A.9.5） |
 | **进程隔离** | ✅ **完全** —— 0 个对方的进程/服务在跑 |
-| **菜单隔离** | ✅ **完全** —— 互不相见（37 / 41 个，对方 0 个） |
+| **菜单隔离** | ✅ **完全** —— 互不相见（35 / 39 个，对方 0 个） |
 | **关联隔离** | ✅ **完全** —— 双击文件都开各自的程序 |
 | **软件包层面** | ⚠️ **共享** —— `/usr` 下的软件包两用户共用 |
-| **例外 2 处** | 密钥环（必须）、PDF（性价比） |
+| **例外 1 处** | PDF（仍用 GNOME 的 Papers，见 7.3 节；密钥环的例外已在 7.3 节撤销） |
 
 > **打比方**：两个房间各自的家具、衣物、日用品已完全分开 ——
 > 但**共用同一套房子的水电管道**（`/usr` 下的软件包）。
@@ -1812,9 +1813,29 @@ V1  → 通过 30 / 警告 6 / 失败 0（加 sudo；6 条警告全是装 KDE �
 V2  → 44637 个文件里，改动只有 2 个，均与 KDE 无关（Clash 日志、音频状态）
 V3  → /etc + 6 个系统目录 全部一致 ✅
 V4  → 13 项全部吻合 ✅
-V5  → gdm3 ✅ / diversion 已登记 ✅ / 菜单 GNOME 41 个、KDE 0 个 ✅
-V6  → 全系统 dpkg -V 只有 1 处"缺失"，就是那个**故意的** dpkg diversion 转移项 ✅
+V5  → gdm3 ✅ / diversion 已登记 ✅ / 菜单 GNOME 39 个、KDE 0 个 ✅
+V6  → 全系统 dpkg -V 报出 2 处"缺失"，但**都不是 KDE 造成的**（见下方修正）
 ```
+
+> ⚠️ **V6 修正（2026-09-13 复核）**：本文早期版本写的是"只有 1 处缺失，就是那个故意的 diversion 转移项"，
+> 这句话**不准确**，两个地方都要改：
+>
+> **① 今天的实测是 2 处，且与 KDE 无关**：
+> ```
+> missing     /usr/lib/modules/7.0.0-31-generic/initrd     ← linux-modules-7.0.0-31-generic 包
+> missing     /etc/apparmor.d/disable                      ← apparmor 包
+> ```
+> 这两处在 **KDE 之前的 Timeshift 快照里同样不存在** —— 属于 Ubuntu 打包本身的常态，
+> 与本次双桌面改造无关（内核版本换代后路径也会变）。
+>
+> **② "diversion 转移项"不会出现在 `dpkg -V` 里**：
+> 登记 diversion 之后，dpkg 自己**知道**该文件被转移了，所以**不会**再报它缺失。
+> 实测 `sudo dpkg -V dolphin` → **无输出**。这与 **6.4 节**的结论一致，
+> 却和本节旧文案自相矛盾 —— **以 6.4 节为准**。
+>
+> **正确的判读方式**：`dpkg -V` 的意义不是"必须 0 输出"，而是"**任何输出都要能解释来源**"。
+> 上面 2 处能追到包名、且在改造前的快照里就不存在 → 判定为**与本次改造无关**。
+> 一条"永远输出正常"的检查等于没有检查（见 **11.2 节**）。
 
 ### A.6 一条命令撤销
 
@@ -1883,6 +1904,255 @@ V6  → 全系统 dpkg -V 只有 1 处"缺失"，就是那个**故意的** dpkg 
 > 📌 **`/var/log/journal`（当时约 875M）被特意保留、从未清理** ——
 > 因为那次事故的**全部证据链都在里面**（文件 mtime、systemd 单元生成时刻、KDE 组件的启动记录）。
 > 事后写这篇复盘时，正是靠它把"11 秒污染"这类结论钉死的。
+
+---
+
+### A.9 补全：真正"照着复刻"需要的三样东西
+
+> A.1–A.8 给的是**操作与验证**；但有三样**内容本身**，原文只写了"去运行那个脚本 / 去复制那个文件"，没给正文 ——
+> 换一台机器复刻时，缺了它们就会卡住。这一节补齐，末尾附本次复核的勘误。
+
+#### A.9.1 双向隐藏名单（脚本里 `APPS=()` 的实际内容）
+
+**① GNOME 侧要藏的 KDE 应用（21 项）** —— 写进 `hide-kde-apps.sh`：
+
+```bash
+APPS=(
+  org.kde.dolphin.desktop
+  org.kde.kate.desktop
+  org.kde.konsole.desktop
+  org.kde.kwrite.desktop
+  org.kde.plasma-systemmonitor.desktop
+  systemsettings.desktop
+  org.kde.kinfocenter.desktop
+  org.kde.khelpcenter.desktop
+  org.kde.kwalletmanager.desktop
+  org.kde.kmenuedit.desktop
+  org.kde.klipper.desktop
+  org.kde.kfontview.desktop
+  kaccess.desktop
+  org.kde.vpnimport.desktop
+  org.kde.plasmawindowed.desktop
+  org.kde.knetattach.desktop
+  breezestyleconfig.desktop
+  # ── 2026-09-12 补装 KDE 原生工具后追加（正是 5.4 节踩的那个坑）──
+  org.kde.gwenview.desktop
+  org.kde.gwenview_importer.desktop
+  org.kde.ark.desktop
+  org.kde.kcalc.desktop
+)
+```
+
+**② 另有 1 项不能用 `OnlyShowIn`，要单独处理** —— `SPECIAL=()`：
+
+```bash
+SPECIAL=(
+  kdesystemsettings.desktop   # 它自带 NotShowIn=KDE → 再加 OnlyShowIn=KDE 两边都不显示
+)                             # 正确做法：改用 NoDisplay=true 覆盖
+```
+
+**③ KDE 侧要藏的 GNOME 应用（18 项）** —— 写进 `hide-gnome-apps.sh`：
+
+```bash
+APPS=(
+  org.gnome.Nautilus.desktop
+  org.gnome.TextEditor.desktop
+  org.gnome.Ptyxis.desktop
+  org.gnome.Loupe.desktop
+  org.gnome.Papers.desktop
+  org.gnome.Calculator.desktop
+  org.gnome.Characters.desktop
+  org.gnome.clocks.desktop
+  org.gnome.Sysprof.desktop
+  org.gnome.baobab.desktop
+  org.gnome.DiskUtility.desktop
+  org.gnome.font-viewer.desktop
+  org.gnome.seahorse.Application.desktop
+  org.gnome.Logs.desktop
+  org.gnome.Settings.desktop
+  org.gnome.tweaks.desktop
+  org.gnome.Yelp.desktop
+  gnome-language-selector.desktop
+)
+```
+
+> 🔴 **刻意不放进名单的**（跨桌面通用工具，KDE 里也要用）：
+> `fcitx5-configtool`、`org.fcitx.Fcitx5`、`kbd-layout-viewer5`（输入法）、`mpv`（视频）、
+> `htop`、`gdebi`、`timeshift-gtk`、`nm-connection-editor`、`nvidia-settings`。
+>
+> ⚠️ **别按"名字里带 KDE / Qt"来判断**：`kbd-layout-viewer5` 是 `fcitx5-config-qt` 提供的**输入法工具**，
+> 名字带 Qt 但 GNOME 里也用得上 —— 这条真被误判过（见 11.1 节第 9 条，已恢复）。
+
+#### A.9.2 隐藏机制的最小可运行实现
+
+> 原理只有一句：**同名的 `.desktop` 放在用户目录，优先级高于系统目录**。
+> 于是"复制一份 + 插一行 `OnlyShowIn=KDE;`"就够了 —— 不用 root、apt 升级碰不到、撤销就是删文件。
+
+```bash
+#!/bin/bash
+# hide-kde-apps.sh（最小可运行版）—— 在 eryuemu 身份下运行，不需要 sudo
+# 反向（KDE 侧藏 GNOME 应用）：MARK 改为 OnlyShowIn=GNOME; 且 USERDIR 指向 KDE 用户家目录
+set -u
+SYSDIR="/usr/share/applications"
+USERDIR="$HOME/.local/share/applications"
+MARK="OnlyShowIn=KDE;"
+
+APPS=( ... )      # 见 A.9.1 ①
+SPECIAL=( ... )   # 见 A.9.1 ②
+
+insert_key() {    # 把 $3 插在 [Desktop Entry] 之后
+  python3 - "$1" "$2" "$3" <<'PYEOF'
+import sys
+src, dst, key = sys.argv[1], sys.argv[2], sys.argv[3]
+out, done = [], False
+for l in open(src, encoding='utf-8', errors='replace').read().splitlines():
+    out.append(l)
+    if l.strip() == "[Desktop Entry]" and not done:
+        out.append(key); done = True
+if not done:
+    out.insert(0, key)
+open(dst, 'w', encoding='utf-8').write("\n".join(out) + "\n")
+PYEOF
+}
+
+mkdir -p "$USERDIR"
+for a in "${APPS[@]}"; do
+  src="$SYSDIR/$a"; dst="$USERDIR/$a"
+  [ -f "$src" ] || { echo "—  $a 系统里没有，跳过"; continue; }
+  grep -qE "^NotShowIn=.*KDE" "$src" && { echo "⏭  $a 自带 NotShowIn=KDE → 交给 SPECIAL"; continue; }
+  if grep -qE "^OnlyShowIn=" "$src"; then cp -f "$src" "$dst"; else insert_key "$src" "$dst" "$MARK"; fi
+  echo "✅ $a"
+done
+for a in "${SPECIAL[@]}"; do
+  src="$SYSDIR/$a"; [ -f "$src" ] || continue
+  grep -qE "^NotShowIn=.*KDE" "$src" && { insert_key "$src" "$USERDIR/$a" "NoDisplay=true"; echo "✅ $a（NoDisplay=true，避开互斥）"; }
+done
+update-desktop-database "$USERDIR" 2>/dev/null
+echo "撤销：删掉 $USERDIR 里上面这些同名文件即可"
+```
+
+**检查（只读）**：
+
+```bash
+ls ~/.local/share/applications/*.desktop | wc -l     # 覆盖文件在不在
+sudo dpkg -V <包名>                                   # 系统文件有没有被改：无输出 = 与原版逐字节一致
+```
+
+> ⚠️ 判断"系统文件是否被改过"**只能用 `dpkg -V`**，不要用 `grep OnlyShowIn=KDE` ——
+> KDE 自己的包本来就带这个字段，会误报（实测误报 5 个，见 A.5 V6 说明）。
+
+#### A.9.3 fcitx5：跨用户要复制的 4 处配置（完整内容）
+
+> ⚠️ 这 4 类**缺任何一类都表现为"输入法不生效"，而且症状看起来一模一样**（见 5.1 ③）。
+> 根因是**环境变量级联有层级**：`environment.d/` 是**用户级**的，新建用户拿不到。
+> 按"环境变量 / 程序配置 / 自启 / 桌面侧声明"四类逐类检查。
+
+**① 环境变量** —— `~/.config/environment.d/95-fcitx5.conf`
+
+```ini
+GTK_IM_MODULE=fcitx
+QT_IM_MODULE=fcitx
+XMODIFIERS=@im=fcitx
+```
+
+**② 输入法方案** —— `~/.config/fcitx5/profile`（关键是含 `pinyin`）
+
+```ini
+[Groups/0]
+Name=Default
+Default Layout=us
+DefaultIM=keyboard-us
+
+[Groups/0/Items/0]
+Name=pinyin
+Layout=
+
+[Groups/0/Items/1]
+Name=keyboard-us
+Layout=
+
+[GroupOrder]
+0=Default
+```
+
+**③ 自启动**（⚠️ 最容易漏）—— `~/.config/autostart/org.fcitx.Fcitx5.desktop`
+
+```ini
+[Desktop Entry]
+Type=Application
+Name=Fcitx 5
+Exec=/usr/bin/fcitx5
+Icon=fcitx
+Terminal=false
+Categories=System;Utility;
+```
+
+**④ KDE 侧声明用 fcitx5** —— `~/.config/kcminputrc`
+
+```ini
+[General]
+InputMethod=fcitx5
+```
+
+#### A.9.4 其余补全命令
+
+| # | 原文只写了"要做"、没给命令的地方 | 补齐 |
+|---|---|---|
+| 1 | 4.3 节"GECOS 字段也要改" | `sudo usermod -c "eryuemu-kde" eryuemu-kde`<br>（登录界面显示的是 GECOS，不是用户名；`useradd -m -c "..."` 里的那个注释就是它） |
+| 2 | A.1 第 4 条那"17 个组件"到底是哪些 | `systemsettings` `konsole` `dolphin` `plasma-nm` `plasma-pa` `kscreen` `powerdevil` `kde-style-breeze` `breeze-gtk-theme` `kde-config-screenlocker` `kde-inotify-survey` `khelpcenter` `kinfocenter` `kmenuedit` `kwalletmanager` `kfind` `kwrite` |
+| 3 | 5.2 节追加安装的 4 个包 | `sudo apt install plasma-systemmonitor kinfocenter`（带 3 个包）<br>`sudo apt install kde-config-gtk-style`<br>`sudo apt install -y --no-install-recommends gwenview kcalc ark` |
+| 4 | 6.6 节"会复发的火狐坏启动器"到底怎么修 | 3 步：① 删 `~/.local/share/applications/userapp-Firefox-*.desktop`；② 把 `~/.config/mimeapps.list` 里指向它的关联全改回 `firefox.desktop`；③ `update-desktop-database ~/.local/share/applications`。<br>KDE 侧那个是"同款毛病、不同症状"（缺 `Icon=` 导致图标空白），补一行 `Icon=firefox` 即可 |
+| 5 | 路径都是本机的，换机器怎么办 | 脚本里要改 3 处：`KU="eryuemu-kde"`（KDE 用户名）、`USERDIR`（对应用户家目录）、`S="/timeshift/snapshots/<你的快照>/localhost"`（verify 脚本里的对比基线） |
+
+#### A.9.5 勘误与复核（2026-09-13 复测后修正）
+
+本文发布后又做了一轮**全程只读**的复核（用户身份、完整 `XDG_DATA_DIRS`、逐条实测）。下面几处**已就地改正**：
+
+| # | 原文 | 复核后 |
+|---|---|---|
+| 1 | 菜单可见数 **GNOME 41 / KDE 37** | **GNOME 39 / KDE 35**（口径见下）。**不变的结论是"对方 0 个"** |
+| 2 | 速览"`kde-plasma-desktop` + **16 个**手工挑选的组件" | **17 个** —— 命令里实际列了 17 个包名（A.1 第 4 条） |
+| 3 | A.5 V6"`dpkg -V` 只有 1 处缺失，就是那个 diversion 转移项" | **2 处，且都与 KDE 无关**；diversion 项**根本不会被 `dpkg -V` 报出**（见 A.5 的 V6 修正框） |
+| 4 | 10.1 节"**例外 2 处**：密钥环（必须）、PDF" | **例外 1 处** —— 密钥环那条已在 7.3 节反转（KDE 侧已屏蔽），只剩 PDF 是主动保留 |
+| 5 | 9.4 / 10.1 节"双方家目录内 **0 项**对方程序的残留" | 应为"**0 项影响功能的**残留"：GNOME 家目录里还剩 **1 个 KDE 写的书签库**（见下） |
+
+**关于那 1 个遗留文件** —— `~/.local/share/user-places.xbel`（同目录还有个 `.tbcache`）
+
+| 项目 | 实测 |
+|---|---|
+| 内容署名 | **KDE**（`<kde_places_version>4</kde_places_version>`、`withBaloo`）→ Dolphin / 位置面板的书签库 |
+| mtime | **09-11 20:58** —— 正是 7.1 节记录的"在 GNOME 里点开 Dolphin"那一刻 |
+| 在安装前指纹里吗 | **不在** → 确认是 KDE 来了之后才产生的 |
+| **谁在读它** | 全系统扫描：**只有 KDE 的 `libKF6KIOFileWidgets`** 引用这个文件名；**GTK3 / GTK4 / Nautilus 均是 0 处引用** |
+| 影响 | **无**。GNOME 侧的外观（主题 / 字体 / 光标）走 `~/.config/gtk-3.0/bookmarks` 与 dconf，不读它 |
+| **删了会再生成吗** | **不会**。没有任何 GNOME 组件会写它；**只有在 `eryuemu` 身份下再次运行 KDE/KIO 程序**（Dolphin、Kate 的文件对话框等）才会重建 —— 也就是只有破坏 7.1 节那条**红线**才会回来 |
+| 想删的话 | `rm -f ~/.local/share/user-places.xbel ~/.local/share/user-places.xbel.tbcache` |
+
+**为什么"菜单可见数"会飘 —— 两种口径，差正好 2**：
+
+| 口径 | GNOME | KDE | 说明 |
+|---|---|---|---|
+| **`Gio.AppInfo.should_show()`**（**本文采用**） | **39** | **35** | GLib 库自己按 XDG 规范算，也是 GNOME Shell 实际走的路径 |
+| 手工解析 desktop-entry 规范 | 41 | 37 | 逐文件读 `NoDisplay` / `Hidden` / `OnlyShowIn` / `NotShowIn` 自己算 |
+
+**两个方向都恰好差 2** —— 这不是矛盾，是**口径差异**（原操作记录里也记为"属口径差异，不影响结论"）。
+除此之外还量出过 **38 / 206** 这类数字，根因见 11.2 节：
+换身份（以 root 读 `Gio` 读的是 root 的库）、少一个 `XDG_DATA_DIRS` 路径
+（`su -` 会丢掉 `/usr/share/ubuntu`，少算 4 个）、脚本忘传参数、
+把"我们放进去的覆盖文件"当成"能点到的应用"。
+
+**复刻时请把方法一起抄** —— 本文的 39 / 35 是这么量出来的：
+
+```bash
+# 以目标用户身份 + 完整 XDG_DATA_DIRS 数可见应用
+sudo -u <用户> env HOME=/home/<用户> \
+  XDG_DATA_HOME=/home/<用户>/.local/share XDG_CONFIG_HOME=/home/<用户>/.config \
+  XDG_CURRENT_DESKTOP="<ubuntu:GNOME 或 KDE>" \
+  XDG_DATA_DIRS="/usr/share/ubuntu:/usr/share/gnome:/usr/local/share/:/usr/share/" \
+  python3 -c "import gi; gi.require_version('Gio','2.0'); from gi.repository import Gio; print(len({a.get_id() for a in Gio.AppInfo.get_all() if a.should_show()}))"
+```
+
+> **一句话**：**总数会飘，"对方的应用数 = 0"不会飘** —— 判断隔离成不成立，看后者。
 
 ---
 
