@@ -2,7 +2,7 @@
 title: '【折腾向】Ubuntu 26.04 让 KDE 与 GNOME 完全隔离的实战全记录：专用系统用户 + 343 包精选方案 + 双向菜单隐藏'
 description: '前两次把 KDE 装在主账户下都以污染 GNOME 告终。第三次换方案：给 KDE 单独开一个系统用户 eryuemu-kde，两套桌面各有各的 $HOME，软件包系统级共享。本文完整记录"只读勘察 → 拆包核对 → 推翻前一版判断 → 发现 sddm 抢登录器风险 → 343 包精选方案 → 安装 → 双向隔离 → 指纹验证"全过程，给出可直接复用的隔离机制清单（账户层 / 用户层 / dpkg 层 / 包层四级）与 7 条污染通道分析。关键手段：用 --no-install-recommends 精确剔除 kde-config-gtk-style / sddm / xdg-desktop-portal-kde 三个污染源；用"用户目录覆盖法"（~/.local/share/applications/ 放同名 .desktop）替代改系统文件，避免被 apt 静默冲掉；用 dpkg diversion 永久加固 Dolphin 抢注 org.freedesktop.FileManager1。含最反直觉的一条洞察——真正的危害不是"对方建了文件"，而是"**谁的值会赢**"：两个方向其实都会被读到，区别在于 KDE 的值在两边都占上风（往 GNOME 写时优先级高于 dconf，往自己家目录写时又用自己的 Breeze 值覆盖）。附完整改动总账（375 新装包 / 0 卸载 / 0 系统文件修改 / 0 项 GNOME 配置改动）与 44637 个文件的指纹验证证据。附录 A.9 另补齐了可直接照抄的复刻材料：双向隐藏名单（22 + 18 项）、fcitx5 四处配置全文、最小可运行的隐藏脚本，以及发布后的复核勘误。'
 pubDate: '2026-09-13T00:48:02+08:00'
-updatedDate: '2026-09-13T12:40:00+08:00'
+updatedDate: '2026-09-13T13:05:00+08:00'
 category: '开发'
 type: 'ai-organized'
 ---
@@ -1515,7 +1515,7 @@ gsettings get org.gnome.desktop.wm.preferences titlebar-font
 
 ```
 ✅ 双向 0 个对方的进程/服务在跑
-✅ 双方家目录内 0 项**影响功能的**对方残留（唯一遗留：1 个 KDE 写的书签库，见 A.9.5）
+✅ 双方家目录内 0 项对方残留（历史上仅剩 1 个 KDE 写的书签库，已于 2026-09-13 清除，见 A.9.5）
 ```
 
 ---
@@ -1528,7 +1528,7 @@ gsettings get org.gnome.desktop.wm.preferences titlebar-font
 |---|---|
 | **功能隔离** | ✅ **完全** —— 各桌面只用各自的程序，互不干扰 |
 | **配置隔离** | ✅ **完全** —— 各写自己的 `$HOME`，互不可见（权限 750） |
-| **文件隔离** | ✅ **完全** —— 无影响功能的对方残留（唯一遗留：1 个 KDE 写的书签库 `user-places.xbel`，无害，见 A.9.5） |
+| **文件隔离** | ✅ **完全** —— 双方家目录内 0 项对方残留（唯一的 `user-places.xbel` 已于 2026-09-13 清除，见 A.9.5） |
 | **进程隔离** | ✅ **完全** —— 0 个对方的进程/服务在跑 |
 | **菜单隔离** | ✅ **完全** —— 互不相见（35 / 39 个，对方 0 个） |
 | **关联隔离** | ✅ **完全** —— 双击文件都开各自的程序 |
@@ -2114,7 +2114,7 @@ InputMethod=fcitx5
 | 2 | 速览"`kde-plasma-desktop` + **16 个**手工挑选的组件" | **17 个** —— 命令里实际列了 17 个包名（A.1 第 4 条） |
 | 3 | A.5 V6"`dpkg -V` 只有 1 处缺失，就是那个 diversion 转移项" | **2 处，且都与 KDE 无关**；diversion 项**根本不会被 `dpkg -V` 报出**（见 A.5 的 V6 修正框） |
 | 4 | 10.1 节"**例外 2 处**：密钥环（必须）、PDF" | **例外 1 处** —— 密钥环那条已在 7.3 节反转（KDE 侧已屏蔽），只剩 PDF 是主动保留 |
-| 5 | 9.4 / 10.1 节"双方家目录内 **0 项**对方程序的残留" | 应为"**0 项影响功能的**残留"：GNOME 家目录里还剩 **1 个 KDE 写的书签库**（见下） |
+| 5 | 9.4 / 10.1 节"双方家目录内 **0 项**对方程序的残留" | 当时确实还剩 **1 个 KDE 写的书签库**（见下）；**已于 2026-09-13 复核后清除** → 现在是真正的 **0 项** |
 
 **关于那 1 个遗留文件** —— `~/.local/share/user-places.xbel`（同目录还有个 `.tbcache`）
 
@@ -2125,8 +2125,32 @@ InputMethod=fcitx5
 | 在安装前指纹里吗 | **不在** → 确认是 KDE 来了之后才产生的 |
 | **谁在读它** | 全系统扫描：**只有 KDE 的 `libKF6KIOFileWidgets`** 引用这个文件名；**GTK3 / GTK4 / Nautilus 均是 0 处引用** |
 | 影响 | **无**。GNOME 侧的外观（主题 / 字体 / 光标）走 `~/.config/gtk-3.0/bookmarks` 与 dconf，不读它 |
-| **删了会再生成吗** | **不会**。没有任何 GNOME 组件会写它；**只有在 `eryuemu` 身份下再次运行 KDE/KIO 程序**（Dolphin、Kate 的文件对话框等）才会重建 —— 也就是只有破坏 7.1 节那条**红线**才会回来 |
-| 想删的话 | `rm -f ~/.local/share/user-places.xbel ~/.local/share/user-places.xbel.tbcache` |
+| **当前状态** | ✅ **已于 2026-09-13 清除** → 两侧现在都是真正的 **0 项残留** |
+
+**关键问题：删了还会再生成吗？—— 不会。**
+
+判据就一条：`~` 展开成的是**运行者的 `$HOME`**，与"当前是什么桌面"无关。
+这台机器上正好有个现成实证 —— **同名文件在两个家目录各有一份**：
+
+```
+/home/eryuemu/.local/share/user-places.xbel        eryuemu      09-11 20:58  4512 B   ← 已删
+/home/eryuemu-kde/.local/share/user-places.xbel    eryuemu-kde  09-12 00:24  4540 B   ← 保留
+        ↑ 署名都是 KDE，但各写各的 $HOME，互不相干
+```
+
+| 场景 | 哪个身份在跑 | 写到哪 | GNOME 家目录那个文件会回来吗 |
+|---|---|---|---|
+| **登录 `eryuemu-kde` → 开 Dolphin**（日常用法） | `eryuemu-kde` | `/home/eryuemu-kde/…` | ❌ **不会** |
+| 在 **GNOME** 里点开 Dolphin / Konsole / 系统监视器 | `eryuemu` | `/home/eryuemu/…` | ✅ 会 ← 当初就是这么来的 |
+| 用 **`eryuemu` 账户登录 KDE** | `eryuemu` | `/home/eryuemu/…` | ✅ 会（而且不止这一个文件，整套 KDE 配置都会落进去） |
+
+> **一句话**：正常用 KDE（登录 `eryuemu-kde`）写的是**它自己那份**，永远不会跑到 GNOME 家目录里来。
+> 只有**破坏 7.1 节那条红线**才会让它回来 —— 而守住那条红线，本来就是这套方案的全部要点。
+
+```bash
+# 清除命令（已执行）
+rm -f ~/.local/share/user-places.xbel ~/.local/share/user-places.xbel.tbcache
+```
 
 **为什么"菜单可见数"会飘 —— 两种口径，差正好 2**：
 
