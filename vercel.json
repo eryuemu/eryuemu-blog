@@ -2,32 +2,22 @@
 	"trailingSlash": true,
 	"redirects": [
 		{
-			"source": "/blog/sennagi-save-mod-and-script-reverse-engineering/:path*",
+			"source": "/blog/sennagi-save-mod-and-script-reverse-engineering/",
 			"destination": "/blog/sennaagi-save-script-recap/",
 			"permanent": true
 		},
 		{
-			"source": "/blog/yukoku-translation-tech-retrospective/:path*",
+			"source": "/blog/yukoku-translation-tech-retrospective/",
 			"destination": "/blog/youketsu-localization-recap/",
 			"permanent": true
 		},
 		{
-			"source": "/blog/shui-long-yin-shanghai-galonly/:path*",
+			"source": "/blog/shui-long-yin-shanghai-galonly/",
 			"destination": "/blog/shuilongyin-galonly-essay/",
 			"permanent": true
 		},
 		{
-			"source": "/blog/gnome-live-wallpaper-engine-two-bugs-fix-recap",
-			"destination": "/blog/gnome-live-wallpaper-engine-fix-recap/",
-			"permanent": true
-		},
-		{
 			"source": "/blog/gnome-live-wallpaper-engine-two-bugs-fix-recap/",
-			"destination": "/blog/gnome-live-wallpaper-engine-fix-recap/",
-			"permanent": true
-		},
-		{
-			"source": "/blog/gnome-live-wallpaper-engine-two-bugs-fix-recap/:path*/",
 			"destination": "/blog/gnome-live-wallpaper-engine-fix-recap/",
 			"permanent": true
 		}
