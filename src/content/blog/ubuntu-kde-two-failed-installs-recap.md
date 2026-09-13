@@ -2,7 +2,7 @@
 title: '【折腾向】Ubuntu 26.04 装 KDE 两次翻车全复盘：同一个 $HOME 下双桌面为什么必然互相污染'
 description: 'Ubuntu 26.04 LTS（GNOME 50.1 / Wayland / gdm3）上两次尝试安装 KDE Plasma 与 GNOME 共存，两次都把 GNOME 搞乱——图标、字体、字号全变，且卸载 KDE 之后依然乱。本文按真实时间顺序记录全过程，含每一步的原始命令。整件事由三个 AI 接力：第一轮 agy 装（--no-install-recommends，316 包，显式加了 kde-config-gtk-style），用户首次登录 KDE 的 7 分钟空窗里污染就已落盘；报 bug 后 agy 跑了 56 条命令全在查图标，一条都没查 GTK 主题，回退时又把主题恢复成默认值而非原值、还执行 killall -9 gjs 把 GNOME Shell 杀掉——用户被踢出桌面后转投 Trae，由 Trae 完成恢复。第二轮 Trae 装（带推荐包，536 包 + 预置 gdm3 + 封印 kde-gtk-config），用户只进 Plasma 11 秒就复现；agy 再次 purge 534 包仍未解决，最终由 DSH 完成系统层 + 家目录 27 项清除。文中记录了第二次回退时"保护列表"过滤 Original 536/Filtered 536 一个都没命中、"安全检查"因 apt 输出走 stderr 而静默失效、~/.gtkrc-2.0 成为漏网之鱼等细节，并用 dpkg 每日快照 + Timeshift 快照双重取证把根因追到 5 条共享通道。'
 pubDate: '2026-09-13T00:48:01+08:00'
-updatedDate: '2026-09-13T13:45:00+08:00'
+updatedDate: '2026-09-13T13:53:28+08:00'
 category: '开发'
 type: 'ai-organized'
 ---
