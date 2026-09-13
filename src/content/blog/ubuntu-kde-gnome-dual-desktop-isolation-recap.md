@@ -2,7 +2,7 @@
 title: '【折腾向】Ubuntu 26.04 让 KDE 与 GNOME 完全隔离的实战全记录：专用系统用户 + 343 包精选方案 + 双向菜单隐藏'
 description: '前两次把 KDE 装在主账户下都以污染 GNOME 告终。第三次换方案：给 KDE 单独开一个系统用户 eryuemu-kde，两套桌面各有各的 $HOME，软件包系统级共享。本文完整记录"只读勘察 → 拆包核对 → 推翻前一版判断 → 发现 sddm 抢登录器风险 → 343 包精选方案 → 安装 → 双向隔离 → 指纹验证"全过程，给出可直接复用的隔离机制清单（账户层 / 用户层 / dpkg 层 / 包层四级）与 7 条污染通道分析。关键手段：用 --no-install-recommends 精确剔除 kde-config-gtk-style / sddm / xdg-desktop-portal-kde 三个污染源；用"用户目录覆盖法"（~/.local/share/applications/ 放同名 .desktop）替代改系统文件，避免被 apt 静默冲掉；用 dpkg diversion 永久加固 Dolphin 抢注 org.freedesktop.FileManager1。含最反直觉的一条洞察——真正的危害不是"对方建了文件"，而是"**谁的值会赢**"：两个方向其实都会被读到，区别在于 KDE 的值在两边都占上风（往 GNOME 写时优先级高于 dconf，往自己家目录写时又用自己的 Breeze 值覆盖）。附完整改动总账（375 新装包 / 0 卸载 / 0 系统文件修改 / 0 项 GNOME 配置改动）与 44637 个文件的指纹验证证据。附录 A.9 另补齐了可直接照抄的复刻材料：双向隐藏名单（22 + 18 项）、fcitx5 四处配置全文、最小可运行的隐藏脚本，以及发布后的复核勘误。'
 pubDate: '2026-09-13T00:48:02+08:00'
-updatedDate: '2026-09-13T13:30:00+08:00'
+updatedDate: '2026-09-13T14:10:00+08:00'
 category: '开发'
 type: 'ai-organized'
 ---
@@ -535,6 +535,7 @@ sudo apt install plasma-systemmonitor kinfocenter      # 带 3 个包，不含 s
 # ② 让 GTK 应用（火狐/Chrome）在 KDE 下也能套用 KDE 外观
 #    ⚠️ 这就是前两次事故的元凶包 —— 但此时两套桌面已用独立账户隔离，
 #       已实测未影响 GNOME（见 9.1 节指纹 diff：改动数为 0）
+#    🔑 它同时修好了"没有放大缩小按钮"—— 见 5.3 节第 5 条详解（21:40 装，21:58 生效）
 sudo apt install kde-config-gtk-style
 
 # ③ 给 KDE 侧补原生工具（隐藏了 GNOME 程序之后，KDE 里双击文件得有得用）
@@ -567,8 +568,8 @@ sudo apt install -y --no-install-recommends gwenview kcalc ark
 | 2 | **没有火狐** | GNOME 早先生成的 `~/.local/share/applications/userapp-Firefox-W57IU3.desktop` 带 `NoDisplay=true`，把火狐从菜单隐藏了；且 `~/.config/mimeapps.list` 里 12 处默认关联指向这个文件 | 删除该文件 + `mimeapps.list` 全改为 `firefox.desktop` |
 | 3 | **任务栏出现 `org.kde.discover.desktop`（白纸图标）** | KDE 默认收藏夹（`kactivitymanagerd-statsrc`）写死了**未安装**的软件：<br>`ordering=preferred://browser,org.kde.discover.desktop,systemsettings.desktop,`<br>`org.kde.plasma-systemmonitor.desktop,org.kde.dolphin.desktop,`<br>`org.kde.konsole.desktop,org.kde.kate.desktop,org.kde.kontact.desktop`<br>其中 **`discover` / `kde-contacts` 这两个包特意没装** → KDE 报 `kicker: Entry is not valid`，并把内部 ID 当 tooltip 显示 | 从收藏夹删掉未装的项；现为 `preferred://browser → 系统设置 → Dolphin → Konsole → Kate`，**全部真实存在** |
 | 4 | **火狐图标空白** | KDE 用户目录的 `userapp-Firefox-BXFCV3.desktop` **缺 `Icon=` 字段**（与 GNOME 侧那个坏启动器同款毛病） | 补上 `Icon=firefox` |
-| 5 | **火狐/Chrome 没有放大缩小按钮** | **Wayland 的设计限制** —— 窗口若**自绘标题栏**，合成器就不能再添加按钮。**两个浏览器在 Wayland 下都自绘** | 见下方"第 5 条详解" |
-| 6 | **火狐/Chrome 是「GNOME 风格」** | 缺 `xsettings` 桥 | 装 `kde-config-gtk-style`（见 5.2 ②） |
+| 5 | **火狐/Chrome 没有放大缩小按钮** | 表面是 Wayland 的 CSD 规则，**真因是 GTK 设置 `gtk-decoration-layout` 缺席**（没有组件提供 `xsettings`/`gtkconfig` 桥 → 应用只能画一个 `✕`） | 见下方"第 5 条详解" |
+| 6 | **火狐/Chrome 是「GNOME 风格」** | 同一个根因：缺 `xsettings` 桥 | 装 `kde-config-gtk-style`（见 5.2 ②）—— ⚠️ **这一个包同时修好了第 5 条和第 6 条** |
 | 7 | **输入法不生效** | 只配了环境变量，**漏配自启动** | 补两处：<br>`~/.config/autostart/org.fcitx.Fcitx5.desktop`<br>`~/.config/kcminputrc` → `InputMethod=fcitx5` |
 | 8 | **GNOME 菜单里全是 KDE 应用** | 系统级 `.desktop` 对所有用户可见（本身正常），但需要 GNOME 干净 | `hide-kde-apps.sh` 让 KDE 应用不在 GNOME 菜单显示（见 6.1 节，**可一键撤销**） |
 
@@ -596,51 +597,71 @@ Icon=firefox
 > - KDE 侧是 `userapp-Firefox-BXFCV3.desktop`，**缺 `Icon=`** → 图标空白
 > **两个文件、两种病，都在修"火狐看起来不对"这一个症状。**
 
-#### 📌 第 5 条详解：为什么没有放大/缩小按钮，最后的结论是什么
+#### 📌 第 5 条详解：为什么没有放大/缩小按钮，最后是怎么修好的
 
-**根因（这是 Wayland 的协议设计，不是 bug）**：
+**表面现象**：窗口右上角只有一个 `✕`，没有最小化、没有最大化。
+
+**第一层原因（协议层，这部分是设计不是 bug）**：
 
 ```
 窗口如果"自己画标题栏"（CSD，客户端装饰）
-   → 合成器（KWin）就不该再往上加一套按钮
+   → 合成器（KWin）就不该再往上加一套按钮（SSD）
    → 否则会出现两层标题栏
 
 而 Firefox 和 Chrome 在 Wayland 下都自绘标题栏
-   → 所以 KWin 不给它们加最小化/最大化/关闭按钮
-   → 看起来就是"没有放大缩小按钮"
+   → KWin 不会给它们补按钮
 ```
+
+**但"KWin 不给"不等于"没办法有"** —— 因为**按钮本来就该由应用自己画**，而"画哪几个"是由
+**GTK 的设置 `gtk-decoration-layout`** 决定的。当时缺的正是这个设置（没有任何组件提供
+`xsettings` / `gtkconfig` 这个桥），所以应用只能画出一个 `✕`。
+
+→ **所以真正的根因是"GTK 侧设置缺席"，而不是"Wayland 不给按钮"。**
+这条区别很关键，它决定了该往哪个方向修（见下面的时间线）。
 
 ![KDE 里火狐窗口的右上角：只有一个 ✕ 关闭按钮，**没有最小化、没有最大化**](../../assets/p16-kde-08-firefox-no-window-buttons.jpg)
 
 **上图是现场**：窗口右上角**只有 `✕`**，最小化/最大化按钮**根本不存在**。
 
-**处理过程走了一个来回**：
+**处理过程：先走了个弯路，然后一步到位**
 
-| 步骤 | 做法 | 最终状态 |
+| 时间 | 动作 | 结果 |
 |---|---|---|
-| ① 火狐 | 给 **KDE 用户专属**的环境变量，让它走 X11/XWayland —— 这样 KWin 会提供标准窗口按钮 | ✅ **保留**（见下） |
-| ② Chrome | 同样做了个 **X11 版启动器** | ❌ **已删除** —— 实测 Chrome 的 Wayland 版**也带**窗口按钮，两个启动器重复，没必要留 |
+| **21:26** | 先按"Wayland 限制"的思路，给火狐加 `MOZ_ENABLE_WAYLAND=0`（KDE 账户专属），并给 Chrome 做了个 X11 版启动器 | ⏳ 对症状的猜测性处理 |
+| **21:40** | 装 **`kde-config-gtk-style`**（1 包 0 依赖） | ✅ **真正的解法** |
+| **21:58** | 它写出 `~/.config/gtk-3.0/settings.ini`，其中两行是关键 | ✅ **两个浏览器同时恢复正常** |
 
-> ⚠️ **这两件事的结果不一样，别混为一谈**：
-> **火狐需要**这个 X11 兜底（Wayland 下它自绘标题栏，KWin 加不了按钮）；
-> **Chrome 不需要**（实测 Wayland 版本来就有按钮）。
-> 所以删掉的是 **Chrome 那个多余的启动器**，**火狐那个环境变量至今仍在**（21:26 创建，从未撤销）。
-
-**火狐那一处的最终做法**（只影响 KDE 账户，不动全局）：
-
-```bash
-# eryuemu-kde/.config/environment.d/60-firefox-x11.conf
-MOZ_ENABLE_WAYLAND=0
+```ini
+# eryuemu-kde/.config/gtk-3.0/settings.ini   ← 由 kde-config-gtk-style 的 gtkconfig 模块写出
+gtk-decoration-layout=icon:minimize,maximize,close                 # ← 决定标题栏上有哪几个按钮、什么顺序
+gtk-modules=colorreload-gtk-module:window-decorations-gtk-module   # ← 把按钮画成 Breeze 样式
 ```
 
-> 💡 **这段值得记的是"改完发现没必要改"**：
-> 一开始按"Wayland 限制"的思路给**两个浏览器**都做了 X11 兜底，
-> 实测后发现 **Chrome 的 Wayland 版本来就有窗口按钮** ——
-> 于是**把 Chrome 那份多余的删掉、保留系统原版**，而不是"既然做了就留着"。
-> **能少一处自定义就少一处**（因为每一处自定义都是将来升级时要维护的负担）。
+> 🔑 **关键就是 `gtk-decoration-layout` 这一行。**
+> 火狐和 Chrome 都是**自绘标题栏、自绘按钮**的，而"画哪几个按钮"正是由这个 GTK 设置决定 ——
+> **它缺席时，只能画出一个 `✕`。**
+> `kde-config-gtk-style` 补上的就是这个桥（`xsettings` / `gtkconfig`），于是**两个浏览器一起好了**。
+
+**那 X11 那两条后来怎么处理了？**
+
+| | 处置 |
+|---|---|
+| **Chrome 的 X11 版启动器** | **已删除** —— 用户实测**系统原版（Wayland）就带按钮**，两个重复没必要留。<br>⚠️ 这本身就是个证据：**按钮是 GTK 侧修好的，不是 X11 带来的** |
+| **火狐的 `60-firefox-x11.conf`** | ⚠️ **留下了，但很可能已经多余** —— 它创建于 21:26，比真正的解法早 14 分钟 |
+
+> 💡 **这段最值得记的是"临时手段忘了撤"**：
+> 21:26 那个 X11 兜底是**对症状的猜测**；21:40 装包后问题已从根上解决 ——
+> 于是 Chrome 那份被撤了，**火狐那份忘了撤**。
+> **能少一处自定义就少一处**，但前提是**先搞清哪一处才是真正起作用的那一处**。
+
+> ⚠️ **诚实说明（没做隔离实验）**：
+> 用户是在三处改动**全部就位之后一次性实测**的，所以严格讲：
+> - ✅ **已证实**：装完 `kde-config-gtk-style` 后**两个浏览器都有按钮**（Chrome 用系统原版即正常 —— 这条是硬证据）
+> - ❓ **未证实**：火狐那个 `MOZ_ENABLE_WAYLAND=0` 是否还是必需
 >
-> 📌 **想撤销火狐这处**：删掉那个文件 + 重登 KDE 即可 —— 代价是火狐会变回"右上角只有 ✕"。
-> 对照实验的做法记在 `操作全记录` 的 D5 条。
+> **想验证只要一条对照实验**：删掉 `60-firefox-x11.conf` → **重登 KDE** → 看火狐右上角。
+> **按钮还在** → 那个文件确实多余，可以删（火狐回到原生 Wayland）；
+> **按钮消失** → 它仍在起作用，留着。
 
 ### 5.4 ⚠️ 一个"文档自己预警过、执行时又踩了"的坑
 
@@ -1744,7 +1765,7 @@ KDE 桌面自身包     ≈55 MB（新增行为 ≈960 MB 里，浏览器数据�
 | K3 | **输入法自启**（⚠️ 最容易漏） | 复制 `~/.config/autostart/org.fcitx.Fcitx5.desktop` |
 | K4 | **KDE 侧声明用 fcitx5** | `~/.config/kcminputrc` → `InputMethod=fcitx5` |
 | K5 | **补 KDE 原生工具**（隐藏 GNOME 程序后要有替代品） | `sudo apt install -y --no-install-recommends gwenview kcalc ark` |
-| K6 | **装 xsettings 桥**（让火狐/Chrome 用 KDE 外观） | `sudo apt install kde-config-gtk-style`<br>⚠️ 装完必须验证 GNOME 未被污染（见 A.5 V4） |
+| K6 | **装 xsettings 桥**（让火狐/Chrome 用 KDE 外观，**同时也修好了"没有放大缩小按钮"** —— 密钥就在它写的 `gtk-decoration-layout=icon:minimize,maximize,close`） | `sudo apt install kde-config-gtk-style`<br>⚠️ 装完必须验证 GNOME 未被污染（见 A.5 V4） |
 | **K7** | **改文件关联为 KDE 程序**（这是关闭"MIME 关联"通道的关键一步） | 写 `eryuemu-kde/.local/share/applications/mimeapps.list`，见下方 |
 
 > 📌 **K6 是个绝佳的验证**：这个包正是前两次事故的元凶。
@@ -2123,7 +2144,7 @@ InputMethod=fcitx5
 | 3 | A.5 V6"`dpkg -V` 只有 1 处缺失，就是那个 diversion 转移项" | **2 处，且都与 KDE 无关**；diversion 项**根本不会被 `dpkg -V` 报出**（见 A.5 的 V6 修正框） |
 | 4 | 10.1 节"**例外 2 处**：密钥环（必须）、PDF" | **例外 1 处** —— 密钥环那条已在 7.3 节反转（KDE 侧已屏蔽），只剩 PDF 是主动保留 |
 | 5 | 9.4 / 10.1 节"双方家目录内 **0 项**对方程序的残留" | 当时确实还剩 **1 个 KDE 写的书签库**（见下）；**已于 2026-09-13 复核后清除** → 现在是真正的 **0 项** |
-| 6 | 5.3 节"**按用户要求删掉 X11 版**，保留系统原版"（读起来像两个浏览器都撤了） | 实际**只删了 Chrome 那个多余的 X11 启动器**；**火狐的 `MOZ_ENABLE_WAYLAND=0` 至今保留**（删了火狐就没有窗口按钮了）。§5.3 已改写清楚 |
+| 6 | 5.3 节把"没有放大缩小按钮"归因成 **Wayland 的协议限制**，并说删掉 X11 版就"两种模式都正常" | ⚠️ **归因不准**：真因是 **GTK 设置 `gtk-decoration-layout` 缺席**，而它在 **21:40 装 `kde-config-gtk-style` 时被补上** → 两个浏览器一起好了。21:26 那两条 X11 手段是**在此之前**的猜测性处理；Chrome 那份已删（系统原版即正常，是硬证据），**火狐那份留下了但很可能已多余**（未做对照实验）。§5.3 已按时间线改写 |
 
 **关于那 1 个遗留文件** —— `~/.local/share/user-places.xbel`（同目录还有个 `.tbcache`）
 
