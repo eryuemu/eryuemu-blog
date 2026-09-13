@@ -2,7 +2,7 @@
 title: '【折腾向】Ubuntu 26.04 装 KDE 两次翻车全复盘：同一个 $HOME 下双桌面为什么必然互相污染'
 description: 'Ubuntu 26.04 LTS（GNOME 50.1 / Wayland / gdm3）上两次尝试安装 KDE Plasma 与 GNOME 共存，两次都把 GNOME 搞乱——图标、字体、字号全变，且卸载 KDE 之后依然乱。本文按真实时间顺序记录全过程，含每一步的原始命令。整件事由三个 AI 接力：第一轮 agy 装（--no-install-recommends，316 包，显式加了 kde-config-gtk-style），用户首次登录 KDE 的 7 分钟空窗里污染就已落盘；报 bug 后 agy 跑了 56 条命令全在查图标，一条都没查 GTK 主题，回退时又把主题恢复成默认值而非原值、还执行 killall -9 gjs 把 GNOME Shell 杀掉——用户被踢出桌面后转投 Trae，由 Trae 完成恢复。第二轮 Trae 装（带推荐包，536 包 + 预置 gdm3 + 封印 kde-gtk-config），用户只进 Plasma 11 秒就复现；agy 再次 purge 534 包仍未解决，最终由 DSH 完成系统层 + 家目录 27 项清除。文中记录了第二次回退时"保护列表"过滤 Original 536/Filtered 536 一个都没命中、"安全检查"因 apt 输出走 stderr 而静默失效、~/.gtkrc-2.0 成为漏网之鱼等细节，并用 dpkg 每日快照 + Timeshift 快照双重取证把根因追到 5 条共享通道。'
 pubDate: '2026-09-13T00:48:01+08:00'
-updatedDate: '2026-09-13T12:40:00+08:00'
+updatedDate: '2026-09-13T13:45:00+08:00'
 category: '开发'
 type: 'ai-organized'
 ---
@@ -523,7 +523,7 @@ Trae 接手后先做了排查，结论有三条：
 | 证据 | 内容 |
 |---|---|
 | 唯一会写它的就是 KDE | `gnome-tweaks` 源码里**没有任何 "gtkrc" 字符串**；而 `kde-config-gtk-style` 的 `gtkconfig.so` 正是成套写这三个文件的那一个 |
-| `$HOME` 自​​身的 mtime | 快照里 `localhost/home/eryuemu` 的 mtime = **13:45** → 那时有新文件被创建在 `$HOME` 下 |
+| `$HOME` 自身的 mtime | 快照里 `localhost/home/eryuemu` 的 mtime = **13:45** → 那时有新文件被创建在 `$HOME` 下 |
 | 没有任何 GTK2 程序 | `apt-cache rdepends --installed libgtk2.0-0t64` 全是库和模块，**没有一个可执行程序** |
 
 **→ 最终判定：删除**（详见第 14 节）。
@@ -1077,7 +1077,7 @@ systemd 用户/系统单元、运行进程：0 个 KDE 项 ✅
 | 12–22 | `~/.local/state/` 下 11 个 KDE 状态文件 | discovernotifier / dolphin / kactivitymanagerd / kicker / knighttime / konsole / lookandfeelautoswitcher / plasmasessionrestore / plasmashell / UserFeedback.org.kde.* |
 | 23 | `~/.local/share/baloo/` | KDE 文件索引 |
 | 24 | `~/.local/share/user-session-migration/KDE.state` | KDE 会话迁移标记 |
-| 25 | `~/.local/share/user-places.xbel{,.bak,.tbcache}` | 被 KIO 覆写的"位置"文件（删掉后 GTK 会自动重新生成原生版） |
+| 25 | `~/.local/share/user-places.xbel{,.bak,.tbcache}` | 被 KIO 覆写的"位置"文件<br>⚠️ **2026-09-13 更正**：原括注"删掉后 GTK 会自动重新生成原生版"**是错的** —— GTK/Nautilus **根本不读**这个文件（全系统扫描：只有 KDE 的 `libKF6KIOFileWidgets` 引用它），所以谈不上"覆写"，也不会"重新生成"。它自始至终是 **KDE 自己的产物** |
 | 26 | `~/.var/`（整棵树） | KDE `plasma-browser-integration` 凭空创建，含 7 个浏览器的 NativeMessagingHosts 配置 |
 | 27 | `~/桌面/.directory` | KDE 写回来的文件夹元数据 |
 
@@ -1160,6 +1160,22 @@ apt-cache rdepends --installed libgtk2.0-0t64
 
 > **这一节的价值**：当两路说法冲突、而且**双方都没有"之前"的快照**时，
 > 靠**文件系统自身留下的元数据**（`$HOME` 的 mtime、依赖关系查询）可以做出比"谁的记忆更权威"更硬的判断。
+
+### 15.1 ⚠️ 同一个坑，`user-places.xbel` 也踩过（2026-09-13 补记）
+
+`~/.local/share/user-places.xbel` 遭遇了**和 `~/.gtkrc-2.0` 一模一样的误判**，而且后果更隐蔽：
+
+| | 原判断 | 实测更正 |
+|---|---|---|
+| 归属 | GTK/Nautilus 的"位置"文件，被 KIO 覆写 | **是 KDE/Dolphin 自己的**「位置」面板配置 |
+| 删了会怎样 | "GTK 会自动重新生成原生版" | ❌ **不会** —— 全系统扫描：只有 KDE 的 `libKF6KIOFileWidgets` 引用这个文件名，**GTK3 / GTK4 / Nautilus 均为 0 处引用** |
+| 后果 | — | 它被当成"GTK 的正常文件"，**从残留扫描关键词里移除了**；于是 Dolphin 在 09-11 20:58 生成的那一份**躲过了之后所有检查**，直到 09-13 才被发现删除 |
+
+🔴 **这条和 §15 的判断方法是同一个道理，但教训更进一步**：
+> **判断一个文件"是谁的"，要用"谁在读/写它"（依赖与引用关系）来定，不能靠"它长得像谁的文件"。**
+> 而**一旦改判了归属，必须回头重跑检查** —— 否则改的只是说法，"0 项残留"的结论依旧建立在有盲区的检查上。
+>
+> 详见[下一篇](/blog/ubuntu-kde-gnome-dual-desktop-isolation-recap/)附录 A.9.5。
 
 ---
 
