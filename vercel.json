@@ -17,7 +17,17 @@
 			"permanent": true
 		},
 		{
-			"source": "/blog/gnome-live-wallpaper-engine-two-bugs-fix-recap/:path*",
+			"source": "/blog/gnome-live-wallpaper-engine-two-bugs-fix-recap",
+			"destination": "/blog/gnome-live-wallpaper-engine-fix-recap/",
+			"permanent": true
+		},
+		{
+			"source": "/blog/gnome-live-wallpaper-engine-two-bugs-fix-recap/",
+			"destination": "/blog/gnome-live-wallpaper-engine-fix-recap/",
+			"permanent": true
+		},
+		{
+			"source": "/blog/gnome-live-wallpaper-engine-two-bugs-fix-recap/:path*/",
 			"destination": "/blog/gnome-live-wallpaper-engine-fix-recap/",
 			"permanent": true
 		}
