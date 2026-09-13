@@ -895,7 +895,7 @@ gsettings get org.gnome.desktop.interface font-name; … document-font-name; …
 
 **然后记录就断了。** 会话在此中断，用户没有得到回答。
 
-> 📌 这个问题的真正原因在[另一篇](/blog/gnome-live-wallpaper-engine-two-bugs-fix-recap/)里有完整分析：
+> 📌 这个问题的真正原因在[另一篇](/blog/gnome-live-wallpaper-engine-fix-recap/)里有完整分析：
 > 那其实是 AI CLI 自己的 TUI 配色 bug（把代码文字的颜色画成了和方块底色一模一样），
 > **跟字体、主题、KDE 都无关**。
 
@@ -1246,6 +1246,6 @@ apt-cache rdepends --installed libgtk2.0-0t64
 ### 相关阅读
 
 - [【折腾向】Ubuntu 26.04 让 KDE 与 GNOME 完全隔离的实战全记录](/blog/ubuntu-kde-gnome-dual-desktop-isolation-recap/)
-- [【折腾向】Ubuntu 26.04 动态壁纸扩展改造全记录](/blog/gnome-live-wallpaper-engine-two-bugs-fix-recap/)
+- [【折腾向】Ubuntu 26.04 动态壁纸扩展改造全记录](/blog/gnome-live-wallpaper-engine-fix-recap/)
 - [七彩虹游戏本无 U 盘安装 Linux 双系统全复盘](/blog/colorful-laptop-no-usb-dual-boot-recap/)
 - [联想小新 14 装 Fedora 44 KDE 双系统全记录（下）：一次注销引发的血案](/blog/lenovo-xx14-fedora-kde-logout-black-screen-recap/)

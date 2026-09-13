@@ -15,6 +15,11 @@
 			"source": "/blog/shui-long-yin-shanghai-galonly/:path*",
 			"destination": "/blog/shuilongyin-galonly-essay/",
 			"permanent": true
+		},
+		{
+			"source": "/blog/gnome-live-wallpaper-engine-two-bugs-fix-recap/:path*",
+			"destination": "/blog/gnome-live-wallpaper-engine-fix-recap/",
+			"permanent": true
 		}
 	]
 }

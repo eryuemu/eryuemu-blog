@@ -16,7 +16,7 @@ type: 'ai-organized'
 > **结果**：✅ 两个桌面完全隔离。菜单互不相见（GNOME 39 个可见 / KDE 35 个可见，对方各 0 个），GNOME 有 **44637 个文件的指纹**证明未被改动。
 > **本文定位**：可复用的操作手册 + 方法论。重点不是"装成功了"，而是**为什么这样做、怎么验证做到了、哪一层最可靠**。
 
-关联笔记：[【折腾向】Ubuntu 26.04 装 KDE 两次翻车全复盘](/blog/ubuntu-kde-two-failed-installs-recap/) · [【折腾向】Ubuntu 26.04 动态壁纸扩展改造全记录](/blog/gnome-live-wallpaper-engine-two-bugs-fix-recap/)
+关联笔记：[【折腾向】Ubuntu 26.04 装 KDE 两次翻车全复盘](/blog/ubuntu-kde-two-failed-installs-recap/) · [【折腾向】Ubuntu 26.04 动态壁纸扩展改造全记录](/blog/gnome-live-wallpaper-engine-fix-recap/)
 
 ---
 
@@ -2285,6 +2285,6 @@ sudo -u <用户> env HOME=/home/<用户> \
 ### 相关阅读
 
 - [【折腾向】Ubuntu 26.04 装 KDE 两次翻车全复盘](/blog/ubuntu-kde-two-failed-installs-recap/)
-- [【折腾向】Ubuntu 26.04 动态壁纸扩展改造全记录](/blog/gnome-live-wallpaper-engine-two-bugs-fix-recap/)
+- [【折腾向】Ubuntu 26.04 动态壁纸扩展改造全记录](/blog/gnome-live-wallpaper-engine-fix-recap/)
 - [七彩虹游戏本无 U 盘安装 Linux 双系统全复盘](/blog/colorful-laptop-no-usb-dual-boot-recap/)
 - [联想小新 14 装 Fedora 44 KDE 双系统全记录（下）：一次注销引发的血案](/blog/lenovo-xx14-fedora-kde-logout-black-screen-recap/)
