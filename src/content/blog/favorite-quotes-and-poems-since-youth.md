@@ -4,6 +4,7 @@ description: '盘点整理从初高中记事起到现在已积累的喜欢的词
 pubDate: '2026-09-18T21:33:46+08:00'
 category: '随笔'
 type: 'original'
+heroImage: '../../assets/houniao-cover.png'
 ---
 
 > 盘点一下我从初高中记事起到现在已积累的喜欢的词句。
