@@ -106,6 +106,23 @@ export const projects: Project[] = [
 		],
 	},
 	{
+		id: 'hbu-os-lab-skill',
+		title: 'HBU-OS-Lab-Skill · 操作系统实验 AI 技能',
+		role: '作者 / 独立开源',
+		desc: '基于 Antigravity (AGY) 沉淀构建的河北大学电子信息工程学院《操作系统实验》（选修课）通用 AI Agent 技能库与排版避坑套件。支持纯黑字体约束、多余空白页消除、手机翻拍照片去水印与报告自动构建。',
+		tags: ['AI Agent', 'Antigravity', 'Python', 'OpenXML', 'DOCX', '操作系统实验'],
+		category: 'tools',
+		status: 'active',
+		iconType: 'ai',
+		links: [
+			{
+				name: 'GitHub 仓库',
+				url: 'https://github.com/eryuemu/hbu-os-lab-skill',
+				type: 'github',
+			},
+		],
+	},
+	{
 		id: 'jwc-monitor',
 		title: 'HBU 教务通知与选课监控助手',
 		role: '作者 / 自动化工具',
