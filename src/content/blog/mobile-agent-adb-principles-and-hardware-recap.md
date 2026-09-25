@@ -7,6 +7,8 @@ type: 'ai-organized'
 heroImage: '../../assets/realme-gt8-adb-hardware-specs-terminal.png'
 ---
 
+> **🌕 中秋节快乐！**
+
 本文记录了一次在 Linux 环境下，通过 USB 数据线将安卓手机（真我 GT8 / RMX6699）接入电脑，利用 Android Debug Bridge (ADB) 实现屏幕捕获、硬件透视，并深度探讨移动端 AI Agent 实现机制的完整技术讨论。针对讨论中提出的所有疑问，逐一说明具体的技术机制与底层原理。
 
 ---
