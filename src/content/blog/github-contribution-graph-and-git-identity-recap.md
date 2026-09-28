@@ -144,7 +144,62 @@ gh api "repos/eryuemu/HBU-Wiki/commits?per_page=100" \
 
 **教训：判断"提交从哪来"，光看 author 邮箱不够，必须 author + committer 一起看。**
 
-### Q6：为什么只有 wiki 中招？同期用同一个工具做的其他项目没事？
+### Q6：那轻薄本为什么是 `3419144842@qq.com`？也是配出来的吗？
+
+是配置的，而且有独立证据能证明这个邮箱的身份：**那 3 条真正的网页端编辑，author 就是 `3419144842@qq.com`**。网页端编辑由 GitHub 服务器代提交，它只能用你 GitHub 账号里登记的邮箱——所以这个地址必然就是你账号的登记邮箱。
+
+轻薄本当初大概率是照着 GitHub 官方那个 "Set up Git" 引导页配的，那个页面会**把你的账号邮箱预填进命令里**：
+
+```bash
+git config --global user.name  "eryuemu"
+git config --global user.email "3419144842@qq.com"   # ← 页面按你的账号自动填好
+```
+
+复制粘贴执行完，这台机器的身份就等于账号邮箱。所以"轻薄本用 3419"不是巧合，也不是工具乱写。
+
+### Q7：到底怎么控制这次用 3419、下次用 noreply？是不是就是邮箱填得不一样？
+
+命令行提交——**对，就是字面意思，填什么就是什么**。`git config user.email` 后面写什么字符串，提交里就记什么，git 不校验、不猜、不去查你的 GitHub 账号。两条命令地位完全平等：
+
+```bash
+git config --global user.email "3419144842@qq.com"                # 要 3419 这个身份
+git config --global user.email "eryuemu@users.noreply.github.com" # 要 noreply 身份
+```
+
+**noreply 不是某种特殊身份，它只是一个恰好被 GitHub 预先绑定好的邮箱地址。** 三者的真实差别只在"GitHub 认不认"和"要不要暴露真实邮箱"：
+
+| 填进去的邮箱 | 是否归属 | 代价 |
+| --- | --- | --- |
+| `eryuemu@users.noreply.github.com` | ✅ 认（GitHub 预绑定） | 无，且不暴露真实邮箱 |
+| `3419144842@qq.com` | ✅ 认（手动绑定+验证过） | 真实邮箱永久留在公开提交记录里，可被爬虫收集 |
+| `eryuemu@example.com` | ❌ 不认 | 头像灰、不算贡献，且永远修不好 |
+
+既然两个都能正常归属，选哪个实际只决定一件事：**要不要在公开仓库暴露真实邮箱**。
+
+但有一个入口**不归 `git config` 管**，这才是"同一个人身上有时 3419 有时 noreply"的真正原因：
+
+| 提交方式 | 身份由谁决定 |
+| --- | --- |
+| 命令行 `git commit` | 你 `git config` 里填的那个，随便填 |
+| GitHub 网页端编辑 / 网页上点 merge | GitHub 账号设置里的 **Keep my email addresses private** 开关，`git config` 管不着 |
+
+这个开关关掉（默认）时，网页操作用你的真实账号邮箱；打开后改用 `253450470+eryuemu@users.noreply.github.com`，GitHub 的原话是：
+
+> We'll remove your public profile email and use `253450470+eryuemu@users.noreply.github.com` when performing **web-based Git operations** (e.g. edits and merges) and sending email on your behalf.
+
+所以两条路各用各的配置，同一个人出现多种邮箱完全正常——只要这些邮箱都在你账号的白名单里，归属就不会丢。
+
+**想按项目固定用不同身份**，别靠手动改，用条件包含，按目录自动切换：
+
+```ini
+# ~/.gitconfig
+[includeIf "gitdir:~/project/hbu/"]
+    path = ~/.gitconfig-hbu
+```
+
+`~/.gitconfig-hbu` 里写那套身份即可。比逐个仓库 `git config` 可靠，也不会在被工具偷偷覆盖后自己还没发现。
+
+### Q8：为什么只有 wiki 中招？同期用同一个工具做的其他项目没事？
 
 这是最有价值的一问，它能区分"全局配错"还是"单仓库配错"。取证过程见 1.4。
 
