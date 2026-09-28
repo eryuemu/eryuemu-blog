@@ -574,7 +574,86 @@ git push -u origin feat/xxx
 
 ---
 
-# 四、命令速查
+# 四、新机器从零配好：认证和身份是两件事
+
+前面三章解释了"为什么算不上"，这一章给一份可以直接抄的清单。核心是别把两件事搞混：
+
+```text
+认证（credential）  → 决定你能不能 push 上去
+身份（user.email）  → 决定提交里写的是谁、能不能归属到你
+```
+
+只配认证不配身份，会卡在 commit 那一步（Q4 那个 fatal）；只配身份不配认证，提交能生成但 push 会报 `Password authentication is not supported`。**两个都要配，顺序建议先认证后身份。**
+
+## 4.1 第一步：认证（用 gh CLI）
+
+```bash
+gh auth login --git-protocol https --web
+```
+
+这条命令除了登录，还会顺手把 credential helper 写进全局配置，之后 `git push` 就不用再管密码。验证：
+
+```bash
+gh auth status
+git config --global --list | grep credential
+```
+
+> 注意 `gh auth login` **不会**替你设置 `user.name` / `user.email`（见 Q8）。它只管认证。
+
+## 4.2 第二步：身份（两条命令）
+
+```bash
+git config --global user.name  "eryuemu"
+git config --global user.email "eryuemu@users.noreply.github.com"
+```
+
+填哪个邮箱的判断标准见 Q9 那张表——一句话：**noreply 或你确定已绑定验证过的邮箱，二选一**。
+
+## 4.3 第三步：验证
+
+```bash
+git config --global --list | grep user
+git var GIT_AUTHOR_IDENT
+# eryuemu <eryuemu@users.noreply.github.com> 1790582416 +0800
+```
+
+第二条最实用：它打印的是**git 实际会写进提交的完整标识**，顺带能看出时区（`+0800` 决定绿格子按哪一天归类，见 3.5）。如果这条命令报错，说明身份还没配好。
+
+## 4.4 单个仓库想用不同身份
+
+在那个仓库目录里执行、**不带 `--global`**，仓库级优先级更高：
+
+```bash
+cd ~/some/repo
+git config user.email "另一个已绑定的邮箱"
+
+git config --show-origin --get user.email   # 查现在生效的是哪个、来自哪个文件
+git config --unset user.email               # 撤销，回落到全局
+```
+
+`--show-origin` 是排查这类问题最有用的一个参数——本文 1.4 那个"只有一个仓库中招"的结论，就是靠它定位到仓库级配置的。
+
+## 4.5 想按目录长期固定多套身份
+
+比逐个仓库手动改更可靠，也不会在被工具偷偷覆盖后自己还没发现：
+
+```ini
+# ~/.gitconfig
+[includeIf "gitdir:~/project/hbu/"]
+    path = ~/.gitconfig-hbu
+```
+
+`~/.gitconfig-hbu` 里写那套环境专用的 `user.name` / `user.email` 即可。
+
+## 4.6 一个 git config 管不到的地方
+
+**GitHub 网页端编辑和网页上点 merge 用的身份，不在这四条命令的控制范围内。** 它由账号设置里的 `Keep my email addresses private` 开关决定——关着用你的真实账号邮箱，开着用带 ID 的 noreply。详见 Q7。
+
+所以同一个人身上同时出现多种邮箱是完全正常的：命令行走 `git config`，网页走账号设置，两条路各管各的。只要这些邮箱都在白名单里，归属就不会丢。
+
+---
+
+# 五、命令速查
 
 ```bash
 # —— git 身份 ——
@@ -608,6 +687,6 @@ git push --force-with-lease=main:<预期远端SHA> origin main
 
 ---
 
-# 五、一句话总结
+# 六、一句话总结
 
 **git 只负责记录你自报的邮箱，GitHub 负责决定"算不算你"、"算在哪个仓库"、"算在哪一天"——而后三者是三套各自独立的规则、缓存和准入条件。** 数字对不上时，先判断卡在哪一层，而不是怀疑统计出错或者去改代码。
