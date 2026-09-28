@@ -128,7 +128,21 @@ git init && echo x > a.txt && git add a.txt && git commit -m test
 | `git push` | **不需要**，只是传已有提交对象 | 认证凭据（gh 的 credential helper） |
 | GitHub 网页端编辑 | 不需要你本地身份 | GitHub 服务器用你账号邮箱替你提交 |
 
-顺带解释一个现象：我 wiki 里有 44 条提交用的是 `3419144842@qq.com`，既不是 noreply 也不是我手动设的——**那全部是在 GitHub 网页上点铅笔编辑产生的**，GitHub 用账号邮箱代署名，跟本地配置毫无关系。所以判断"这提交是在哪产生的"，看邮箱就够了。
+顺带纠正一个我自己踩过的判断错误：wiki 里有 44 条提交用 `3419144842@qq.com`，我一度以为"这不是 noreply，那肯定是 GitHub 网页端编辑"。**错**——44 条里只有 3 条真是网页编辑。
+
+区分方法是看 **committer**：网页端编辑由 GitHub 服务器代提交，`committer.email` 是 `noreply@github.com`；本地提交则 author 与 committer 一致。
+
+```bash
+gh api "repos/eryuemu/HBU-Wiki/commits?per_page=100" \
+  --jq '.[] | select(.commit.committer.email=="noreply@github.com") | "\(.commit.author.date[0:16])  \(.commit.message|split("\n")[0])"'
+# 2026-08-12T14:01  Update professional data section in README
+# 2026-08-13T10:20  Remove future plans from README
+# 2026-09-20T05:51  删除readme中"当前内容"时效性板块
+```
+
+只有这 3 条。剩下 41 条 author=committer=`3419144842@qq.com`，是**轻薄本上配置的本地 git 身份**（真实邮箱，已绑定账号，所以归属一直正常）。
+
+**教训：判断"提交从哪来"，光看 author 邮箱不够，必须 author + committer 一起看。**
 
 ### Q6：为什么只有 wiki 中招？同期用同一个工具做的其他项目没事？
 
@@ -140,14 +154,14 @@ git init && echo x > a.txt && git add a.txt && git commit -m test
 
 ```text
 46  eryuemu@example.com                 ← 假身份
-44  3419144842@qq.com                   ← 网页端编辑
+44  3419144842@qq.com                   ← 轻薄本的本地身份（仅 3 条是网页编辑）
 39  eryuemu@users.noreply.github.com    ← 正常命令行
  5  3251711961@qq.com                   ← 合作者
 ```
 
 按月份交叉：
 
-| 月份 | 3419（网页） | example.com（假） | noreply（命令行） | 合作者 |
+| 月份 | 3419（轻薄本） | example.com（假） | noreply（命令行） | 合作者 |
 | --- | --- | --- | --- | --- |
 | 2026-04 | 1 | — | — | — |
 | 2026-06 | 40 | — | — | — |
@@ -172,7 +186,7 @@ git init && echo x > a.txt && git add a.txt && git commit -m test
 
 **假身份与 noreply 从未在同一天并存过**，是干净的前后两段。上面那张月度表格里 8 月同时出现"假 43 / noreply 17"，只是因为 8 月这个月**横跨了切换点**，并不代表两套环境同时在跑——查身份问题必须按天看，按月聚合会掩盖切换点。
 
-同一天里唯一混着的是「假 + 网页端」，这毫不矛盾：网页端由 GitHub 服务器代提交，跟本地配置无关。
+同一天里唯一混进来的另一种身份（08-12 14:01、08-13 10:20 那两条）正是上面查出的**网页端编辑**——committer 是 `noreply@github.com`，由 GitHub 服务器代提交，跟本地配置无关，所以不构成"两套环境并存"的反例。
 
 ### 同期其他仓库取证：为什么只有 wiki 中招
 
@@ -203,11 +217,22 @@ grep pubDate src/content/blog/colorful-laptop-no-usb-dual-boot-recap.md
 
 | 时间 | 机器 / 系统 | 工具 | wiki 提交用的邮箱 |
 | --- | --- | --- | --- |
-| 4–6 月 | 轻薄本 · Windows | 只在 GitHub 网页上编辑 | `3419144842@qq.com` |
-| 7-05 前后 | 游戏本 · Windows（配环境、WSL2） | 装 Antigravity | 7-04 起转成假身份 |
+| 4/29 ~ 6/27 | 轻薄本 · Windows | Antigravity（命令行本地提交） | `3419144842@qq.com` |
+| 7-05 前后 | 换到游戏本 · Windows（配环境、WSL2） | 装 Antigravity | 7-04 起转成假身份 |
 | 7-04 ~ 8-20 | 游戏本 · Windows | Antigravity | **`eryuemu@example.com`** |
 | 8-23 ~ 8-24 | **游戏本刷装 Ubuntu 26.04 双系统** | — | 空窗，无提交 |
 | 8-28 起 | 游戏本 · Ubuntu | 命令行 git | `eryuemu@users.noreply.github.com` |
+
+把三套环境的身份并排列出来，问题的孤立性就一目了然：
+
+| 环境 | 生效身份 | 是否绑定账号 | 结果 |
+| --- | --- | --- | --- |
+| 轻薄本 · Windows | `3419144842@qq.com` | ✅ | 归属正常 |
+| 游戏本 · Windows（全局） | `eryuemu@users.noreply.github.com` | ✅ | 归属正常 |
+| 游戏本 · Windows（**仅 wiki 仓库级**） | `eryuemu@example.com` | ❌ 无法绑定 | 46 条无头像 |
+| 游戏本 · Ubuntu | `eryuemu@users.noreply.github.com` | ✅ | 归属正常 |
+
+也就是说：**同一款工具在三台/套环境里有两次是正常的，只在游戏本的 wiki 那一个仓库上写出了假身份**。所以不能笼统说"Antigravity 会污染 git 配置"，准确说法是"它曾在那一个仓库里写过一条仓库级配置"——具体是版本差异还是某次会话的偶发行为，已经无从考证，但影响面可以确定：**只有一个仓库**。
 
 **机制**：换系统后是在新环境里**重新克隆**的 wiki。新克隆的 `.git/config` 从零生成，Antigravity 当初写进去的那条仓库级假邮箱自然不存在了，于是 git 回落到正常的全局配置，身份当场恢复。
 
