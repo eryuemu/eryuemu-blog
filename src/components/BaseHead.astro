@@ -35,7 +35,7 @@ const { title, description, image = FallbackImage } = Astro.props;
 <meta name="generator" content={Astro.generator} />
 
 <!-- Umami Analytics -->
-{UMAMI_WEBSITE_ID && (
+{UMAMI_WEBSITE_ID && import.meta.env.PROD && (
 	<script
 		defer
 		src="https://cloud.umami.is/script.js"
