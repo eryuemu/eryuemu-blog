@@ -15,10 +15,48 @@ heroImage: '../../assets/esp32-c3-world-execute-me-pv-cover.png'
 
 ![手持 FoloToy AI Passport 播放大肥鱼封面现场实拍](../../assets/esp32-c3-ai-passport-handheld-terminal.jpg)
 
+---
+
+## 📺 B 站实机演示视频（内嵌播放）
+
+<div style="position: relative; width: 100%; aspect-ratio: 16 / 9; margin: 1.5rem 0; border-radius: 8px; overflow: hidden; background: #000;">
+  <iframe 
+    src="https://player.bilibili.com/player.html?bvid=BV1qMHr6eEyy&page=1&high_quality=1&danmaku=0&autoplay=0" 
+    scrolling="no" 
+    border="0" 
+    frameborder="no" 
+    framespacing="0" 
+    allowfullscreen="true"
+    style="position: absolute; width: 100%; height: 100%; left: 0; top: 0; border: none;">
+  </iframe>
+</div>
+
+> *如果上方内嵌播放器未加载，可直接点击跳转原视频：[B站原视频直达 (BV1qMHr6eEyy)](https://www.bilibili.com/video/BV1qMHr6eEyy)*
+
+---
+
+## 🎞️ 实机动效与名场面实录
+
+### 1. 开机就绪与待机大肥鱼封面
+![开机就绪与待机大肥鱼封面](../../assets/esp32-c3-clip-01-boot-handheld.gif)
+
+### 2. 音频波形跳动与星空粒子
+![音频波形跳动与星空粒子](../../assets/esp32-c3-clip-02-waveform-galaxy.gif)
+
+### 3. 名场面：高潮处刑倒计时 Execution
+![名场面：高潮处刑倒计时 Execution](../../assets/esp32-c3-clip-03-countdown-execution.gif)
+
+### 4. 结尾大肥鱼微笑挥手
+![结尾大肥鱼微笑挥手](../../assets/esp32-c3-clip-04-ending-smile.gif)
+
+---
+
+## 🔗 开源与固件发布
+
 固件已发布在官方社区，源码也已开源：
 * **官方社区一键免编译刷入**：[https://ai-passport.folotoy.cn/plays/909/?v=1899-2](https://ai-passport.folotoy.cn/plays/909/?v=1899-2)
 * **完整源码与工程 GitHub**：[https://github.com/eryuemu/ai-passport-world-execute-me](https://github.com/eryuemu/ai-passport-world-execute-me)
-* **B 站实机演示视频**：[https://www.bilibili.com/video/BV1qMHr6eEyy](https://www.bilibili.com/video/BV1qMHr6eEyy)
+* **B 站演示原地址**：[https://www.bilibili.com/video/BV1qMHr6eEyy](https://www.bilibili.com/video/BV1qMHr6eEyy)
 
 目前固件在官方社区已经冲进热度榜 Top 9：
 
