@@ -536,7 +536,7 @@ async function updatePageviews() {
 ```text
 https://eryuemu.com/?eryuemu0721
 ```
-*（输入 `https://eryuemu.com/?eryuemu0721=1` 同样支持）*
+直接访问带值参数 `https://eryuemu.com/?eryuemu0721=1` 也完全支持。
 
 - **预期验证现象**：
   1. 页面加载完成瞬间，地址栏后缀自动还原为 `https://eryuemu.com/`；
@@ -550,4 +550,4 @@ https://eryuemu.com/?eryuemu0721
 ```text
 https://eryuemu.com/?eryuemu0721=0
 ```
-*（或 `?eryuemu0721=off`）*，控制台将输出恢复提示，并清除磁盘中的站长标记。
+也可以访问 `https://eryuemu.com/?eryuemu0721=off`，控制台将输出恢复提示，并清除磁盘中的站长标记。
