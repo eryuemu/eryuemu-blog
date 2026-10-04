@@ -335,21 +335,21 @@ const cleanPath = Astro.url.pathname.replace(/\/+$/, '') || '/';
 			}
 
 			.hero-image {
+				width: 100%;
 				margin-bottom: 2rem;
 				border-radius: var(--radius);
 				overflow: hidden;
 				display: flex;
 				justify-content: center;
+				align-items: center;
 				background-color: var(--bg-secondary);
 			}
 
 			.hero-image img {
 				display: block;
-				max-width: 100%;
-				max-height: 520px;
-				width: auto;
+				width: 100%;
 				height: auto;
-				object-fit: contain;
+				object-fit: cover;
 			}
 
 			.creation-notice {

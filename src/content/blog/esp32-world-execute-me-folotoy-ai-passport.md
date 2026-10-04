@@ -35,7 +35,7 @@ heroImage: '../../assets/esp32-c3-world-execute-me-pv-cover.png'
 
 ---
 
-## 🎞️ 实机动效与名场面实录
+## 🎞️ 实机动态效果展示
 
 ### 1. 开机就绪与待机大肥鱼封面
 ![开机就绪与待机大肥鱼封面](../../assets/esp32-c3-clip-01-boot-handheld.gif)
@@ -43,8 +43,8 @@ heroImage: '../../assets/esp32-c3-world-execute-me-pv-cover.png'
 ### 2. 音频波形跳动与星空粒子
 ![音频波形跳动与星空粒子](../../assets/esp32-c3-clip-02-waveform-galaxy.gif)
 
-### 3. 名场面：高潮处刑倒计时 Execution
-![名场面：高潮处刑倒计时 Execution](../../assets/esp32-c3-clip-03-countdown-execution.gif)
+### 3. 高潮处刑倒计时 Execution
+![高潮处刑倒计时 Execution](../../assets/esp32-c3-clip-03-countdown-execution.gif)
 
 ### 4. 结尾大肥鱼微笑挥手
 ![结尾大肥鱼微笑挥手](../../assets/esp32-c3-clip-04-ending-smile.gif)
