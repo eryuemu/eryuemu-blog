@@ -2,12 +2,18 @@
 import Layout from '../layouts/BlogPost.astro';
 import { Image } from 'astro:assets';
 import eustiaVisual from '../assets/eustia-key-visual.jpg';
+
+const wordCount = 2531;
+const readingTime = Math.max(1, Math.ceil(wordCount / 350));
 ---
 
 <Layout
 	title="关于我"
 	description="关于 eryuemu（二月木）— 河北大学工科生、自动化专业、重度软硬件折腾控与赛博洁癖患者的个人简介与经历。"
 	pubDate={new Date('2026-07-18T16:42:00+08:00')}
+	id="about"
+	wordCount={wordCount}
+	readingTime={readingTime}
 >
 	<blockquote>
 		"事在人为，圆融自治。"
