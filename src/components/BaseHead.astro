@@ -34,6 +34,30 @@ const { title, description, image = FallbackImage } = Astro.props;
 />
 <meta name="generator" content={Astro.generator} />
 
+<!-- Admin / Owner zero-tracking mode detector -->
+<script is:inline>
+	try {
+		const params = new URLSearchParams(window.location.search);
+		if (params.get('admin') === '1' || params.get('me') === '1') {
+			localStorage.setItem('eryuemu_is_owner', '1');
+			localStorage.setItem('umami.disabled', '1');
+			console.log('🛡️ [站长免记账模式] 已开启：全站统计（Vercount/Umami/Waline）均处于纯只读状态，绝不增加自身访问！');
+			params.delete('admin');
+			params.delete('me');
+			const cleanSearch = params.toString() ? '?' + params.toString() : '';
+			window.history.replaceState({}, '', window.location.pathname + cleanSearch + window.location.hash);
+		} else if (params.get('admin') === '0' || params.get('me') === '0') {
+			localStorage.removeItem('eryuemu_is_owner');
+			localStorage.removeItem('umami.disabled');
+			console.log('🔄 [站长免记账模式] 已关闭：恢复正常访客统计。');
+			params.delete('admin');
+			params.delete('me');
+			const cleanSearch = params.toString() ? '?' + params.toString() : '';
+			window.history.replaceState({}, '', window.location.pathname + cleanSearch + window.location.hash);
+		}
+	} catch (e) {}
+</script>
+
 <!-- Umami Analytics -->
 {UMAMI_WEBSITE_ID && import.meta.env.PROD && (
 	<script

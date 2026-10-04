@@ -903,10 +903,15 @@ const cleanPath = Astro.url.pathname.replace(/\/+$/, '') || '/';
 				const sessionKey = `waline_pv_${currentPath}`;
 				const alreadyViewed = sessionStorage.getItem(sessionKey);
 
+				let isOwner = false;
+				try {
+					isOwner = typeof localStorage !== 'undefined' && localStorage.getItem('eryuemu_is_owner') === '1';
+				} catch (e) {}
+
 				try {
 					let count: number | null = null;
 
-					if (!alreadyViewed) {
+					if (!alreadyViewed && !isOwner) {
 						// First visit in current session: increment view count
 						const res = await fetch(`${WALINE_SERVER_URL.replace(/\/+$/, '')}/api/article`, {
 							method: 'POST',
@@ -922,7 +927,7 @@ const cleanPath = Astro.url.pathname.replace(/\/+$/, '') || '/';
 						}
 					}
 
-					// Fallback or repeat navigation in same session: read-only counter fetch
+					// Fallback, repeat navigation, or owner mode: read-only counter fetch
 					if (count === null) {
 						const res = await fetch(
 							`${WALINE_SERVER_URL.replace(/\/+$/, '')}/api/article?path=${encodeURIComponent(currentPath)}&type=time`

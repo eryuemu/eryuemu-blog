@@ -228,8 +228,13 @@ const formattedWords = totalWords >= 1000 ? (totalWords / 1000).toFixed(1) + 'k'
 				return;
 			}
 
+			let isOwner = false;
+			try {
+				isOwner = typeof localStorage !== 'undefined' && localStorage.getItem('eryuemu_is_owner') === '1';
+			} catch (e) {}
+
 			const hasVisited = checkHasVisited();
-			const isNewUv = !hasVisited;
+			const isNewUv = !hasVisited && !isOwner;
 
 			if (isNewUv) {
 				markAsVisited();
@@ -239,16 +244,22 @@ const formattedWords = totalWords >= 1000 ? (totalWords / 1000).toFixed(1) + 'k'
 			const statUrl = window.location.href.replace(/^https?:\/\/eryuemu\.com/, 'https://www.eryuemu.com');
 
 			try {
-				const res = await fetch(API_URL, {
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json'
-					},
-					body: JSON.stringify({
-						url: statUrl,
-						isNewUv: isNewUv
-					})
-				});
+				let res: Response;
+				if (isOwner) {
+					// 站长免记账模式：使用 GET 请求仅获取当前数据，完全不增加 site_pv 和 site_uv
+					res = await fetch(`${API_URL}?url=${encodeURIComponent(statUrl)}`);
+				} else {
+					res = await fetch(API_URL, {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json'
+						},
+						body: JSON.stringify({
+							url: statUrl,
+							isNewUv: isNewUv
+						})
+					});
+				}
 
 				if (res.ok) {
 					const json = await res.json();
@@ -260,7 +271,12 @@ const formattedWords = totalWords >= 1000 ? (totalWords / 1000).toFixed(1) + 'k'
 					const visitorsEl = document.getElementById('visitors-count');
 					const viewsEl = document.getElementById('views-count');
 					if (visitorsEl) visitorsEl.innerText = siteUv.toLocaleString();
-					if (viewsEl) viewsEl.innerText = sitePv.toLocaleString();
+					if (viewsEl) {
+						viewsEl.innerText = sitePv.toLocaleString();
+						if (isOwner) {
+							viewsEl.title = '站长免记账模式 (仅读取不增量)';
+						}
+					}
 				}
 			} catch (err) {
 				console.error('Failed to fetch stats:', err);
