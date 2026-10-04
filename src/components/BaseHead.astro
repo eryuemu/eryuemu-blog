@@ -38,20 +38,24 @@ const { title, description, image = FallbackImage } = Astro.props;
 <script is:inline>
 	try {
 		const params = new URLSearchParams(window.location.search);
-		if (params.get('admin') === '1' || params.get('me') === '1') {
+		const val = params.get('eryuemu0721');
+		const isTurnOff = val === '0' || val === 'off';
+		const isTurnOn = (params.has('eryuemu0721') && !isTurnOff) || params.get('token') === 'eryuemu0721' || params.get('secret') === 'eryuemu0721';
+
+		if (isTurnOn) {
 			localStorage.setItem('eryuemu_is_owner', '1');
 			localStorage.setItem('umami.disabled', '1');
 			console.log('🛡️ [站长免记账模式] 已开启：全站统计（Vercount/Umami/Waline）均处于纯只读状态，绝不增加自身访问！');
-			params.delete('admin');
-			params.delete('me');
+			params.delete('eryuemu0721');
+			params.delete('token');
+			params.delete('secret');
 			const cleanSearch = params.toString() ? '?' + params.toString() : '';
 			window.history.replaceState({}, '', window.location.pathname + cleanSearch + window.location.hash);
-		} else if (params.get('admin') === '0' || params.get('me') === '0') {
+		} else if (isTurnOff) {
 			localStorage.removeItem('eryuemu_is_owner');
 			localStorage.removeItem('umami.disabled');
 			console.log('🔄 [站长免记账模式] 已关闭：恢复正常访客统计。');
-			params.delete('admin');
-			params.delete('me');
+			params.delete('eryuemu0721');
 			const cleanSearch = params.toString() ? '?' + params.toString() : '';
 			window.history.replaceState({}, '', window.location.pathname + cleanSearch + window.location.hash);
 		}
