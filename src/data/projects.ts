@@ -13,7 +13,7 @@ export interface Project {
 	category: 'featured' | 'tools';
 	links: ProjectLink[];
 	status?: 'active' | 'beta' | 'archived';
-	iconType: 'web' | 'wiki' | 'keyboard' | 'ai' | 'script' | 'hardware';
+	iconType: 'web' | 'wiki' | 'keyboard' | 'ai' | 'script' | 'hardware' | 'calendar';
 }
 
 export const projects: Project[] = [
@@ -94,6 +94,23 @@ export const projects: Project[] = [
 			{
 				name: 'GitHub 仓库',
 				url: 'https://github.com/eryuemu/HBU-Wiki',
+				type: 'github',
+			},
+		],
+	},
+	{
+		id: 'hbu-schedule',
+		title: 'HBUschedule · 河北大学掌上课表',
+		role: '联合开发',
+		desc: '专为河北大学本科生打造的现代 Android 课表客户端。基于 Kotlin 与 Jetpack Compose 开发，本地通过 WebVPN 会话代理直连青果教务系统接口，无需依赖第三方服务器；支持 24 位周次位图精准解析、学期周次自动校准、手动自建/补全排课以及 .ics 系统日历批量导出。',
+		tags: ['Android', 'Kotlin', 'Jetpack Compose', 'WebVPN', '教务接口', 'iCalendar / .ics', 'OkHttp'],
+		category: 'featured',
+		status: 'active',
+		iconType: 'calendar',
+		links: [
+			{
+				name: 'GitHub 仓库 (GZHback/HBUschedule)',
+				url: 'https://github.com/GZHback/HBUschedule',
 				type: 'github',
 			},
 		],
