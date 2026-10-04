@@ -62,7 +62,7 @@ heroImage: '../../assets/esp32-c3-world-execute-me-pv-cover.png'
 
 ![FoloToy 官方社区排行榜 Top 8 截图](../../assets/esp32-c3-ai-passport-community-top8.png)
 
-本项目代码由 Antigravity 平台的 Gemini 3.8 Flash 与 Claude 5.5 Opus 结对协同完成，本人主要负责提出离谱需求、纠正 AI 的硬件幻觉、插拔数据线以及最终实机验收。
+本项目代码由 Antigravity 平台的 Gemini 3.8 Flash 与 Claude 5.5 Opus 结对协同完成，本人主要负责提出**离谱需求**、纠正 AI 的硬件幻觉、插拔数据线以及最终实机验收。
 
 ---
 
