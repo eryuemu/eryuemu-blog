@@ -46,8 +46,8 @@ heroImage: '../../assets/esp32-c3-world-execute-me-pv-cover.png'
 ### 3. 高潮处刑倒计时 Execution
 ![高潮处刑倒计时 Execution](../../assets/esp32-c3-clip-03-countdown-execution.gif)
 
-### 4. 结尾大肥鱼微笑挥手
-![结尾大肥鱼微笑挥手](../../assets/esp32-c3-clip-04-ending-smile.gif)
+### 4. 播放完毕回到封面
+![播放完毕回到封面](../../assets/esp32-c3-clip-04-ending-smile.gif)
 
 ---
 
