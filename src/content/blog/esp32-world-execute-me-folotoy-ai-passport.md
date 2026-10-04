@@ -1,7 +1,7 @@
 ---
 title: '【ESP32】我把大肥鱼眼中的 world.execute(me); 装进了99块钱的工牌里'
 description: '在 B 站刷到 UP 主 @西西弗斯的风车 制作的《world.execute(me);》二创后深受触动，决定把这部作品带到 99 块钱的 FoloToy AI Passport 掌上工牌中。针对 ESP32-C3 单核与零外挂 PSRAM 进行了逐帧差分提取、抖动量化与硬件直驱优化，纯离线流畅播放，固件与源码已完全开源。'
-pubDate: '2026-10-04T21:55:00+08:00'
+pubDate: '2026-10-04T22:06:44+08:00'
 category: '开发'
 type: 'original'
 heroImage: '../../assets/esp32-c3-world-execute-me-pv-cover.png'
