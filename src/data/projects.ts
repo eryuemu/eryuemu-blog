@@ -13,7 +13,7 @@ export interface Project {
 	category: 'featured' | 'tools';
 	links: ProjectLink[];
 	status?: 'active' | 'beta' | 'archived';
-	iconType: 'web' | 'wiki' | 'keyboard' | 'ai' | 'script';
+	iconType: 'web' | 'wiki' | 'keyboard' | 'ai' | 'script' | 'hardware';
 }
 
 export const projects: Project[] = [
@@ -36,6 +36,38 @@ export const projects: Project[] = [
 				name: 'GitHub 源码',
 				url: 'https://github.com/eryuemu/eryuemu-blog',
 				type: 'github',
+			},
+		],
+	},
+	{
+		id: 'ai-passport-world-execute-me',
+		title: 'world.execute(me); · FoloToy AI Passport 专属播放器固件',
+		role: '作者 / 独立开源',
+		desc: '专为 99 元 FoloToy AI Passport 掌上透明工牌定制的纯离线微型影音播放器。将 Mili 神作《world.execute(me);》与大肥鱼二创 PV 深度移植进 ESP32-C3，自研逐帧差分提取、抖动量化与零堆内存双缓冲直驱，支持开机大肥鱼 HUD 封面与音画严格同步全速播放。官方社区热度 Top 8。',
+		tags: ['ESP32-C3', 'ESP-IDF', 'C语言', '嵌入式影音', '差分解码', '硬件直驱', 'FoloToy'],
+		category: 'featured',
+		status: 'active',
+		iconType: 'hardware',
+		links: [
+			{
+				name: '社区免编译刷入 (Top 8)',
+				url: 'https://ai-passport.folotoy.cn/plays/909/?v=1899-2',
+				type: 'site',
+			},
+			{
+				name: 'GitHub 源码',
+				url: 'https://github.com/eryuemu/ai-passport-world-execute-me',
+				type: 'github',
+			},
+			{
+				name: 'B 站实机演示',
+				url: 'https://www.bilibili.com/video/BV1qMHr6eEyy',
+				type: 'demo',
+			},
+			{
+				name: '博文手记',
+				url: 'https://eryuemu.com/blog/esp32-world-execute-me-folotoy-ai-passport',
+				type: 'doc',
 			},
 		],
 	},
