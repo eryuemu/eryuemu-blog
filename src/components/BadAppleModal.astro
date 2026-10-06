@@ -1,0 +1,797 @@
+---
+// Bad Apple!! 博客原生双模式彩蛋组件
+// 入口 1【博主头像 5 连击】：全息透明剪影模式
+//   - 博客背景 100% 完整保留在原地，高对比剪影直接在你的博文、卡片与头像上方奔跑跃动
+// 入口 2【昼夜按钮 5 连击】：【极致 60FPS 炫技级】博文文字流变粒子系统
+//   - 极致性能优化：状态复用与零耗能渲染，彻底告别掉帧卡顿，丝滑如丝绸流动！
+//   - 零黑屏闪烁：屏幕博文文字原地脱离页面，底层卡片优雅暗化，荧光汉字粒子沿旋涡流场疾驰汇聚！
+//   - 在屏幕中央严丝合缝拼合出 Bad Apple 开场人物剪影，前奏鼓点精准引燃，无缝进入正片！
+//   - 按 ESC 或点击屏幕，字符散开回弹，博客原貌丝滑复原！
+---
+
+<div id="bad-apple-overlay" class="bad-apple-overlay" aria-hidden="true" style="display: none;">
+	<!-- 隐藏的音视频解码器（充能阶段提前建立预热缓冲） -->
+	<video
+		id="ba-source-video"
+		playsinline
+		crossorigin="anonymous"
+		style="display: none;"
+	></video>
+
+	<!-- 统一全屏 Canvas（负责粒子旋涡汇聚、全息剪影与动态汉字流） -->
+	<canvas id="ba-projection-canvas" class="ba-projection-canvas"></canvas>
+
+	<!-- 离屏取帧与抠像计算 Canvas（不在页面展示） -->
+	<canvas id="ba-proc-canvas" width="480" height="360" style="display: none;"></canvas>
+</div>
+
+<!-- 触发微交互 Toast 提示 -->
+<div id="ba-toast" class="ba-toast" aria-live="polite">
+	<span class="ba-toast-icon">🍎</span>
+	<span id="ba-toast-text" class="ba-toast-text"></span>
+</div>
+
+<style is:global>
+	/* ─── 模式 2：文字脱离页面、底层卡片优雅暗下融入深空 ─── */
+	html.ba-converge-active body > *:not(#bad-apple-overlay):not(#ba-toast) {
+		opacity: 0 !important;
+		transition: opacity 1.35s cubic-bezier(0.16, 1, 0.3, 1) !important;
+		pointer-events: none !important;
+	}
+
+	/* 当文字粒子由 Canvas 接管运动时，隐藏 DOM 原生文字颜色，保留卡片边框与背景 */
+	html.ba-converge-active main *,
+	html.ba-converge-active .site-header * {
+		color: transparent !important;
+		text-shadow: none !important;
+	}
+
+	html.ba-playing-active body > *:not(#bad-apple-overlay):not(#ba-toast) {
+		opacity: 0 !important;
+		pointer-events: none !important;
+	}
+
+	/* 模式 1（全息剪影）暗角微光增强，博客背景保留 */
+	html.ba-silhouette-active::after {
+		content: '';
+		position: fixed;
+		inset: 0;
+		pointer-events: none;
+		z-index: 9998;
+		box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.4);
+		transition: opacity 0.5s ease;
+	}
+</style>
+
+<style>
+	/* ─── 统一全屏画布容器 ─── */
+	.bad-apple-overlay {
+		position: fixed;
+		inset: 0;
+		width: 100vw;
+		height: 100vh;
+		pointer-events: auto;
+		z-index: 99999;
+		overflow: hidden;
+		user-select: none;
+		cursor: pointer;
+		display: none;
+		background-color: transparent;
+		transition: background-color 1.35s cubic-bezier(0.16, 1, 0.3, 1);
+	}
+
+	.bad-apple-overlay.active {
+		display: block !important;
+	}
+
+	/* 模式 2：背景平滑过渡至极夜深黑 */
+	.bad-apple-overlay.dark-stage {
+		background-color: #000000 !important;
+	}
+
+	.bad-apple-overlay.mode-silhouette {
+		background-color: transparent !important;
+	}
+
+	/* ─── 全屏 Canvas ─── */
+	.ba-projection-canvas {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 100%;
+		pointer-events: none;
+	}
+
+	.bad-apple-overlay.mode-silhouette .ba-projection-canvas {
+		filter: drop-shadow(0 4px 16px rgba(0, 0, 0, 0.45));
+	}
+
+	:global(html.dark) .bad-apple-overlay.mode-silhouette .ba-projection-canvas {
+		filter: drop-shadow(0 4px 20px rgba(255, 255, 255, 0.35));
+	}
+
+	/* ─── 触发微交互 Toast 提示 ─── */
+	.ba-toast {
+		position: fixed;
+		bottom: 3rem;
+		left: 50%;
+		transform: translateX(-50%) translateY(20px) scale(0.95);
+		background: rgba(10, 10, 10, 0.95);
+		color: #ffffff;
+		border: 1px solid rgba(255, 255, 255, 0.2);
+		box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6), 0 0 25px rgba(255, 255, 255, 0.12);
+		padding: 0.7rem 1.4rem;
+		border-radius: 9999px;
+		backdrop-filter: blur(16px);
+		-webkit-backdrop-filter: blur(16px);
+		display: flex;
+		align-items: center;
+		gap: 0.65rem;
+		font-size: 0.9rem;
+		font-weight: 500;
+		z-index: 1000000;
+		pointer-events: none;
+		opacity: 0;
+		visibility: hidden;
+		transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1), transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+	}
+
+	.ba-toast.show {
+		opacity: 1;
+		visibility: visible;
+		transform: translateX(-50%) translateY(0) scale(1);
+	}
+
+	.ba-toast-icon {
+		font-size: 1.1rem;
+	}
+</style>
+
+<script>
+	// ─── Bad Apple!! 极致性能字符粒子汇聚与全息画布单例管理器 ───
+	(function () {
+		const BAD_APPLE_CDN_URL = 'https://cdn.jsdelivr.net/gh/milkbottle0305/bad-apple-ascii@main/res/video.mp4';
+
+		// 抠像处理分辨率
+		const PROC_W = 480;
+		const PROC_H = 360;
+
+		// 汉字点阵网格（88 列 x 35 行）
+		const MATRIX_COLS = 88;
+		const MATRIX_ROWS = 35;
+
+		// 经典 Bad Apple 开场人物剪影（博丽灵梦/手捧苹果）60x32 精准位图 (Base64 打包，仅 320 字节)
+		const TARGET_BITMASK_B64 = 'AAA////wAAAAAH///gAAAAAP///AAAAAAf//+AAAAAA///+AAAAAAf//+AAAAAAH//4AAAAAAH//4AAAAAAH//4AAAAAAH//4AAAAAAH//4AAAAAAH//4AAAAAAD//4AAAAAAH//4AAAAAAf//8AAAAAA///+AAAAAA////AAAAAA////AAAAAB////gAAAAB////wAAAAP////wAAAAH////4AAAAH////4AAAAP////cAAAAP////cAAAAf//+/cAAAAf//+/8AAAA///8/+AAAB///+/+AAAB///+/+AAAD///+/+AAAH///+/+AA';
+
+		// 视频片头静音黑屏截止时间点（跳过前 1.35 秒静音黑屏，鼓点瞬间引燃）
+		const AUDIO_START_OFFSET = 1.35;
+
+		interface Particle {
+			char: string;
+			startX: number;
+			startY: number;
+			targetX: number;
+			targetY: number;
+			cp1X: number;
+			cp1Y: number;
+			cp2X: number;
+			cp2Y: number;
+			delay: number;
+		}
+
+		let currentMode: 'silhouette' | 'text_matrix' = 'silhouette';
+		let isPlaying = false;
+		let animFrameId: number | null = null;
+		let blogChars: string = '';
+		let morphParticles: Particle[] = [];
+		let morphStartTime = 0;
+		let isMorphing = false;
+
+		// DOM 缓存引用
+		let overlayEl: HTMLElement | null = null;
+		let videoEl: HTMLVideoElement | null = null;
+		let projCanvas: HTMLCanvasElement | null = null;
+		let projCtx: CanvasRenderingContext2D | null = null;
+		let procCanvas: HTMLCanvasElement | null = null;
+		let procCtx: CanvasRenderingContext2D | null = null;
+
+		let toastEl: HTMLElement | null = null;
+		let toastText: HTMLElement | null = null;
+		let toastTimer: any = null;
+
+		function getElements() {
+			overlayEl = document.getElementById('bad-apple-overlay');
+			videoEl = document.getElementById('ba-source-video') as HTMLVideoElement;
+			projCanvas = document.getElementById('ba-projection-canvas') as HTMLCanvasElement;
+			if (projCanvas) {
+				projCtx = projCanvas.getContext('2d');
+			}
+			procCanvas = document.getElementById('ba-proc-canvas') as HTMLCanvasElement;
+			if (procCanvas) {
+				procCtx = procCanvas.getContext('2d', { willReadFrequently: true });
+				procCanvas.width = PROC_W;
+				procCanvas.height = PROC_H;
+			}
+			toastEl = document.getElementById('ba-toast');
+			toastText = document.getElementById('ba-toast-text');
+		}
+
+		function showToast(msg: string, duration = 1800) {
+			if (!toastEl || !toastText) getElements();
+			if (!toastEl || !toastText) return;
+			toastText.textContent = msg;
+			toastEl.classList.add('show');
+			clearTimeout(toastTimer);
+			toastTimer = setTimeout(() => {
+				toastEl?.classList.remove('show');
+			}, duration);
+		}
+
+		function warmUpVideo() {
+			if (!videoEl) getElements();
+			if (videoEl && (!videoEl.src || videoEl.src === '')) {
+				videoEl.src = BAD_APPLE_CDN_URL;
+				videoEl.preload = 'auto';
+				videoEl.currentTime = AUDIO_START_OFFSET;
+				videoEl.load();
+			}
+		}
+
+		// 动态提取当前页面的真实博文汉字
+		function extractPageText(): string {
+			const text = (document.querySelector('main')?.innerText || document.body.innerText || '')
+				.replace(/[\s\r\n\t#*`_>[\]()\-+!]+/g, '');
+			const clean = text.replace(/[^\u4e00-\u9fa5a-zA-Z0-9]/g, '');
+			if (clean.length > 25) {
+				return clean;
+			}
+			return '二月木自动化圆融自洽赛博洁癖衡水模式洛天依风暴星文章开发随笔';
+		}
+
+		// ─── 解码 Bad Apple 开场人物目标轮廓点阵 ───
+		function decodeTargetPoints(vw: number, vh: number): { x: number; y: number }[] {
+			const raw = atob(TARGET_BITMASK_B64);
+			const bits: number[] = [];
+			for (let i = 0; i < raw.length; i++) {
+				const b = raw.charCodeAt(i);
+				for (let bit = 7; bit >= 0; bit--) {
+					bits.push((b >> bit) & 1);
+				}
+			}
+
+			const W = 60;
+			const H = 32;
+			const points: { x: number; y: number }[] = [];
+
+			const aspect = 4 / 3;
+			let boxH = vh * 0.76;
+			let boxW = boxH * aspect;
+			if (boxW > vw * 0.88) {
+				boxW = vw * 0.88;
+				boxH = boxW / aspect;
+			}
+			const offsetX = (vw - boxW) / 2;
+			const offsetY = (vh - boxH) / 2;
+
+			for (let r = 0; r < H; r++) {
+				for (let c = 0; c < W; c++) {
+					if (bits[r * W + c]) {
+						const px = offsetX + (c / W) * boxW;
+						const py = offsetY + (r / H) * boxH;
+						points.push({ x: px, y: py });
+					}
+				}
+			}
+			return points;
+		}
+
+		// ─── 从页面视口真实文字元素解构提取起始坐标 ───
+		function gatherPageTextParticles(vw: number, vh: number, targets: { x: number; y: number }[]): Particle[] {
+			const particles: Particle[] = [];
+			const textNodes: { char: string; x: number; y: number }[] = [];
+
+			const textElements = document.querySelectorAll(
+				'.site-header nav a, .hero-title, .hero-author-name, .hero-motto, .hero-desc, .hero-links a, .section-title, .tab-btn, .post-item a, .grid-card-item h3, .grid-card-item p, h1, h2, h3, p, a, code'
+			);
+
+			textElements.forEach((el) => {
+				const rect = el.getBoundingClientRect();
+				if (
+					rect.width > 0 &&
+					rect.height > 0 &&
+					rect.top < vh &&
+					rect.bottom > 0 &&
+					rect.left < vw &&
+					rect.right > 0
+				) {
+					const str = (el as HTMLElement).innerText?.trim() || '';
+					if (str.length > 0 && str.length < 350) {
+						const clean = str.replace(/[\s\r\n\t]+/g, '');
+						const step = rect.width / Math.max(clean.length, 1);
+						for (let i = 0; i < clean.length; i++) {
+							textNodes.push({
+								char: clean[i],
+								x: rect.left + i * step + 4,
+								y: rect.top + rect.height / 2,
+							});
+						}
+					}
+				}
+			});
+
+			const fullText = extractPageText();
+			const totalTargets = targets.length;
+
+			for (let i = 0; i < totalTargets; i++) {
+				const target = targets[i];
+				let char = '';
+				let startX = 0;
+				let startY = 0;
+
+				if (i < textNodes.length) {
+					char = textNodes[i].char;
+					startX = textNodes[i].x;
+					startY = textNodes[i].y;
+				} else if (textNodes.length > 0) {
+					const source = textNodes[i % textNodes.length];
+					char = source.char;
+					startX = source.x + (Math.random() - 0.5) * 20;
+					startY = source.y + (Math.random() - 0.5) * 10;
+				} else {
+					char = fullText[i % fullText.length];
+					startX = Math.random() * vw;
+					startY = Math.random() * vh;
+				}
+
+				// 计算旋涡流场曲线控制点
+				const dx = target.x - startX;
+				const dy = target.y - startY;
+				const dist = Math.hypot(dx, dy);
+				const angle = Math.atan2(dy, dx) + (startX < vw / 2 ? 0.72 : -0.72);
+				const swirlDist = dist * 0.55 + 35;
+
+				const cp1X = startX + Math.cos(angle) * swirlDist;
+				const cp1Y = startY + Math.sin(angle) * swirlDist;
+				const cp2X = target.x - Math.cos(angle * 0.8) * (swirlDist * 0.45);
+				const cp2Y = target.y - Math.sin(angle * 0.8) * (swirlDist * 0.45);
+
+				particles.push({
+					char,
+					startX,
+					startY,
+					targetX: target.x,
+					targetY: target.y,
+					cp1X,
+					cp1Y,
+					cp2X,
+					cp2Y,
+					delay: Math.random() * 0.1, // 微弱错落波纹
+				});
+			}
+
+			return particles;
+		}
+
+		// ─── 核心渲染循环（高频优化版：0 状态抖动，锁帧 60FPS 极速渲染） ───
+		function renderLoop(timestamp: number) {
+			if (!projCanvas || !projCtx) return;
+
+			// 自适应画布尺寸
+			if (projCanvas.width !== window.innerWidth || projCanvas.height !== window.innerHeight) {
+				projCanvas.width = window.innerWidth;
+				projCanvas.height = window.innerHeight;
+			}
+			const vw = projCanvas.width;
+			const vh = projCanvas.height;
+
+			// ═════════════════════════════════════════════════════════════
+			// 阶段 A：【极速 60FPS】博文文字流变粒子系统 · 旋涡汇聚成开场人物
+			// ═════════════════════════════════════════════════════════════
+			if (isMorphing) {
+				if (!morphStartTime) morphStartTime = timestamp;
+				const elapsed = (timestamp - morphStartTime) / 1000;
+				const duration = 1.35; // 1.35 秒精准吻合前奏鼓点
+				const rawProgress = Math.min(elapsed / duration, 1);
+
+				const isDarkTheme = document.documentElement.classList.contains('dark');
+
+				projCtx.clearRect(0, 0, vw, vh);
+
+				// 🚀 性能关键优化 1：状态设置全部移出循环，每一帧仅设置 1 次！
+				const uniformFontSize = Math.max(Math.floor((vw / MATRIX_COLS) * 1.15), 13);
+				projCtx.font = `bold ${uniformFontSize}px "JetBrains Mono", "PingFang SC", monospace`;
+				projCtx.textAlign = 'center';
+				projCtx.textBaseline = 'middle';
+
+				// 🚀 性能关键优化 2：彻底移除 shadowBlur 高斯模糊开销，零 GPU 阻塞！
+				if (isDarkTheme) {
+					projCtx.fillStyle = '#ffffff';
+				} else {
+					const gray = Math.round(24 + (255 - 24) * rawProgress);
+					projCtx.fillStyle = `rgb(${gray}, ${gray}, ${gray})`;
+				}
+
+				// 🚀 性能关键优化 3：极简代数展开，每颗粒子单帧仅需微秒级计算
+				const count = morphParticles.length;
+				for (let i = 0; i < count; i++) {
+					const p = morphParticles[i];
+					const pProg = rawProgress <= p.delay ? 0 : (rawProgress - p.delay) / (1 - p.delay);
+					const pe = pProg >= 1 ? 1 : 1 - (1 - pProg) * (1 - pProg) * (1 - pProg);
+					const u = 1 - pe;
+					const u2 = u * u;
+					const pe2 = pe * pe;
+
+					const px = u2 * u * p.startX + 3 * u2 * pe * p.cp1X + 3 * u * pe2 * p.cp2X + pe2 * pe * p.targetX;
+					const py = u2 * u * p.startY + 3 * u2 * pe * p.cp1Y + 3 * u * pe2 * p.cp2Y + pe2 * pe * p.targetY;
+
+					projCtx.fillText(p.char, px, py);
+				}
+
+				// 汇聚收官时刻（冲击波脉冲闪光，无缝衔接进入正片）
+				if (rawProgress >= 1) {
+					isMorphing = false;
+					document.documentElement.classList.add('ba-playing-active');
+
+					// 绘制一道轻微冲击波光环
+					projCtx.save();
+					projCtx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
+					projCtx.lineWidth = 3;
+					projCtx.beginPath();
+					projCtx.arc(vw / 2, vh / 2, Math.min(vw, vh) * 0.42, 0, Math.PI * 2);
+					projCtx.stroke();
+					projCtx.restore();
+				}
+
+				animFrameId = requestAnimationFrame(renderLoop);
+				return;
+			}
+
+			// ═════════════════════════════════════════════════════════════
+			// 阶段 B：正片播放（模式 1 全息剪影 / 模式 2 博文汉字流）
+			// ═════════════════════════════════════════════════════════════
+			if (!videoEl || videoEl.paused || videoEl.ended) {
+				return;
+			}
+
+			if (procCtx && procCanvas) {
+				// 1. 将视频帧捕获至离屏计算画布
+				procCtx.drawImage(videoEl, 0, 0, PROC_W, PROC_H);
+				const imgData = procCtx.getImageData(0, 0, PROC_W, PROC_H);
+				const buf32 = new Uint32Array(imgData.data.buffer);
+
+				// 2. 采样四周边缘确定本帧背景极性
+				const c1 = buf32[0] & 0xff;
+				const c2 = buf32[PROC_W - 1] & 0xff;
+				const c3 = buf32[(PROC_H - 1) * PROC_W] & 0xff;
+				const c4 = buf32[PROC_H * PROC_W - 1] & 0xff;
+				const isBgWhite = (c1 + c2 + c3 + c4) / 4 > 128;
+
+				const isDarkTheme = document.documentElement.classList.contains('dark');
+				const fgColor = isDarkTheme ? 0xeeffffff : 0xe6181818;
+
+				projCtx.clearRect(0, 0, vw, vh);
+
+				const aspect = PROC_W / PROC_H;
+				let dw = vw;
+				let dh = vw / aspect;
+				if (dh > vh) {
+					dh = vh;
+					dw = vh * aspect;
+				}
+				const ox = (vw - dw) / 2;
+				const oy = (vh - dh) / 2;
+
+				// ─── 模式 1：全息透明剪影（头像触发，博客背景 100% 透出） ───
+				if (currentMode === 'silhouette') {
+					const totalPixels = PROC_W * PROC_H;
+					if (isBgWhite) {
+						for (let i = 0; i < totalPixels; i++) {
+							const gray = buf32[i] & 0xff;
+							buf32[i] = gray > 140 ? 0x00000000 : fgColor;
+						}
+					} else {
+						for (let i = 0; i < totalPixels; i++) {
+							const gray = buf32[i] & 0xff;
+							buf32[i] = gray < 115 ? 0x00000000 : fgColor;
+						}
+					}
+
+					procCtx.putImageData(imgData, 0, 0);
+					projCtx.drawImage(procCanvas, ox, oy, dw, dh);
+				}
+
+				// ─── 模式 2：博文汉字文字流（人物汇聚完成后，正片汉字流起舞） ───
+				else if (currentMode === 'text_matrix') {
+					const cellW = dw / MATRIX_COLS;
+					const cellH = dh / MATRIX_ROWS;
+					const fontSize = Math.floor(Math.min(cellW, cellH) * 1.2);
+
+					projCtx.font = `bold ${fontSize}px "JetBrains Mono", "PingFang SC", "Microsoft YaHei", monospace`;
+					projCtx.fillStyle = '#ffffff';
+					projCtx.textAlign = 'center';
+					projCtx.textBaseline = 'middle';
+
+					const stepX = PROC_W / MATRIX_COLS;
+					const stepY = PROC_H / MATRIX_ROWS;
+					const textLen = blogChars.length;
+					let charIdx = 0;
+
+					for (let row = 0; row < MATRIX_ROWS; row++) {
+						const py = Math.floor(row * stepY);
+						const rowOffset = py * PROC_W;
+						const renderY = oy + (row + 0.5) * cellH;
+
+						for (let col = 0; col < MATRIX_COLS; col++) {
+							const px = Math.floor(col * stepX);
+							const gray = buf32[rowOffset + px] & 0xff;
+							const isSilhouette = isBgWhite ? gray <= 140 : gray >= 115;
+
+							if (isSilhouette) {
+								const renderX = ox + (col + 0.5) * cellW;
+								const ch = blogChars[charIdx % textLen];
+								charIdx++;
+								projCtx.fillText(ch, renderX, renderY);
+							}
+						}
+					}
+				}
+			}
+
+			animFrameId = requestAnimationFrame(renderLoop);
+		}
+
+		// ─── 启动函数（针对不同模式执行专属衔接） ───
+		function openBadApple(mode: 'silhouette' | 'text_matrix') {
+			getElements();
+			if (!overlayEl || !videoEl || !projCanvas) return;
+
+			currentMode = mode;
+
+			// 1. 互斥暂停原背景音乐播放器
+			try {
+				const mp = (window as any).__music_player_manager;
+				if (mp && mp.audio && !mp.audio.paused) {
+					mp.audio.pause();
+				}
+			} catch (e) {}
+
+			blogChars = extractPageText();
+
+			// 2. 差异化动效启动：
+			if (mode === 'text_matrix') {
+				// ═════════════════════════════════════════════════════════
+				// 模式 2：【极致 60FPS 炫技启动】页面文字脱离原地，旋涡汇聚成开场人物！
+				// ═════════════════════════════════════════════════════════
+				overlayEl.classList.remove('mode-silhouette', 'dark-stage');
+				overlayEl.classList.add('mode-matrix', 'active');
+				overlayEl.style.display = 'block';
+
+				const vw = window.innerWidth;
+				const vh = window.innerHeight;
+				projCanvas.width = vw;
+				projCanvas.height = vh;
+
+				const targets = decodeTargetPoints(vw, vh);
+				morphParticles = gatherPageTextParticles(vw, vh, targets);
+				morphStartTime = 0;
+				isMorphing = true;
+
+				void overlayEl.offsetWidth;
+
+				requestAnimationFrame(() => {
+					overlayEl?.classList.add('dark-stage');
+					document.documentElement.classList.add('ba-converge-active');
+				});
+			} else {
+				// 模式 1：全息透明剪影，保留原生博客背景
+				overlayEl.classList.remove('mode-matrix', 'dark-stage');
+				overlayEl.classList.add('mode-silhouette', 'active');
+				overlayEl.style.display = 'block';
+				document.documentElement.classList.add('ba-silhouette-active');
+				isMorphing = false;
+			}
+
+			// 3. 起播音视频（跳过片头 1.35 秒静音黑屏，鼓点瞬间引燃）
+			if (!videoEl.src || videoEl.src === '') {
+				videoEl.src = BAD_APPLE_CDN_URL;
+				videoEl.volume = 0.8;
+				videoEl.load();
+			}
+
+			try {
+				videoEl.currentTime = AUDIO_START_OFFSET;
+			} catch (e) {}
+
+			videoEl.play().then(() => {
+				isPlaying = true;
+				if (animFrameId) cancelAnimationFrame(animFrameId);
+				animFrameId = requestAnimationFrame(renderLoop);
+			}).catch((err) => {
+				console.warn('[BadApple] Play error:', err);
+				isPlaying = false;
+				if (isMorphing) {
+					if (animFrameId) cancelAnimationFrame(animFrameId);
+					animFrameId = requestAnimationFrame(renderLoop);
+				}
+			});
+		}
+
+		// ─── 统一退出函数（字符轰然散开，博客原貌丝滑复原） ───
+		function closeBadApple() {
+			if (!overlayEl || !videoEl) return;
+
+			isMorphing = false;
+
+			// 移除所有特效类，文字卡片优雅淡回
+			document.documentElement.classList.remove(
+				'ba-converge-active',
+				'ba-playing-active',
+				'ba-silhouette-active'
+			);
+
+			if (overlayEl) {
+				overlayEl.classList.remove('dark-stage');
+			}
+
+			setTimeout(() => {
+				if (overlayEl) {
+					overlayEl.classList.remove('active', 'mode-matrix', 'mode-silhouette');
+					overlayEl.style.display = 'none';
+				}
+			}, 400);
+
+			if (animFrameId) {
+				cancelAnimationFrame(animFrameId);
+				animFrameId = null;
+			}
+
+			if (videoEl) {
+				videoEl.pause();
+				isPlaying = false;
+			}
+
+			if (projCtx && projCanvas) {
+				projCtx.clearRect(0, 0, projCanvas.width, projCanvas.height);
+			}
+		}
+
+		function togglePlay() {
+			if (!videoEl) return;
+			if (videoEl.paused) {
+				videoEl.play();
+				isPlaying = true;
+				if (animFrameId) cancelAnimationFrame(animFrameId);
+				animFrameId = requestAnimationFrame(renderLoop);
+			} else {
+				videoEl.pause();
+				isPlaying = false;
+			}
+		}
+
+		function bindControls() {
+			getElements();
+
+			// 键盘控制（ESC 退出，空格播放/暂停）
+			document.addEventListener('keydown', (e) => {
+				if (overlayEl?.classList.contains('active')) {
+					if (e.key === 'Escape') {
+						e.preventDefault();
+						closeBadApple();
+					} else if (e.key === ' ' || e.code === 'Space') {
+						e.preventDefault();
+						togglePlay();
+					}
+				}
+			});
+
+			// 点击屏幕任意位置退出（极简无 UI 纯净体验）
+			overlayEl?.addEventListener('click', (e) => {
+				if (e.target === overlayEl || e.target === projCanvas) {
+					closeBadApple();
+				}
+			});
+
+			videoEl?.addEventListener('ended', () => {
+				closeBadApple();
+			});
+		}
+
+		// ─── 顶级捕获阶段事件委托（双入口精准路由） ───
+		function setupGlobalDelegation() {
+			if ((window as any).__ba_delegation_active) return;
+			(window as any).__ba_delegation_active = true;
+
+			let themeClicks = 0;
+			let themeTimer: any = null;
+
+			let avatarClicks = 0;
+			let avatarTimer: any = null;
+
+			document.addEventListener(
+				'click',
+				(e: MouseEvent) => {
+					const target = e.target as HTMLElement | null;
+					if (!target) return;
+
+					// ─── 入口 2：右上角昼夜模式 5 连击 -> 【文字流变粒子系统 · 旋涡汇聚成开场人物】 ───
+					const themeBtn = target.closest('#theme-toggle');
+					if (themeBtn) {
+						themeClicks++;
+						clearTimeout(themeTimer);
+						themeTimer = setTimeout(() => {
+							themeClicks = 0;
+						}, 2200);
+
+						if (themeClicks >= 5) {
+							themeClicks = 0;
+							showToast('🌀 文字脱离页面！博文汉字正在汇聚成 Bad Apple 开场人物...', 2600);
+							openBadApple('text_matrix');
+						} else if (themeClicks === 3) {
+							warmUpVideo();
+							showToast('🍎 阴阳逆转充能中... (3/5)', 1200);
+						} else if (themeClicks === 4) {
+							warmUpVideo();
+							showToast('⚡ 空间引力波紊乱！万千汉字即将脱离页面！(4/5)', 1400);
+						}
+						return;
+					}
+
+					// ─── 入口 1：博主头像 5 连击 -> 【全息透明剪影 · 原生博客背景保留】 ───
+					const avatarEl = target.closest(
+						'.hero-avatar, .sidebar-avatar, .avatar-img, .sidebar-avatar-link'
+					) as HTMLElement | null;
+
+					if (avatarEl) {
+						avatarClicks++;
+						clearTimeout(avatarTimer);
+						avatarTimer = setTimeout(() => {
+							avatarClicks = 0;
+						}, 2200);
+
+						if (avatarClicks > 1 && (avatarEl.tagName.toLowerCase() === 'a' || avatarEl.closest('a'))) {
+							e.preventDefault();
+							e.stopPropagation();
+						}
+
+						avatarEl.style.transform = `scale(0.92) rotate(${avatarClicks % 2 === 0 ? '6deg' : '-6deg'})`;
+						setTimeout(() => {
+							avatarEl.style.transform = '';
+						}, 160);
+
+						if (avatarClicks >= 5) {
+							e.preventDefault();
+							e.stopPropagation();
+							avatarClicks = 0;
+							showToast('💥 全息透明投影 Bad Apple 降临 (按 ESC 退出)', 2200);
+							openBadApple('silhouette');
+						} else if (avatarClicks === 3) {
+							warmUpVideo();
+							showToast('🍎 侦测到神秘高能信号... (3/5)', 1200);
+						} else if (avatarClicks === 4) {
+							warmUpVideo();
+							showToast('⚡ 核心过载！再按 1 次唤醒幻想乡！(4/5)', 1200);
+						}
+					}
+				},
+				true // 捕获阶段，100% 稳定
+			);
+		}
+
+		function init() {
+			bindControls();
+			setupGlobalDelegation();
+		}
+
+		document.addEventListener('astro:page-load', () => {
+			getElements();
+			bindControls();
+		});
+
+		if (document.readyState === 'loading') {
+			document.addEventListener('DOMContentLoaded', init);
+		} else {
+			init();
+		}
+	})();
+</script>
