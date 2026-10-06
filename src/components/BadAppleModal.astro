@@ -151,21 +151,21 @@
 <script>
 	// ─── Bad Apple!! 极致性能字符粒子汇聚与全息画布单例管理器 ───
 	(function () {
-		const BAD_APPLE_CDN_URL = 'https://cdn.jsdelivr.net/gh/milkbottle0305/bad-apple-ascii@main/res/video.mp4';
-
 		// 抠像处理分辨率
 		const PROC_W = 480;
 		const PROC_H = 360;
+
+		// 优先使用本地优化版视频（5.7MB，已剪除片头静音黑屏，0延迟秒起）
+		const BAD_APPLE_LOCAL_URL = `${(import.meta.env?.BASE_URL || '/').replace(/\/$/, '')}/media/bad-apple.mp4`;
+		const BAD_APPLE_CDN_FALLBACK = 'https://cdn.jsdelivr.net/gh/milkbottle0305/bad-apple-ascii@main/res/video.mp4';
 
 		// 汉字点阵网格（88 列 x 35 行）
 		const MATRIX_COLS = 88;
 		const MATRIX_ROWS = 35;
 
-		// 经典 Bad Apple 开场人物剪影（博丽灵梦/手捧苹果）60x32 精准位图 (Base64 打包，仅 320 字节)
-		const TARGET_BITMASK_B64 = 'AAA////wAAAAAH///gAAAAAP///AAAAAAf//+AAAAAA///+AAAAAAf//+AAAAAAH//4AAAAAAH//4AAAAAAH//4AAAAAAH//4AAAAAAH//4AAAAAAH//4AAAAAAD//4AAAAAAH//4AAAAAAf//8AAAAAA///+AAAAAA////AAAAAA////AAAAAB////gAAAAB////wAAAAP////wAAAAH////4AAAAH////4AAAAP////cAAAAP////cAAAAf//+/cAAAAf//+/8AAAA///8/+AAAB///+/+AAAB///+/+AAAD///+/+AAAH///+/+AA';
-
-		// 视频片头静音黑屏截止时间点（跳过前 1.35 秒静音黑屏，鼓点瞬间引燃）
-		const AUDIO_START_OFFSET = 1.35;
+		// 经典 Bad Apple 开场人物剪影（博丽灵梦/手捧苹果）88x35 矩阵网格 1:1 像素级锁相位图 (1427 字符点阵)
+		const TARGET_BITMASK_B64 =
+			'AAAAB//////+AAAAAAAAP/////4AAAAAAAA//////gAAAAAAAB/////+AAAAAAAAP/////wAAAAAAAA/////+AAAAAAAAB/////4AAAAAAAAB/////wAAAAAAAAD/////AAAAAAAAAH////8AAAAAAAAAf////4AAAAAAAAB/////gAAAAAAAAH////+AAAAAAAAA/////wAAAAAAAAB////+AAAAAAAAA/////4AAAAAAAAP/////wAAAAAAAB//////wAAAAAAAP//////gAAAAAAA//////+AAAAAAAD//////4AAAAAAAP//////gAAAAAAP//////+AAAAAAB///////8AAAAAAH////////AAAAAAP///////+AAAAAAf///////wAAAAAD///////+AAAAAAP/////3/4AAAAAB/////+f/gAAAAAP/////x/+AAAAAB//////H/8AAAAAP/////8//wAAAAA//////z//AAAAAH//////P/+AA==';
 
 		interface Particle {
 			char: string;
@@ -186,6 +186,7 @@
 		let blogChars: string = '';
 		let morphParticles: Particle[] = [];
 		let morphStartTime = 0;
+		let shockwaveStartTime = 0;
 		let isMorphing = false;
 
 		// DOM 缓存引用
@@ -228,14 +229,29 @@
 			}, duration);
 		}
 
-		function warmUpVideo() {
+		function loadVideoSource() {
 			if (!videoEl) getElements();
-			if (videoEl && (!videoEl.src || videoEl.src === '')) {
-				videoEl.src = BAD_APPLE_CDN_URL;
-				videoEl.preload = 'auto';
-				videoEl.currentTime = AUDIO_START_OFFSET;
-				videoEl.load();
-			}
+			if (!videoEl || (videoEl.src && videoEl.src !== '')) return;
+
+			videoEl.src = BAD_APPLE_LOCAL_URL;
+			videoEl.preload = 'auto';
+			videoEl.volume = 0.8;
+
+			// 本地加载异常时，自动秒级降级至 CDN 备用地址
+			videoEl.onerror = () => {
+				console.warn('[BadApple] Local video not available, switching to CDN fallback...');
+				if (videoEl) {
+					videoEl.src = BAD_APPLE_CDN_FALLBACK;
+					videoEl.currentTime = 1.35;
+					videoEl.load();
+				}
+			};
+
+			videoEl.load();
+		}
+
+		function warmUpVideo() {
+			loadVideoSource();
 		}
 
 		// 动态提取当前页面的真实博文汉字
@@ -260,25 +276,25 @@
 				}
 			}
 
-			const W = 60;
-			const H = 32;
 			const points: { x: number; y: number }[] = [];
-
-			const aspect = 4 / 3;
-			let boxH = vh * 0.76;
-			let boxW = boxH * aspect;
-			if (boxW > vw * 0.88) {
-				boxW = vw * 0.88;
-				boxH = boxW / aspect;
+			const aspect = PROC_W / PROC_H;
+			let dw = vw;
+			let dh = vw / aspect;
+			if (dh > vh) {
+				dh = vh;
+				dw = vh * aspect;
 			}
-			const offsetX = (vw - boxW) / 2;
-			const offsetY = (vh - boxH) / 2;
+			const ox = (vw - dw) / 2;
+			const oy = (vh - dh) / 2;
 
-			for (let r = 0; r < H; r++) {
-				for (let c = 0; c < W; c++) {
-					if (bits[r * W + c]) {
-						const px = offsetX + (c / W) * boxW;
-						const py = offsetY + (r / H) * boxH;
+			const cellW = dw / MATRIX_COLS;
+			const cellH = dh / MATRIX_ROWS;
+
+			for (let r = 0; r < MATRIX_ROWS; r++) {
+				for (let c = 0; c < MATRIX_COLS; c++) {
+					if (bits[r * MATRIX_COLS + c]) {
+						const px = ox + (c + 0.5) * cellW;
+						const py = oy + (r + 0.5) * cellH;
 						points.push({ x: px, y: py });
 					}
 				}
@@ -320,26 +336,24 @@
 				}
 			});
 
-			const fullText = extractPageText();
+			const fullText = blogChars || extractPageText();
 			const totalTargets = targets.length;
 
 			for (let i = 0; i < totalTargets; i++) {
 				const target = targets[i];
-				let char = '';
+				// 字符与正片矩阵按网格序号 1:1 锁死，接棒瞬间 0 个字符发生跳变！
+				const char = fullText[i % fullText.length];
 				let startX = 0;
 				let startY = 0;
 
 				if (i < textNodes.length) {
-					char = textNodes[i].char;
 					startX = textNodes[i].x;
 					startY = textNodes[i].y;
 				} else if (textNodes.length > 0) {
 					const source = textNodes[i % textNodes.length];
-					char = source.char;
 					startX = source.x + (Math.random() - 0.5) * 20;
 					startY = source.y + (Math.random() - 0.5) * 10;
 				} else {
-					char = fullText[i % fullText.length];
 					startX = Math.random() * vw;
 					startY = Math.random() * vh;
 				}
@@ -390,17 +404,43 @@
 			// ═════════════════════════════════════════════════════════════
 			if (isMorphing) {
 				if (!morphStartTime) morphStartTime = timestamp;
-				const elapsed = (timestamp - morphStartTime) / 1000;
-				const duration = 1.35; // 1.35 秒精准吻合前奏鼓点
-				const rawProgress = Math.min(elapsed / duration, 1);
+
+				// 🚀 音画硬件级锁相与超丝滑渐进动力学：
+				// 高阶减速流线汇聚，1.30s 优雅减速归位，1.35s 第 4 拍重锤同帧无缝接棒起舞
+				const CONVERGE_DURATION = 1.30;
+				const DROP_TIME = 1.35;
+
+				let timeSeconds = 0;
+				if (videoEl && !videoEl.paused && videoEl.currentTime > 0) {
+					timeSeconds = videoEl.currentTime;
+				} else {
+					timeSeconds = (timestamp - morphStartTime) / 1000;
+				}
+
+				// 🚀 预热离屏计算画布与 GPU 纹理缓存，彻底消除切入正片瞬间的 GPU 停顿卡顿！
+				if (timeSeconds > 0.4 && procCtx && procCanvas && videoEl && !videoEl.paused) {
+					procCtx.drawImage(videoEl, 0, 0, PROC_W, PROC_H);
+					procCtx.getImageData(0, 0, PROC_W, PROC_H);
+				}
+
+				const morphProgress = Math.min(timeSeconds / CONVERGE_DURATION, 1);
 
 				const isDarkTheme = document.documentElement.classList.contains('dark');
 
 				projCtx.clearRect(0, 0, vw, vh);
 
-				// 🚀 性能关键优化 1：状态设置全部移出循环，每一帧仅设置 1 次！
-				const uniformFontSize = Math.max(Math.floor((vw / MATRIX_COLS) * 1.15), 13);
-				projCtx.font = `bold ${uniformFontSize}px "JetBrains Mono", "PingFang SC", monospace`;
+				const aspect = PROC_W / PROC_H;
+				let dw = vw;
+				let dh = vw / aspect;
+				if (dh > vh) {
+					dh = vh;
+					dw = vh * aspect;
+				}
+				const cellW = dw / MATRIX_COLS;
+				const cellH = dh / MATRIX_ROWS;
+				const uniformFontSize = Math.floor(Math.min(cellW, cellH) * 1.2);
+
+				projCtx.font = `bold ${uniformFontSize}px "JetBrains Mono", "PingFang SC", "Microsoft YaHei", monospace`;
 				projCtx.textAlign = 'center';
 				projCtx.textBaseline = 'middle';
 
@@ -408,16 +448,16 @@
 				if (isDarkTheme) {
 					projCtx.fillStyle = '#ffffff';
 				} else {
-					const gray = Math.round(24 + (255 - 24) * rawProgress);
+					const gray = Math.round(24 + (255 - 24) * morphProgress);
 					projCtx.fillStyle = `rgb(${gray}, ${gray}, ${gray})`;
 				}
 
-				// 🚀 性能关键优化 3：极简代数展开，每颗粒子单帧仅需微秒级计算
+				// 🚀 四阶渐进减速曲线 (quartic ease-out)，速度连续衰减至平滑贴合，零死定格顿挫
 				const count = morphParticles.length;
 				for (let i = 0; i < count; i++) {
 					const p = morphParticles[i];
-					const pProg = rawProgress <= p.delay ? 0 : (rawProgress - p.delay) / (1 - p.delay);
-					const pe = pProg >= 1 ? 1 : 1 - (1 - pProg) * (1 - pProg) * (1 - pProg);
+					const pProg = morphProgress <= p.delay ? 0 : (morphProgress - p.delay) / (1 - p.delay);
+					const pe = pProg >= 1 ? 1 : 1 - Math.pow(1 - pProg, 4);
 					const u = 1 - pe;
 					const u2 = u * u;
 					const pe2 = pe * pe;
@@ -428,23 +468,16 @@
 					projCtx.fillText(p.char, px, py);
 				}
 
-				// 汇聚收官时刻（冲击波脉冲闪光，无缝衔接进入正片）
-				if (rawProgress >= 1) {
+				// 汇聚收官时刻（第 4 拍 Drop 重音引燃冲击波脉冲闪光，同帧无缝接棒进入正片）
+				if (timeSeconds >= DROP_TIME) {
 					isMorphing = false;
+					shockwaveStartTime = timestamp;
 					document.documentElement.classList.add('ba-playing-active');
-
-					// 绘制一道轻微冲击波光环
-					projCtx.save();
-					projCtx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
-					projCtx.lineWidth = 3;
-					projCtx.beginPath();
-					projCtx.arc(vw / 2, vh / 2, Math.min(vw, vh) * 0.42, 0, Math.PI * 2);
-					projCtx.stroke();
-					projCtx.restore();
+					// 🚀 核心优化：本帧绝不 return，直接向下贯穿执行正片渲染，彻底消灭 1 帧空白顿挫！
+				} else {
+					animFrameId = requestAnimationFrame(renderLoop);
+					return;
 				}
-
-				animFrameId = requestAnimationFrame(renderLoop);
-				return;
 			}
 
 			// ═════════════════════════════════════════════════════════════
@@ -536,6 +569,20 @@
 						}
 					}
 				}
+
+				// 涟漪冲击波光环：在正片汉字流之上优雅炸开并渐隐，伴随鼓点冲击感
+				if (shockwaveStartTime && timestamp - shockwaveStartTime < 350) {
+					const swProg = (timestamp - shockwaveStartTime) / 350;
+					const swAlpha = (1 - swProg) * 0.45;
+					const swRadius = Math.min(vw, vh) * (0.28 + 0.32 * swProg);
+					projCtx.save();
+					projCtx.strokeStyle = `rgba(255, 255, 255, ${swAlpha})`;
+					projCtx.lineWidth = Math.max(3 * (1 - swProg), 1);
+					projCtx.beginPath();
+					projCtx.arc(vw / 2, vh / 2, swRadius, 0, Math.PI * 2);
+					projCtx.stroke();
+					projCtx.restore();
+				}
 			}
 
 			animFrameId = requestAnimationFrame(renderLoop);
@@ -547,6 +594,7 @@
 			if (!overlayEl || !videoEl || !projCanvas) return;
 
 			currentMode = mode;
+			shockwaveStartTime = 0;
 
 			// 1. 互斥暂停原背景音乐播放器
 			try {
@@ -592,29 +640,33 @@
 				isMorphing = false;
 			}
 
-			// 3. 起播音视频（跳过片头 1.35 秒静音黑屏，鼓点瞬间引燃）
-			if (!videoEl.src || videoEl.src === '') {
-				videoEl.src = BAD_APPLE_CDN_URL;
-				videoEl.volume = 0.8;
-				videoEl.load();
-			}
+			// 3. 起播音视频（本地优先秒起，自带片头跳过）
+			loadVideoSource();
 
 			try {
-				videoEl.currentTime = AUDIO_START_OFFSET;
+				if (videoEl && videoEl.src) {
+					if (videoEl.src.includes('video.mp4') && !videoEl.src.includes('media/bad-apple.mp4')) {
+						videoEl.currentTime = 1.35; // CDN 备用地址跳过片头黑屏
+					} else {
+						videoEl.currentTime = 0; // 本地剪辑版 0 秒直接起播
+					}
+				}
 			} catch (e) {}
 
-			videoEl.play().then(() => {
-				isPlaying = true;
-				if (animFrameId) cancelAnimationFrame(animFrameId);
-				animFrameId = requestAnimationFrame(renderLoop);
-			}).catch((err) => {
-				console.warn('[BadApple] Play error:', err);
-				isPlaying = false;
-				if (isMorphing) {
+			if (videoEl) {
+				videoEl.play().then(() => {
+					isPlaying = true;
 					if (animFrameId) cancelAnimationFrame(animFrameId);
 					animFrameId = requestAnimationFrame(renderLoop);
-				}
-			});
+				}).catch((err) => {
+					console.warn('[BadApple] Play error:', err);
+					isPlaying = false;
+					if (isMorphing) {
+						if (animFrameId) cancelAnimationFrame(animFrameId);
+						animFrameId = requestAnimationFrame(renderLoop);
+					}
+				});
+			}
 		}
 
 		// ─── 统一退出函数（字符轰然散开，博客原貌丝滑复原） ───
@@ -622,6 +674,7 @@
 			if (!overlayEl || !videoEl) return;
 
 			isMorphing = false;
+			shockwaveStartTime = 0;
 
 			// 移除所有特效类，文字卡片优雅淡回
 			document.documentElement.classList.remove(
