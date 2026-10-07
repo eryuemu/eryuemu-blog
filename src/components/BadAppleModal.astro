@@ -39,11 +39,29 @@
 		pointer-events: none !important;
 	}
 
-	/* 当文字粒子由 Canvas 接管运动时，隐藏 DOM 原生文字颜色，保留卡片边框与背景 */
-	html.ba-converge-active main *,
-	html.ba-converge-active .site-header * {
-		color: transparent !important;
-		text-shadow: none !important;
+	/* ─── 文字原地浮空脱离动效：微浮、泛光微散、平滑隐去，与粒子起飞无缝接轨 ─── */
+	html.ba-converge-active main,
+	html.ba-converge-active .site-header {
+		animation: ba-text-detach 0.38s cubic-bezier(0.2, 0.8, 0.25, 1) forwards !important;
+	}
+
+	@keyframes ba-text-detach {
+		0% {
+			transform: translateY(0) scale(1);
+			filter: blur(0px);
+			opacity: 1;
+		}
+		45% {
+			transform: translateY(-4px) scale(1.02);
+			filter: blur(1px);
+			opacity: 0.85;
+			text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+		}
+		100% {
+			transform: translateY(-12px) scale(1.04);
+			filter: blur(3px);
+			opacity: 0;
+		}
 	}
 
 	html.ba-playing-active body > *:not(#bad-apple-overlay):not(#ba-toast) {
@@ -452,6 +470,10 @@
 					projCtx.fillStyle = `rgb(${gray}, ${gray}, ${gray})`;
 				}
 
+				// 🚀 平滑起飞融合度：初始 0.18s 粒子透明度渐增，与 DOM 文字浮空消隐无缝接轨
+				const takeoffAlpha = Math.min(morphProgress / 0.18, 1);
+				projCtx.globalAlpha = takeoffAlpha;
+
 				// 🚀 四阶渐进减速曲线 (quartic ease-out)，速度连续衰减至平滑贴合，零死定格顿挫
 				const count = morphParticles.length;
 				for (let i = 0; i < count; i++) {
@@ -467,6 +489,7 @@
 
 					projCtx.fillText(p.char, px, py);
 				}
+				projCtx.globalAlpha = 1;
 
 				// 汇聚收官时刻（第 4 拍 Drop 重音引燃冲击波脉冲闪光，同帧无缝接棒进入正片）
 				if (timeSeconds >= DROP_TIME) {
