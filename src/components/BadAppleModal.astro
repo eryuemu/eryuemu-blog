@@ -39,29 +39,11 @@
 		pointer-events: none !important;
 	}
 
-	/* ─── 文字原地浮空脱离动效：微浮、泛光微散、平滑隐去，与粒子起飞无缝接轨 ─── */
-	html.ba-converge-active main,
-	html.ba-converge-active .site-header {
-		animation: ba-text-detach 0.38s cubic-bezier(0.2, 0.8, 0.25, 1) forwards !important;
-	}
-
-	@keyframes ba-text-detach {
-		0% {
-			transform: translateY(0) scale(1);
-			filter: blur(0px);
-			opacity: 1;
-		}
-		45% {
-			transform: translateY(-4px) scale(1.02);
-			filter: blur(1px);
-			opacity: 0.85;
-			text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-		}
-		100% {
-			transform: translateY(-12px) scale(1.04);
-			filter: blur(3px);
-			opacity: 0;
-		}
+	/* 当文字粒子由 Canvas 接管运动时，隐藏 DOM 原生文字颜色，保留卡片边框与背景 */
+	html.ba-converge-active main *,
+	html.ba-converge-active .site-header * {
+		color: transparent !important;
+		text-shadow: none !important;
 	}
 
 	html.ba-playing-active body > *:not(#bad-apple-overlay):not(#ba-toast) {
@@ -189,12 +171,17 @@
 			char: string;
 			startX: number;
 			startY: number;
+			midX: number;
+			midY: number;
 			targetX: number;
 			targetY: number;
 			cp1X: number;
 			cp1Y: number;
 			cp2X: number;
 			cp2Y: number;
+			pullDist: number;
+			baseAngle: number;
+			swirlOffset: number;
 			delay: number;
 		}
 
@@ -376,29 +363,46 @@
 					startY = Math.random() * vh;
 				}
 
-				// 计算旋涡流场曲线控制点
-				const dx = target.x - startX;
-				const dy = target.y - startY;
+				// 第一阶段：引力吸积中间点（朝屏幕中心 vw/2, vh/2 强力拉扯偏移 42%）
+				const dx = vw / 2 - startX;
+				const dy = vh / 2 - startY;
 				const dist = Math.hypot(dx, dy);
-				const angle = Math.atan2(dy, dx) + (startX < vw / 2 ? 0.72 : -0.72);
-				const swirlDist = dist * 0.55 + 35;
+				const baseAngle = Math.atan2(dy, dx);
+				const swirlOffset = startX < vw / 2 ? 0.45 : -0.45;
+				const pullDist = dist * 0.42;
 
-				const cp1X = startX + Math.cos(angle) * swirlDist;
-				const cp1Y = startY + Math.sin(angle) * swirlDist;
-				const cp2X = target.x - Math.cos(angle * 0.8) * (swirlDist * 0.45);
-				const cp2Y = target.y - Math.sin(angle * 0.8) * (swirlDist * 0.45);
+				const endAngle = baseAngle + swirlOffset;
+				const midX = startX + Math.cos(endAngle) * pullDist;
+				const midY = startY + Math.sin(endAngle) * pullDist;
+
+				// 第二阶段：自中间吸入点沿宏大旋涡流场汇聚至开场灵梦目标点
+				const mdx = target.x - midX;
+				const mdy = target.y - midY;
+				const mdist = Math.hypot(mdx, mdy);
+				const mangle = Math.atan2(mdy, mdx) + swirlOffset * 1.2;
+				const swirlDist = mdist * 0.5 + 30;
+
+				const cp1X = midX + Math.cos(mangle) * swirlDist;
+				const cp1Y = midY + Math.sin(mangle) * swirlDist;
+				const cp2X = target.x - Math.cos(mangle * 0.8) * (swirlDist * 0.45);
+				const cp2Y = target.y - Math.sin(mangle * 0.8) * (swirlDist * 0.45);
 
 				particles.push({
 					char,
 					startX,
 					startY,
+					midX,
+					midY,
 					targetX: target.x,
 					targetY: target.y,
 					cp1X,
 					cp1Y,
 					cp2X,
 					cp2Y,
-					delay: Math.random() * 0.1, // 微弱错落波纹
+					pullDist,
+					baseAngle,
+					swirlOffset,
+					delay: Math.random() * 0.08,
 				});
 			}
 
@@ -425,8 +429,6 @@
 
 				// 🚀 音画硬件级锁相与超丝滑渐进动力学：
 				// 高阶减速流线汇聚，1.30s 优雅减速归位，1.35s 第 4 拍重锤同帧无缝接棒起舞
-				const CONVERGE_DURATION = 1.30;
-				const DROP_TIME = 1.35;
 
 				let timeSeconds = 0;
 				if (videoEl && !videoEl.paused && videoEl.currentTime > 0) {
@@ -441,7 +443,9 @@
 					procCtx.getImageData(0, 0, PROC_W, PROC_H);
 				}
 
-				const morphProgress = Math.min(timeSeconds / CONVERGE_DURATION, 1);
+				const SUCK_TIME = 0.36; // 前 0.36 秒：博文文字原地显著朝屏幕中心引力拉扯吸入！
+				const CONVERGE_TIME = 1.30;
+				const DROP_TIME = 1.35;
 
 				const isDarkTheme = document.documentElement.classList.contains('dark');
 
@@ -462,34 +466,53 @@
 				projCtx.textAlign = 'center';
 				projCtx.textBaseline = 'middle';
 
-				// 🚀 性能关键优化 2：彻底移除 shadowBlur 高斯模糊开销，零 GPU 阻塞！
-				if (isDarkTheme) {
-					projCtx.fillStyle = '#ffffff';
-				} else {
-					const gray = Math.round(24 + (255 - 24) * morphProgress);
-					projCtx.fillStyle = `rgb(${gray}, ${gray}, ${gray})`;
-				}
-
-				// 🚀 平滑起飞融合度：初始 0.18s 粒子透明度渐增，与 DOM 文字浮空消隐无缝接轨
-				const takeoffAlpha = Math.min(morphProgress / 0.18, 1);
-				projCtx.globalAlpha = takeoffAlpha;
-
-				// 🚀 四阶渐进减速曲线 (quartic ease-out)，速度连续衰减至平滑贴合，零死定格顿挫
 				const count = morphParticles.length;
-				for (let i = 0; i < count; i++) {
-					const p = morphParticles[i];
-					const pProg = morphProgress <= p.delay ? 0 : (morphProgress - p.delay) / (1 - p.delay);
-					const pe = pProg >= 1 ? 1 : 1 - Math.pow(1 - pProg, 4);
-					const u = 1 - pe;
-					const u2 = u * u;
-					const pe2 = pe * pe;
 
-					const px = u2 * u * p.startX + 3 * u2 * pe * p.cp1X + 3 * u * pe2 * p.cp2X + pe2 * pe * p.targetX;
-					const py = u2 * u * p.startY + 3 * u2 * pe * p.cp1Y + 3 * u * pe2 * p.cp2Y + pe2 * pe * p.targetY;
+				if (timeSeconds <= SUCK_TIME) {
+					// ─── 阶段 A1（0.0s ~ 0.36s）：文字原地显著朝屏幕中心引力流拉扯吸入！───
+					const sProg = timeSeconds / SUCK_TIME;
+					const se = Math.pow(sProg, 2.2);
 
-					projCtx.fillText(p.char, px, py);
+					if (isDarkTheme) {
+						projCtx.fillStyle = '#ffffff';
+					} else {
+						const gray = Math.round(24 + (180 - 24) * se);
+						projCtx.fillStyle = `rgb(${gray}, ${gray}, ${gray})`;
+					}
+
+					for (let i = 0; i < count; i++) {
+						const p = morphParticles[i];
+						const curDist = p.pullDist * se;
+						const curAngle = p.baseAngle + p.swirlOffset * se;
+						const px = p.startX + Math.cos(curAngle) * curDist;
+						const py = p.startY + Math.sin(curAngle) * curDist;
+						projCtx.fillText(p.char, px, py);
+					}
+				} else {
+					// ─── 阶段 A2（0.36s ~ 1.30s）：自吸入流场爆发，旋涡汇聚成开场灵梦剪影！───
+					const cProg = Math.min((timeSeconds - SUCK_TIME) / (CONVERGE_TIME - SUCK_TIME), 1);
+
+					if (isDarkTheme) {
+						projCtx.fillStyle = '#ffffff';
+					} else {
+						const gray = Math.round(180 + (255 - 180) * cProg);
+						projCtx.fillStyle = `rgb(${gray}, ${gray}, ${gray})`;
+					}
+
+					for (let i = 0; i < count; i++) {
+						const p = morphParticles[i];
+						const pProg = cProg <= p.delay ? 0 : (cProg - p.delay) / (1 - p.delay);
+						const pe = pProg >= 1 ? 1 : 1 - Math.pow(1 - pProg, 4);
+						const u = 1 - pe;
+						const u2 = u * u;
+						const pe2 = pe * pe;
+
+						const px = u2 * u * p.midX + 3 * u2 * pe * p.cp1X + 3 * u * pe2 * p.cp2X + pe2 * pe * p.targetX;
+						const py = u2 * u * p.midY + 3 * u2 * pe * p.cp1Y + 3 * u * pe2 * p.cp2Y + pe2 * pe * p.targetY;
+
+						projCtx.fillText(p.char, px, py);
+					}
 				}
-				projCtx.globalAlpha = 1;
 
 				// 汇聚收官时刻（第 4 拍 Drop 重音引燃冲击波脉冲闪光，同帧无缝接棒进入正片）
 				if (timeSeconds >= DROP_TIME) {
