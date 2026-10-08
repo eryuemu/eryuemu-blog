@@ -16,6 +16,10 @@ posts.forEach(post => {
 });
 
 const formattedWords = totalWords >= 1000 ? (totalWords / 1000).toFixed(1) + 'k' : totalWords;
+
+const startYear = 2026;
+const currentYear = today.getFullYear();
+const yearDisplay = currentYear <= startYear ? `${startYear}` : `${startYear} - ${currentYear}`;
 ---
 
 <footer class="site-footer">
@@ -30,7 +34,7 @@ const formattedWords = totalWords >= 1000 ? (totalWords / 1000).toFixed(1) + 'k'
 		<!-- Center Copyright & Uptime -->
 		<div class="footer-center">
 			<p>
-				<span class="footer-segment">&copy; 2026 - {today.getFullYear()} ❤️ eryuemu</span>
+				<span class="footer-segment">&copy; {yearDisplay} eryuemu</span>
 				<span class="divider-dot">·</span>
 				<span class="footer-segment">共 {totalPosts} 篇文章</span>
 				<span class="divider-dot">·</span>
@@ -41,7 +45,8 @@ const formattedWords = totalWords >= 1000 ? (totalWords / 1000).toFixed(1) + 'k'
 
 		<!-- Right visitor counts -->
 		<div class="footer-right">
-			<p>
+			<p class="footer-motto">“We always keep minority spirit”</p>
+			<p class="visitor-row">
 				<span class="footer-segment">访问人数 <span id="visitors-count" class="highlight-text">0</span></span>
 				<span class="divider-dot">·</span>
 				<span class="footer-segment">总访问量 <span id="views-count" class="highlight-text">0</span></span>
@@ -98,6 +103,24 @@ const formattedWords = totalWords >= 1000 ? (totalWords / 1000).toFixed(1) + 'k'
 
 	.uptime-row {
 		margin-top: 0.35rem !important;
+	}
+
+	.footer-motto {
+		margin: 0 0 0.35rem 0 !important;
+		font-family: 'Cormorant Garamond', 'Baskerville', 'Georgia', 'Times New Roman', serif;
+		font-style: italic;
+		font-size: 1.05rem;
+		letter-spacing: 0.04em;
+		color: var(--text-secondary);
+		line-height: 1.4;
+	}
+
+	:global(html.dark) .footer-motto {
+		color: #b5b5b5;
+	}
+
+	.visitor-row {
+		margin: 0;
 	}
 
 	.highlight-text {
