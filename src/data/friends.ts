@@ -3,7 +3,25 @@ export interface Friend {
   link: string;
   logo: string;
   desc: string;
+  tags?: string[];
 }
+
+export const myProjects: Friend[] = [
+  {
+    title: 'HBU Wiki · 生存指北',
+    link: 'https://guide.hbuwiki.top/',
+    logo: '/friends/hbuwiki.png',
+    desc: '非官方学生生存指北，汇集转专业真实数据、选课推荐与校园生活避坑。',
+    tags: ['生存指北', '校园攻略'],
+  },
+  {
+    title: 'HBU Wiki',
+    link: 'https://hbuwiki.top/',
+    logo: '/friends/hbuwiki.png',
+    desc: '河北大学非官方校园知识库与生活百科，由河大师生共同维护。',
+    tags: ['校园百科', '知识库'],
+  },
+];
 
 export const friends: Friend[] = [
   {
