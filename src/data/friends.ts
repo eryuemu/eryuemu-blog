@@ -36,4 +36,10 @@ export const friends: Friend[] = [
     logo: 'https://img.lonelybing.top/file/头像/1789400498937.jpg',
     desc: '一名普普通通の大学生~',
   },
+  {
+    title: '雪雪档案馆',
+    link: 'https://yuki-archive.ankotree.chatgpt.site/',
+    logo: '/friends/yuki-archive.png',
+    desc: '把喜欢的事，慢慢存起来。',
+  },
 ];
