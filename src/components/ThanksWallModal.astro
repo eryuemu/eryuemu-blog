@@ -4,8 +4,10 @@
 //   - 内容取自《转专业第一年，我彻底看清了大学评奖》里那些真实的回信：
 //     加分是 0.00，但微信和贴吧里的“谢谢学长”堆了一整面墙。
 //   - 直接访问 #thanks 也能打开，方便从文章里链接过来。
+//   - 深浅两版图：浅色主题显示浅底版，深色主题显示深底版（同一张图的两版导出）。
 import { Image } from 'astro:assets';
 import wall from '../assets/the-sixteenth-fool-thanks-wall.jpg';
+import wallLight from '../assets/the-sixteenth-fool-thanks-wall-light.jpg';
 ---
 
 <div
@@ -18,8 +20,17 @@ import wall from '../assets/the-sixteenth-fool-thanks-wall.jpg';
 >
 	<figure class="tw-frame">
 		<Image
-			id="tw-image"
+			class="tw-img tw-img-dark"
 			src={wall}
+			widths={[900, 1500, 2100]}
+			sizes="(max-width: 900px) 94vw, 1500px"
+			alt="微信与百度贴吧里收到的回信墙：谢谢学长、好的好的谢谢学长、谢谢泥、其中的苦只有你知道……"
+			loading="lazy"
+			decoding="async"
+		/>
+		<Image
+			class="tw-img tw-img-light"
+			src={wallLight}
 			widths={[900, 1500, 2100]}
 			sizes="(max-width: 900px) 94vw, 1500px"
 			alt="微信与百度贴吧里收到的回信墙：谢谢学长、好的好的谢谢学长、谢谢泥、其中的苦只有你知道……"
@@ -53,13 +64,17 @@ import wall from '../assets/the-sixteenth-fool-thanks-wall.jpg';
 		align-items: center;
 		justify-content: center;
 		padding: clamp(1rem, 4vw, 3rem);
-		background: rgba(6, 6, 8, 0.82);
+		background: rgba(247, 248, 250, 0.88);
 		backdrop-filter: blur(14px) saturate(0.9);
 		-webkit-backdrop-filter: blur(14px) saturate(0.9);
 		opacity: 0;
 		visibility: hidden;
 		transition: opacity 0.34s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.34s;
 		cursor: zoom-out;
+	}
+
+	:global(html.dark) .tw-overlay {
+		background: rgba(6, 6, 8, 0.82);
 	}
 
 	.tw-overlay.show {
@@ -91,8 +106,25 @@ import wall from '../assets/the-sixteenth-fool-thanks-wall.jpg';
 		max-height: 80vh;
 		object-fit: contain;
 		border-radius: 10px;
-		box-shadow: 0 30px 90px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.08);
+		box-shadow: 0 22px 60px rgba(20, 22, 30, 0.18), 0 0 0 1px rgba(0, 0, 0, 0.05);
 		margin: 0;
+	}
+
+	:global(html.dark) .tw-frame img {
+		box-shadow: 0 30px 90px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.08);
+	}
+
+	/* 同图两版：浅色主题（默认）显示浅底版，深色主题显示深底版 */
+	.tw-frame .tw-img-dark {
+		display: none;
+	}
+
+	:global(html.dark) .tw-frame .tw-img-light {
+		display: none;
+	}
+
+	:global(html.dark) .tw-frame .tw-img-dark {
+		display: block;
 	}
 
 	.tw-caption {
@@ -103,10 +135,18 @@ import wall from '../assets/the-sixteenth-fool-thanks-wall.jpg';
 		flex-wrap: wrap;
 		font-size: 0.78rem;
 		letter-spacing: 0.02em;
-		color: rgba(235, 238, 245, 0.62);
+		color: rgba(44, 48, 58, 0.66);
 	}
 
 	.tw-hint {
+		color: rgba(44, 48, 58, 0.44);
+	}
+
+	:global(html.dark) .tw-caption {
+		color: rgba(235, 238, 245, 0.62);
+	}
+
+	:global(html.dark) .tw-hint {
 		color: rgba(235, 238, 245, 0.4);
 	}
 
@@ -183,10 +223,11 @@ import wall from '../assets/the-sixteenth-fool-thanks-wall.jpg';
 		document.documentElement.classList.add('tw-open');
 	}
 
-	// 图片是 lazy 的：第 3 次连击就开始预取，翻开时不留白
+	// 图片是 lazy 的：第 3 次连击就开始预取，翻开时不留白（深浅两版都预热）
 	function warmImage() {
-		const img = document.getElementById('tw-image') as HTMLImageElement | null;
-		if (img && img.loading !== 'eager') img.loading = 'eager';
+		document.querySelectorAll<HTMLImageElement>('.tw-img').forEach((img) => {
+			if (img.loading !== 'eager') img.loading = 'eager';
+		});
 	}
 
 	function closeWall() {

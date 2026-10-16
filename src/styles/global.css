@@ -387,6 +387,21 @@ html.dark .prose .phone-screenshot img {
 	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
 }
 
+/* 回信墙：同一张图导出的深浅两版，按主题只显示一版 */
+/* 浅色主题（默认）：显示浅底版，藏起深底版 */
+.prose img[src*="thanks-wall"]:not([src*="thanks-wall-light"]) {
+	display: none;
+}
+
+/* 深色主题：反过来 —— 藏起浅底版，显示深底版 */
+html.dark .prose img[src*="thanks-wall-light"] {
+	display: none;
+}
+
+html.dark .prose img[src*="thanks-wall"]:not([src*="thanks-wall-light"]) {
+	display: block;
+}
+
 /* Image Captions (from Markdown `*图 x：说明*`) */
 .prose p:has(> em:only-child),
 .prose p > em:only-child {

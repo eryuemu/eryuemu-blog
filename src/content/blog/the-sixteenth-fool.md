@@ -40,3 +40,4 @@ heroImage: '../../assets/the-sixteenth-fool.jpg'
 往后，让精明者继续去分食腐肉，让盲者继续在暗夜里跌撞。**关门，闭户，我只管去磨我自己的刀。**
 
 ![微信与百度贴吧里收到的回信：谢谢学长、好的好的谢谢学长、谢谢泥、其中的苦只有你知道……](../../assets/the-sixteenth-fool-thanks-wall.jpg)
+![微信与百度贴吧里收到的回信：谢谢学长、好的好的谢谢学长、谢谢泥、其中的苦只有你知道……](../../assets/the-sixteenth-fool-thanks-wall-light.jpg)
