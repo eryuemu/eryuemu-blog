@@ -208,6 +208,18 @@ const jsonLd = {
 				flex-shrink: 0;
 			}
 
+			.status-badge.archived {
+				background: var(--bg-secondary);
+				color: var(--text-muted);
+				border: 1px solid var(--border);
+			}
+
+			.status-badge.beta {
+				background: rgba(245, 158, 11, 0.1);
+				color: #f59e0b;
+				border: 1px solid rgba(245, 158, 11, 0.2);
+			}
+
 			.status-dot {
 				width: 6px;
 				height: 6px;
@@ -354,9 +366,9 @@ const jsonLd = {
 										</div>
 									</div>
 									{project.status && (
-										<span class="status-badge">
+										<span class:list={['status-badge', project.status]}>
 											<span class="status-dot"></span>
-											{project.status === 'active' ? 'Active' : project.status}
+											{project.status === 'active' ? 'Active' : project.status === 'archived' ? 'Archived' : project.status}
 										</span>
 									)}
 								</div>
@@ -478,9 +490,9 @@ const jsonLd = {
 										</div>
 									</div>
 									{project.status && (
-										<span class="status-badge">
+										<span class:list={['status-badge', project.status]}>
 											<span class="status-dot"></span>
-											{project.status === 'active' ? 'Active' : project.status}
+											{project.status === 'active' ? 'Active' : project.status === 'archived' ? 'Archived' : project.status}
 										</span>
 									)}
 								</div>

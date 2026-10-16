@@ -78,7 +78,7 @@ export const projects: Project[] = [
 		desc: '校友共建的河北大学维基百科知识指南，帮助在校生及新生了解校园生活、规章选课与获取有效信息。',
 		tags: ['Vue 3', 'VitePress', 'Markdown', 'GitHub Pages'],
 		category: 'featured',
-		status: 'active',
+		status: 'archived',
 		iconType: 'wiki',
 		links: [
 			{
