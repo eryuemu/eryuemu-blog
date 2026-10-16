@@ -1,0 +1,253 @@
+---
+// 彩蛋 3【页脚格言 5 连击】：一墙“谢谢学长”
+//   - 与站内既有的“5 连击”暗号保持一致（头像 5 连击 / 昼夜按钮 5 连击）。
+//   - 内容取自《转专业第一年，我彻底看清了大学评奖》里那些真实的回信：
+//     加分是 0.00，但微信和贴吧里的“谢谢学长”堆了一整面墙。
+//   - 直接访问 #thanks 也能打开，方便从文章里链接过来。
+import { Image } from 'astro:assets';
+import wall from '../assets/the-sixteenth-fool-thanks-wall.jpg';
+---
+
+<div
+	id="tw-overlay"
+	class="tw-overlay"
+	aria-hidden="true"
+	role="dialog"
+	aria-modal="true"
+	aria-label="学弟学妹们的回信"
+>
+	<figure class="tw-frame">
+		<Image
+			id="tw-image"
+			src={wall}
+			widths={[900, 1500, 2100]}
+			sizes="(max-width: 900px) 94vw, 1500px"
+			alt="微信与百度贴吧里收到的回信墙：谢谢学长、好的好的谢谢学长、谢谢泥、其中的苦只有你知道……"
+			loading="lazy"
+			decoding="async"
+		/>
+		<figcaption class="tw-caption">
+			<span>来自微信与百度贴吧 · 学弟学妹们的回信</span>
+			<span class="tw-hint">点击任意处 / ESC 关闭</span>
+		</figcaption>
+	</figure>
+</div>
+
+<div id="tw-toast" class="tw-toast" aria-live="polite">
+	<span id="tw-toast-text" class="tw-toast-text"></span>
+</div>
+
+<style is:global>
+	html.tw-open,
+	html.tw-open body {
+		overflow: hidden !important;
+	}
+</style>
+
+<style>
+	.tw-overlay {
+		position: fixed;
+		inset: 0;
+		z-index: 99990;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		padding: clamp(1rem, 4vw, 3rem);
+		background: rgba(6, 6, 8, 0.82);
+		backdrop-filter: blur(14px) saturate(0.9);
+		-webkit-backdrop-filter: blur(14px) saturate(0.9);
+		opacity: 0;
+		visibility: hidden;
+		transition: opacity 0.34s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.34s;
+		cursor: zoom-out;
+	}
+
+	.tw-overlay.show {
+		opacity: 1;
+		visibility: visible;
+	}
+
+	.tw-frame {
+		margin: 0;
+		max-width: min(1500px, 94vw);
+		max-height: 90vh;
+		display: flex;
+		flex-direction: column;
+		gap: 0.7rem;
+		transform: translateY(16px) scale(0.975);
+		opacity: 0;
+		transition: transform 0.42s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.42s cubic-bezier(0.16, 1, 0.3, 1);
+	}
+
+	.tw-overlay.show .tw-frame {
+		transform: translateY(0) scale(1);
+		opacity: 1;
+	}
+
+	.tw-frame img {
+		display: block;
+		width: 100%;
+		height: auto;
+		max-height: 80vh;
+		object-fit: contain;
+		border-radius: 10px;
+		box-shadow: 0 30px 90px rgba(0, 0, 0, 0.65), 0 0 0 1px rgba(255, 255, 255, 0.08);
+		margin: 0;
+	}
+
+	.tw-caption {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		gap: 1rem;
+		flex-wrap: wrap;
+		font-size: 0.78rem;
+		letter-spacing: 0.02em;
+		color: rgba(235, 238, 245, 0.62);
+	}
+
+	.tw-hint {
+		color: rgba(235, 238, 245, 0.4);
+	}
+
+	.tw-toast {
+		position: fixed;
+		bottom: 2.2rem;
+		left: 50%;
+		z-index: 99991;
+		padding: 0.55rem 1rem;
+		border-radius: 999px;
+		background: rgba(10, 10, 12, 0.94);
+		border: 1px solid rgba(255, 255, 255, 0.18);
+		box-shadow: 0 14px 36px rgba(0, 0, 0, 0.55);
+		color: #eef0f5;
+		font-size: 0.82rem;
+		line-height: 1;
+		white-space: nowrap;
+		opacity: 0;
+		visibility: hidden;
+		transform: translateX(-50%) translateY(14px) scale(0.96);
+		transition: opacity 0.24s cubic-bezier(0.16, 1, 0.3, 1),
+			transform 0.24s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.24s;
+		pointer-events: none;
+	}
+
+	.tw-toast.show {
+		opacity: 1;
+		visibility: visible;
+		transform: translateX(-50%) translateY(0) scale(1);
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.tw-overlay,
+		.tw-frame,
+		.tw-toast {
+			transition: none !important;
+		}
+	}
+</style>
+
+<script>
+	const TRIGGER_SELECTOR = '.footer-motto, #footer-motto';
+	const NEEDED_CLICKS = 5;
+	const CLICK_WINDOW = 2200;
+
+	let overlayEl: HTMLElement | null = null;
+	let toastEl: HTMLElement | null = null;
+	let toastTextEl: HTMLElement | null = null;
+	let toastTimer: ReturnType<typeof setTimeout> | undefined;
+	let clicks = 0;
+	let clickTimer: ReturnType<typeof setTimeout> | undefined;
+
+	function grab() {
+		overlayEl = document.getElementById('tw-overlay');
+		toastEl = document.getElementById('tw-toast');
+		toastTextEl = document.getElementById('tw-toast-text');
+	}
+
+	function toast(msg: string, duration = 1500) {
+		if (!toastEl || !toastTextEl) grab();
+		if (!toastEl || !toastTextEl) return;
+		toastTextEl.textContent = msg;
+		toastEl.classList.add('show');
+		clearTimeout(toastTimer);
+		toastTimer = setTimeout(() => toastEl?.classList.remove('show'), duration);
+	}
+
+	function openWall() {
+		if (!overlayEl) grab();
+		if (!overlayEl) return;
+		warmImage();
+		overlayEl.classList.add('show');
+		overlayEl.setAttribute('aria-hidden', 'false');
+		document.documentElement.classList.add('tw-open');
+	}
+
+	// 图片是 lazy 的：第 3 次连击就开始预取，翻开时不留白
+	function warmImage() {
+		const img = document.getElementById('tw-image') as HTMLImageElement | null;
+		if (img && img.loading !== 'eager') img.loading = 'eager';
+	}
+
+	function closeWall() {
+		if (!overlayEl) grab();
+		if (!overlayEl) return;
+		overlayEl.classList.remove('show');
+		overlayEl.setAttribute('aria-hidden', 'true');
+		document.documentElement.classList.remove('tw-open');
+	}
+
+	function onKeydown(e: KeyboardEvent) {
+		if (e.key === 'Escape') closeWall();
+	}
+
+	// 5 连击页脚格言：与站内其他彩蛋的暗号节奏保持一致
+	function onDocumentClick(e: MouseEvent) {
+		const target = e.target as HTMLElement | null;
+		if (!target || !target.closest) return;
+
+		if (target.closest(TRIGGER_SELECTOR)) {
+			clicks += 1;
+			clearTimeout(clickTimer);
+			clickTimer = setTimeout(() => {
+				clicks = 0;
+			}, CLICK_WINDOW);
+
+			if (clicks === 3) {
+				warmImage();
+				toast('🎈 好像有人在说谢谢…（3/5）', 1100);
+			} else if (clicks === 4) {
+				warmImage();
+				toast('🎈 再点 1 次，把整面墙翻开（4/5）', 1100);
+			} else if (clicks >= NEEDED_CLICKS) {
+				clicks = 0;
+				toast('🎈 加分是 0，回响是一整面墙', 1900);
+				openWall();
+			}
+			return;
+		}
+
+		if (target.closest('#tw-overlay')) closeWall();
+	}
+
+	function bind() {
+		grab();
+		if (!overlayEl) return;
+
+		const root = document.documentElement;
+		if (root.dataset.twBound !== '1') {
+			root.dataset.twBound = '1';
+			document.addEventListener('click', onDocumentClick, true);
+			document.addEventListener('keydown', onKeydown);
+			window.addEventListener('hashchange', () => {
+				if (window.location.hash === '#thanks') openWall();
+			});
+		}
+
+		if (window.location.hash === '#thanks') openWall();
+	}
+
+	document.addEventListener('astro:page-load', bind);
+	if (document.readyState !== 'loading') bind();
+	else document.addEventListener('DOMContentLoaded', bind);
+</script>
