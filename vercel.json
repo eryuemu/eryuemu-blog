@@ -20,6 +20,11 @@
 			"source": "/blog/gnome-live-wallpaper-engine-two-bugs-fix-recap/",
 			"destination": "/blog/gnome-live-wallpaper-engine-fix-recap/",
 			"permanent": true
+		},
+		{
+			"source": "/blog/the-sixteenth-fool/",
+			"destination": "/blog/first-year-major-transfer-college-awards/",
+			"permanent": true
 		}
 	]
 }
