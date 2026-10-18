@@ -892,7 +892,23 @@ const cleanPath = Astro.url.pathname.replace(/\/+$/, '') || '/';
 		<Footer />
 
 		<script>
-			import { WALINE_SERVER_URL } from '../consts';
+			import { WALINE_SERVER_URL, PAGEVIEW_INHERIT } from '../consts';
+
+			const walineApiBase = WALINE_SERVER_URL ? WALINE_SERVER_URL.replace(/\/+$/, '') : '';
+
+			// 只读拉取某个 path 在 Waline 里的阅读量（time 字段）。
+			// 返回 null = 请求失败或该 path 尚无记录（此时保留占位符「-」，不显示成 0）。
+			async function fetchPageview(path: string): Promise<number | null> {
+				try {
+					const res = await fetch(`${walineApiBase}/api/article?path=${encodeURIComponent(path)}&type=time`);
+					if (!res.ok) return null;
+					const data = await res.json();
+					const value = data?.data?.[0]?.time;
+					return typeof value === 'number' ? value : null;
+				} catch (e) {
+					return null;
+				}
+			}
 
 			async function updatePageviews() {
 				const els = document.querySelectorAll<HTMLElement>('.waline-pageview-count');
@@ -929,15 +945,16 @@ const cleanPath = Astro.url.pathname.replace(/\/+$/, '') || '/';
 
 					// Fallback, repeat navigation, or owner mode: read-only counter fetch
 					if (count === null) {
-						const res = await fetch(
-							`${WALINE_SERVER_URL.replace(/\/+$/, '')}/api/article?path=${encodeURIComponent(currentPath)}&type=time`
+						count = await fetchPageview(currentPath);
+					}
+
+					// slug 改名继承：把旧 slug path 在 Waline 里遗留的累计值并入当前文章
+					const legacyPaths = PAGEVIEW_INHERIT[currentPath] || [];
+					if (count !== null && legacyPaths.length > 0) {
+						const legacyCounts = await Promise.all(
+							legacyPaths.map(async (legacyPath) => (await fetchPageview(legacyPath)) ?? 0)
 						);
-						if (res.ok) {
-							const data = await res.json();
-							if (data?.data?.[0]?.time !== undefined) {
-								count = data.data[0].time;
-							}
-						}
+						count += legacyCounts.reduce((sum, value) => sum + value, 0);
 					}
 
 					if (count !== null) {
