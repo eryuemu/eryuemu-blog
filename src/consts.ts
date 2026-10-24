@@ -7,6 +7,12 @@ export const WALINE_SERVER_URL = 'https://comments.eryuemu.com'; // 请在此处
 export const UMAMI_WEBSITE_ID = 'cc1efd93-dc34-45ab-85e2-9b3d28c373bd'; // Umami Cloud 分配给博客的专属 Website ID
 export const UMAMI_DASHBOARD_URL = 'https://cloud.umami.is/share/8266GJJSrID9mjsc'; // Umami 免登录公开统计大屏地址
 
+// 只有这些主机名才允许写入任何统计计数（Waline 阅读量、Umami PV）。
+// 本地 dev/preview、Vercel 预览部署（*.vercel.app）都不在其中：
+// 开发时反复刷新预览页会真实累加线上 Waline 的 path 计数，Umami 也会多出本地 PV。
+// 以后加域名（如 www 或新站）就在这里补一项。
+export const SITE_HOSTS = ['eryuemu.com', 'www.eryuemu.com'];
+
 // Waline 的文章阅读量以「URL path」为存储键，一旦文章改名（slug 变更）且配置了 301，
 // 访客浏览器里最终落地的是新 path，计数就会从 0 重新开始，旧 slug 已累计的阅读量变成孤儿数据。
 // 这里声明「新 path ← 旧 path」的继承表：展示时把旧 path 存储的计数值并入当前文章，

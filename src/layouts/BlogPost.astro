@@ -892,7 +892,7 @@ const cleanPath = Astro.url.pathname.replace(/\/+$/, '') || '/';
 		<Footer />
 
 		<script>
-			import { WALINE_SERVER_URL, PAGEVIEW_INHERIT } from '../consts';
+			import { WALINE_SERVER_URL, PAGEVIEW_INHERIT, SITE_HOSTS } from '../consts';
 
 			const walineApiBase = WALINE_SERVER_URL ? WALINE_SERVER_URL.replace(/\/+$/, '') : '';
 
@@ -927,8 +927,8 @@ const cleanPath = Astro.url.pathname.replace(/\/+$/, '') || '/';
 				try {
 					let count: number | null = null;
 
-					if (!alreadyViewed && !isOwner) {
-						// First visit in current session: increment view count
+					if (!alreadyViewed && !isOwner && SITE_HOSTS.includes(window.location.hostname)) {
+						// First visit in current session on a production host: increment view count
 						const res = await fetch(`${WALINE_SERVER_URL.replace(/\/+$/, '')}/api/article`, {
 							method: 'POST',
 							headers: { 'Content-Type': 'application/json' },
