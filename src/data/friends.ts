@@ -60,4 +60,10 @@ export const friends: Friend[] = [
     logo: '/friends/yuki-archive.png',
     desc: '把喜欢的事，慢慢存起来。',
   },
+  {
+    title: '星河hm的小窝',
+    link: 'https://www.xhehm.com/',
+    logo: '/friends/xhehm.png',
+    desc: '12年出生的开发者，擅长编程，网上冲浪爱好者，喜欢探索新技术和分享知识。',
+  },
 ];
