@@ -1,17 +1,19 @@
 ---
-title: '强网杯两题：猜中出题人的种子，补上仿真器缺的指令'
-description: '2026 强网杯线上赛，misc「NeuronShuffle」和 reverse「license」。前者卡在答案串的序列化，最后发现答案和模型标签无关，是出题人用次日种子摇的三个排列；后者把白盒 AES 当幌子，真正的判定藏在自修改 VM 里，靠父进程读 /proc/pid/mem 零侵入采样、补上仿真器缺的 LOOP 指令、再逐字符枚举才拿到 flag。本文按真实时间线记录 CodeBuddy / Qoder / Trae / DSH 四个工具的分工、两次假 flag，以及每一步踩过的坑。'
+title: '强网杯NeuronShuffle与license预期解WP'
+description: '2026 强网杯线上赛 misc「NeuronShuffle」与 reverse「license」预期解。NeuronShuffle 的模型是 default_rng(20261101) 摇出来的，答案却是次日种子 20261102 的三个 permutation；license 的白盒 AES 是诱饵，真正的判定在自修改 VM 里，靠父进程读 /proc/pid/mem 零侵入采样、补上 LOOP 指令、再逐字符枚举补完。按真实时间线记录四个 AI 工具的分工、两次假 flag 和每一步的坑。'
 pubDate: '2026-11-01T20:30:00+08:00'
 category: '开发'
 type: 'ai-organized'
 ---
 
-# 强网杯两题：猜中出题人的种子，补上仿真器缺的指令
+# 强网杯NeuronShuffle与license预期解WP
 
 > **背景**：2026 强网杯线上赛，我不是队里主力，方向也没定，就挑了两道看起来能自己啃的题：misc 的 NeuronShuffle 和 reverse 的 license。
 > **工具**：CodeBuddy、Qoder、Trae、DSH（DeepSeek Harness）四个 AI 工具接力，中间还参考过另一个 AI 给的建议。
 > **结果**：两道题都拿到了 flag，而且都在真程序 / 本地校验器上复验过。
 > **本文定位**：按真实时间线写解题过程和踩过的坑。技术细节保留到能照着复现的程度，但不搬 15MB 反汇编和 187 个中间文件。
+
+![NeuronShuffle 题目页，题面和附件下载。截图时动态分值是 364 分](../../assets/qwb2026-neuronshuffle-challenge.png)
 
 ---
 
@@ -221,6 +223,8 @@ $ python3 check.py "$(cat answer.txt)"
 
 这也解释了为什么之前所有标签序列化都失败：**答案根本不在模型里**。模型只是用来藏种子的。种子 20261101 指向比赛日期，答案种子 20261102 是它的下一天，这个「+1」几乎不需要猜——先试相邻日期，第一个就中。
 
+![NeuronShuffle 提交正确，101 分](../../assets/qwb2026-neuronshuffle-solved.png)
+
 ### 1.7 这题踩的坑
 
 | 坑 | 后果 | 怎么发现的 |
@@ -237,6 +241,8 @@ $ python3 check.py "$(cat answer.txt)"
 ---
 
 ## 二、license：白盒是幌子，VM 才是判官
+
+![CodeBuddy 里分析 VM、跑 tracer2.c 的工作现场](../../assets/qwb2026-license-codebuddy.png)
 
 ### 2.1 入口：96 个 hex，48 字节
 
@@ -484,6 +490,8 @@ please input your license: flag{9530b81c-61d0-2b62-3e96-f9a5e937f893}
 | Qoder | 工程化、能跑长任务 | NeuronShuffle 的种子搜索与生成器复原；license 的白盒翻案、`/proc` 采样 | 上下文一满就丢细节，需要交接文档 |
 | Trae | 后台任务、GPU | NeuronShuffle 的 GPU 爆破、battery12、验证答案 | GPU 队列按小时排，熄灯前跑不完 |
 | DSH | 长时仿真、C 求解器 | license 的完整仿真器、syscall 语义、哈希反演、前 7 字节 | 卡在 LOOP 指令，需要下一棒补 |
+
+![手机端 Trae 的 license 任务清单，任务耗时 65 分 44 秒](../../assets/qwb2026-license-trae-todolist.jpg)
 
 交接文档不是形式主义。每个工具接手时，第一件事都是读上一棒写的 `交接文档.md`，里面有：已确认的事实、已排除的路线、当前卡点、最短续跑命令。没有它，下一棒会把上一棒踩过的坑再踩一遍。
 
