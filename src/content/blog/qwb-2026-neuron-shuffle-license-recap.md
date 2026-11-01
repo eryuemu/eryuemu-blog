@@ -461,16 +461,34 @@ license 的排布是 `j0.a0 j1.a0 j2.a0 j0.b0 j1.b0 j2.b0`。flag 阶段要求 `
 00800CC020E00101600C20E000800CA14040E01A038260E0
 ```
 
-真机验证：
+### 2.9 拿到 license 之后
+
+48 字节 license 只是输入，flag 是程序打印出来的。把它写成 96 个 hex 字符的文件：
 
 ```bash
+$ cat TRUE_LIC.txt
+5B6C94D31D85E2344E666179A1D203EF02B5FDCB271D3D0500800CC020E00101600C20E000800CA14040E01A038260E0
+
 $ ./license < TRUE_LIC.txt
 please input your license: flag{9530b81c-61d0-2b62-3e96-f9a5e937f893}
 ```
 
 ![license 提交正确，101 分](/images/qwb2026/license-solved-phone.jpg)
 
-### 2.9 这题踩的坑
+提交的是 `flag{...}`，不是 license 本身。
+
+如果手上只有仿真器，等价的做法是跑 `solveflag.py`，它会落盘 `flag_candidate.txt` 和 `license_candidate.txt`；或者跑到 `#17137` 后直接读 `ctx+0x1c8`（`0x5aa528`），flag 就在那 56 字节的缓冲里。
+
+从 license 到 flag 的链路：
+
+| 阶段 | 输入 | 发生什么 | 产物 |
+|---|---|---|---|
+| 哈希 fold | `license[0:24]` | 3 个 8 字节 Feistel + `FIN`，与 `T` 比较 | fold 通过，构造提示串 |
+| 第二段 | `license[24:48]` | 每个 block 尾读一个字节，哈希进 `ctx+0xa` 密钥流 | 决定后续 dispatch 落点 |
+| flag 阶段 | 每块读一个 license 字节 | 写一个 flag 字符到 `ctx+0x1c8` | `flag{...}` |
+| VM 退出 | `#17137` | `rel=0x49c03` | `main` 打印 `ctx+0x1c8` |
+
+### 2.10 这题踩的坑
 
 | 坑 | 后果 | 怎么发现的 |
 |---|---|---|
