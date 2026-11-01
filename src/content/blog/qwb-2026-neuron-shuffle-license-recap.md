@@ -464,9 +464,7 @@ $ ./license < TRUE_LIC.txt
 please input your license: flag{9530b81c-61d0-2b62-3e96-f9a5e937f893}
 ```
 
-<p align="center">
-  <img src="/images/qwb2026/license-solved.jpg" alt="license 提交正确，101 分" width="320">
-</p>
+![license 提交正确，101 分](/images/qwb2026/license-solved-phone.jpg)
 
 ### 2.9 这题踩的坑
 
@@ -496,9 +494,7 @@ please input your license: flag{9530b81c-61d0-2b62-3e96-f9a5e937f893}
 | Trae | 后台任务、GPU | NeuronShuffle 的 GPU 爆破、battery12、验证答案 | GPU 队列按小时排，熄灯前跑不完 |
 | DSH | 长时仿真、C 求解器 | license 的完整仿真器、syscall 语义、哈希反演、前 7 字节 | 卡在 LOOP 指令，需要下一棒补 |
 
-<p align="center">
-  <img src="/images/qwb2026/license-trae-todolist.jpg" alt="手机端 Trae 的 license 任务清单，任务耗时 65 分 44 秒" width="320">
-</p>
+![手机端 Trae 的 license 任务清单，任务耗时 65 分 44 秒](/images/qwb2026/license-trae-todolist-phone.jpg)
 
 交接文档不是形式主义。每个工具接手时，第一件事都是读上一棒写的 `交接文档.md`，里面有：已确认的事实、已排除的路线、当前卡点、最短续跑命令。没有它，下一棒会把上一棒踩过的坑再踩一遍。
 
