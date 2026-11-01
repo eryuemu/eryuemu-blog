@@ -9,7 +9,7 @@ type: 'ai-organized'
 
 # 强网杯NeuronShuffle与license预期解WP
 
-> **背景**：2026 强网杯线上赛，我不是队里主力，方向也没定，就挑了两道看起来能自己啃的题：misc 的 NeuronShuffle 和 reverse 的 license。
+> **背景**：这算是我第一次参加 CTF 比赛。2026 强网杯线上赛，我不是队里主力，方向也没定，就挑了两道看起来能自己啃的题：misc 的 NeuronShuffle 和 reverse 的 license。
 > **工具**：CodeBuddy、Qoder、Trae、DSH（DeepSeek Harness）四个 AI 工具接力，中间还参考过另一个 AI 给的建议。
 > **结果**：两道题都拿到了 flag，而且都在真程序 / 本地校验器上复验过。
 > **本文定位**：按真实时间线写解题过程和踩过的坑。技术细节保留到能照着复现的程度，但不搬 15MB 反汇编和 187 个中间文件。
