@@ -14,8 +14,6 @@ type: 'ai-organized'
 > **结果**：两道题都拿到了 flag，而且都在真程序 / 本地校验器上复验过。
 > **本文定位**：按真实时间线写解题过程和踩过的坑。技术细节保留到能照着复现的程度，但不搬 15MB 反汇编和 187 个中间文件。
 
-![NeuronShuffle 题目页，题面和附件下载。截图时动态分值是 364 分](../../assets/qwb2026-neuronshuffle-challenge.png)
-
 ---
 
 ## 0. 先看结果
@@ -43,6 +41,8 @@ type: 'ai-organized'
 ## 一、NeuronShuffle：答案不在模型里
 
 ### 1.1 题目：一个哈希，两个 npz
+
+![NeuronShuffle 题目页，题面和附件下载。截图时动态分值是 364 分](../../assets/qwb2026-neuronshuffle-challenge.png)
 
 附件三个文件：`check.py`、`model_A.npz`、`model_B.bin`。`check.py` 是唯一的判据：
 
@@ -243,9 +243,9 @@ $ python3 check.py "$(cat answer.txt)"
 
 ## 二、license：白盒是幌子，VM 才是判官
 
-![CodeBuddy 里分析 VM、跑 tracer2.c 的工作现场](../../assets/qwb2026-license-codebuddy.png)
-
 ### 2.1 入口：96 个 hex，48 字节
+
+![license 题目页，题面和附件下载](../../assets/qwb2026-license-challenge.png)
 
 程序是静态链接的 x86-64 ELF，1,747,992 字节，not stripped，非 PIE。跑起来：
 
@@ -319,6 +319,8 @@ main 0x402f9a
 - 用 gdb 附加 → `TracerPid` 变，`0x48` 也跟着变。
 
 程序把「不许调试、不许打补丁」写进了密钥流。
+
+![CodeBuddy 里分析 VM、跑 tracer2.c 的工作现场](../../assets/qwb2026-license-codebuddy.png)
 
 ### 2.4 零侵入采样：父进程读 `/proc/<pid>/mem`
 
