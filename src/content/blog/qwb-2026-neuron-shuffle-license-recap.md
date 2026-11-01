@@ -1,7 +1,8 @@
 ---
 title: '强网杯NeuronShuffle与license预期解WP'
 description: '2026 强网杯线上赛 misc「NeuronShuffle」与 reverse「license」预期解。NeuronShuffle 的模型是 default_rng(20261101) 摇出来的，答案却是次日种子 20261102 的三个 permutation；license 的白盒 AES 是诱饵，真正的判定在自修改 VM 里，靠父进程读 /proc/pid/mem 零侵入采样、补上 LOOP 指令、再逐字符枚举补完。按真实时间线记录四个 AI 工具的分工、两次假 flag 和每一步的坑。'
-pubDate: '2026-11-01T20:30:00+08:00'
+pubDate: '2026-11-01T20:05:00+08:00'
+heroImage: '../../assets/qwb2026-cover.png'
 category: '开发'
 type: 'ai-organized'
 ---
@@ -463,11 +464,15 @@ $ ./license < TRUE_LIC.txt
 please input your license: flag{9530b81c-61d0-2b62-3e96-f9a5e937f893}
 ```
 
+<p align="center">
+  <img src="/images/qwb2026/license-solved.jpg" alt="license 提交正确，101 分" width="320">
+</p>
+
 ### 2.9 这题踩的坑
 
 | 坑 | 后果 | 怎么发现的 |
 |---|---|---|
-| 相信「白盒是 PRF」 | 差点判定 license 不可逆 | 碰撞是采样重复，期望值 n²/2³³≈3.5 |
+| 相信「白盒是 PRF」 | 差点判定 license 不可逆 | 碰撞是采样重复，期望值 n²/2³³≈4.7 |
 | 用 gdb / ptrace 跟 VM | 全部跑飞，解码成垃圾 | handler 检查 `si_code==2`，ptrace 注入的不是 |
 | 打补丁跟踪 | 自校验哈希变，字节码全错 | `0x4c` 哈希内存窗口，`0x218` 哈希文件 `.text` |
 | 把 `close(-1)` 当成功返回 0 | 仿真在 `#1419` 跑成 `cli`，误判「死在 cli」 | 实际返回 `-EBADF(-9)`，修正后 off=0xa13c |
@@ -491,7 +496,9 @@ please input your license: flag{9530b81c-61d0-2b62-3e96-f9a5e937f893}
 | Trae | 后台任务、GPU | NeuronShuffle 的 GPU 爆破、battery12、验证答案 | GPU 队列按小时排，熄灯前跑不完 |
 | DSH | 长时仿真、C 求解器 | license 的完整仿真器、syscall 语义、哈希反演、前 7 字节 | 卡在 LOOP 指令，需要下一棒补 |
 
-![手机端 Trae 的 license 任务清单，任务耗时 65 分 44 秒](../../assets/qwb2026-license-trae-todolist.jpg)
+<p align="center">
+  <img src="/images/qwb2026/license-trae-todolist.jpg" alt="手机端 Trae 的 license 任务清单，任务耗时 65 分 44 秒" width="320">
+</p>
 
 交接文档不是形式主义。每个工具接手时，第一件事都是读上一棒写的 `交接文档.md`，里面有：已确认的事实、已排除的路线、当前卡点、最短续跑命令。没有它，下一棒会把上一棒踩过的坑再踩一遍。
 
