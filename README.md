@@ -98,3 +98,13 @@ npx astro dev stop
 ```bash
 node migrate.cjs
 ```
+
+---
+
+## 许可证 (License)
+
+本项目采用双重许可协议：
+
+- **代码与架构**：采用 [MIT License](LICENSE)，包括网站源代码、样式系统、自定义组件及构建脚本。
+- **文章与内容**：采用 [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh-hans)（知识共享 署名-非商业性使用-相同方式共享 4.0 国际许可协议），包括所有原创博文、文稿、个人随笔及配图。
+

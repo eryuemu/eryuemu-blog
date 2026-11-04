@@ -28,7 +28,12 @@ const yearDisplay = currentYear <= startYear ? `${startYear}` : `${startYear} - 
 		<!-- Left info -->
 		<div class="footer-left">
 			<p>
-				<span class="footer-segment">由 <a href="https://astro.build/" target="_blank">Astro</a> 驱动</span>
+				<span class="footer-segment">由 <a href="https://astro.build/" target="_blank" rel="noopener noreferrer">Astro</a> 驱动</span>
+			</p>
+			<p class="license-row">
+				<span class="footer-segment">代码 <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener noreferrer">MIT</a></span>
+				<span class="divider-dot">·</span>
+				<span class="footer-segment">内容 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh-hans" target="_blank" rel="noopener noreferrer">CC BY-NC-SA 4.0</a></span>
 			</p>
 		</div>
 
@@ -101,6 +106,10 @@ const yearDisplay = currentYear <= startYear ? `${startYear}` : `${startYear} - 
 		text-align: right;
 		flex: 1;
 		min-width: 200px;
+	}
+
+	.license-row {
+		margin-top: 0.35rem !important;
 	}
 
 	.uptime-row {

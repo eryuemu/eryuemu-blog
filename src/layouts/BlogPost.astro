@@ -368,6 +368,51 @@ const cleanPath = Astro.url.pathname.replace(/\/+$/, '') || '/';
 				color: var(--text-primary);
 			}
 
+			/* ─── Article Copyright Notice (CC BY-NC-SA 4.0) ─── */
+			.post-copyright {
+				margin: 3.5rem 0 2rem 0;
+				padding: 1.15rem 1.25rem;
+				background: var(--bg-secondary);
+				border: 1px solid var(--border);
+				border-left: 3px solid var(--text-primary);
+				border-radius: var(--radius, 6px);
+				font-size: 0.85rem;
+				line-height: 1.7;
+				color: var(--text-secondary);
+			}
+
+			.post-copyright-item {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 0.25rem 0.4rem;
+				margin-bottom: 0.45rem;
+			}
+
+			.post-copyright-item:last-child {
+				margin-bottom: 0;
+			}
+
+			.post-copyright-meta {
+				flex-shrink: 0;
+				font-weight: 600;
+				color: var(--text-primary);
+			}
+
+			.post-copyright-info {
+				word-break: break-all;
+			}
+
+			.post-copyright-info a {
+				color: var(--text-primary);
+				text-decoration: underline;
+				text-underline-offset: 3px;
+				transition: opacity 0.2s ease;
+			}
+
+			.post-copyright-info a:hover {
+				opacity: 0.75;
+			}
+
 			/* ─── Right Sidebar: Table of Contents (TOC) ─── */
 			.sidebar-right {
 				position: sticky;
@@ -822,6 +867,30 @@ const cleanPath = Astro.url.pathname.replace(/\/+$/, '') || '/';
 					<div class="prose">
 						<slot />
 					</div>
+
+					{id !== 'about' && (
+						<section class="post-copyright" aria-label="版权声明">
+							<div class="post-copyright-item">
+								<span class="post-copyright-meta">文章标题：</span>
+								<span class="post-copyright-info">{title}</span>
+							</div>
+							<div class="post-copyright-item">
+								<span class="post-copyright-meta">文章作者：</span>
+								<span class="post-copyright-info">eryuemu（二月木）</span>
+							</div>
+							<div class="post-copyright-item">
+								<span class="post-copyright-meta">文章链接：</span>
+								<span class="post-copyright-info"><a href={Astro.url.href}>{Astro.url.href}</a></span>
+							</div>
+							<div class="post-copyright-item">
+								<span class="post-copyright-meta">版权许可：</span>
+								<span class="post-copyright-info">
+									除特别声明外，本文采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/deed.zh-hans" target="_blank" rel="noopener noreferrer">CC BY-NC-SA 4.0</a>（署名-非商业性使用-相同方式共享 4.0 国际）许可协议。转载请保留出处与链接，商业用途请联系作者。
+								</span>
+							</div>
+						</section>
+					)}
+
 					<WalineComments />
 				</article>
 			</div>
