@@ -8,6 +8,13 @@ export interface Friend {
 
 export const myProjects: Friend[] = [
   {
+    title: '高校 Wiki 目录',
+    link: 'https://collegewiki.github.io/',
+    logo: '/friends/collegewiki.png',
+    desc: '收集中国各高校由学生或校友自建的知识站入口，只做导航与外链。',
+    tags: ['高校导航', 'Wiki 目录'],
+  },
+  {
     title: 'HBU Wiki · 生存指北',
     link: 'https://guide.hbuwiki.top/',
     logo: '/friends/hbuwiki.png',
